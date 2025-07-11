@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeMethod;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.MediaEntityBuilder;
 import com.aventstack.extentreports.Status;
 
 import io.appium.java_client.AppiumDriver;
@@ -65,7 +66,8 @@ public class BaseTest {
 
 	        try {
 	            System.out.println("Launching Appium session with capabilities: " + caps);
-	            URL appiumURL = new URL("http://127.0.0.1:4723/wd/hub");
+	            //URL appiumURL = new URL("http://127.0.0.1:4723/wd/hub");
+	            URL appiumURL = new URL("http://127.0.0.1:4723");
 	            return new AndroidDriver(appiumURL, caps);
 	        } catch (Exception e) {
 	            e.printStackTrace(); 
@@ -76,25 +78,31 @@ public class BaseTest {
 
 
 
-    @AfterMethod
-    public void tearDown(ITestResult result) throws IOException {
-        if (result.getStatus() == ITestResult.FAILURE) {
-            test.fail(result.getThrowable());
+	    @AfterMethod
+	    public void tearDown(ITestResult result) throws IOException {
+	        if (result.getStatus() == ITestResult.FAILURE) {
+	            test.fail(result.getThrowable());
 
-            // Use the util method
-            String screenshotPath = ScreenshotUtils.captureScreenshot(driver, result.getName());
-            test.addScreenCaptureFromPath(screenshotPath);
-        } else if (result.getStatus() == ITestResult.SUCCESS) {
-            test.pass("Test passed");
-        } else if (result.getStatus() == ITestResult.SKIP) {
-            test.skip("Test skipped");
-        }
+	            String screenshotPath = ScreenshotUtils.captureScreenshot(driver, result.getName());
 
-        if (driver != null) {
-            driver.quit();
-        }
+	            if (screenshotPath != null) {
+	                test.fail("Failure Screenshot:",
+	                    MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+	            }
 
-        extent.flush();
-    }
+	        } else if (result.getStatus() == ITestResult.SUCCESS) {
+	            test.pass("Test passed");
+
+	        } else if (result.getStatus() == ITestResult.SKIP) {
+	            test.skip("Test skipped");
+	        }
+
+	        if (driver != null) {
+	            driver.quit();
+	        }
+
+	        extent.flush();
+	    }
+
 
 }
