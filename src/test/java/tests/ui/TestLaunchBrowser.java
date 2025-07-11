@@ -1,8 +1,6 @@
-package tests;
+package tests.ui;
 
-import java.util.Properties;
 
-import org.openqa.selenium.By;
 import org.testng.annotations.Test;
 
 import com.aventstack.extentreports.Status;

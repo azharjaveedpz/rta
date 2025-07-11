@@ -14,7 +14,8 @@ public class ConfigReader {
             prop.load(globalFis);
 
             // Determine environment
-            String env = System.getProperty("env", prop.getProperty("env")); // prefer system property
+            String env = System.getProperty("env", prop.getProperty("env", "mqa"));
+ // prefer system property
             String envFilePath = String.format("src/test/resources/config/%s.properties", env);
 
             // Load environment config

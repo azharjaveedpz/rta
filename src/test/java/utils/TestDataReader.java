@@ -8,10 +8,10 @@ public class TestDataReader {
 
     private static final String BASE_PATH = "src/test/resources/testdata/";
 
-    public static Properties load(String fileName, Properties config) {
+    public static Properties load(String fileName, String string, Properties config) {
         Properties prop = new Properties();
 
-        // ✅ Strictly require 'env' key from config
+   
         String env = config.getProperty("env");
         if (env == null || env.trim().isEmpty()) {
             throw new RuntimeException(" 'env' is missing in configuration. Please define it in global.properties or pass as -Denv=qa");
