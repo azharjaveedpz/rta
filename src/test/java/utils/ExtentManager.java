@@ -2,18 +2,31 @@ package utils;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.reporter.ExtentSparkReporter;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ExtentManager {
-	private static ExtentReports extent;
+    private static ExtentReports extent;
 
     public static ExtentReports getInstance() {
         if (extent == null) {
-            String reportPath = System.getProperty("user.dir") + "/test-output/ExtentReport.html";
-            ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath);
-            extent = new ExtentReports();
-            extent.attachReporter(sparkReporter);
-            extent.setSystemInfo("OS", "Mac");
-            extent.setSystemInfo("Tester", "Azhar");
+            createInstance();
         }
         return extent;
+    }
+
+    private static void createInstance() {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String reportPath = System.getProperty("user.dir") + "/reports/TestReport_" + timestamp + ".html";
+
+        ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath);
+        sparkReporter.config().setReportName("Automation Test Report");
+        sparkReporter.config().setDocumentTitle("Test Execution Report");
+
+        extent = new ExtentReports();
+        extent.attachReporter(sparkReporter);
     }
 }

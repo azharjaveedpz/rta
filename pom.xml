@@ -1,25 +1,41 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.rta</groupId>
   <artifactId>rta</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
  <dependencies>
-    <!-- Selenium WebDriver -->
+    <!-- ✅ Selenium Java (All modules aligned to 4.11.0) -->
     <dependency>
         <groupId>org.seleniumhq.selenium</groupId>
         <artifactId>selenium-java</artifactId>
-        <version>4.20.0</version>
+        <version>4.11.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-api</artifactId>
+        <version>4.11.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-remote-driver</artifactId>
+        <version>4.11.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-support</artifactId>
+        <version>4.11.0</version>
     </dependency>
 
-    <!-- WebDriverManager -->
+    <!-- ✅ WebDriverManager -->
     <dependency>
         <groupId>io.github.bonigarcia</groupId>
         <artifactId>webdrivermanager</artifactId>
         <version>5.7.0</version>
     </dependency>
 
-    <!-- TestNG -->
+    <!-- ✅ TestNG -->
     <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
@@ -27,47 +43,48 @@
         <scope>test</scope>
     </dependency>
 
-    <!-- Appium Java Client for Mobile Testing -->
+    <!-- ✅ Appium Java Client -->
     <dependency>
         <groupId>io.appium</groupId>
         <artifactId>java-client</artifactId>
-        <version>9.0.0</version>
+        <version>8.5.1</version>
     </dependency>
 
-    <!-- Rest-Assured for API Testing -->
+    <!-- ✅ Rest-Assured -->
     <dependency>
         <groupId>io.rest-assured</groupId>
         <artifactId>rest-assured</artifactId>
         <version>5.4.0</version>
+        <scope>test</scope>
     </dependency>
 
-    <!-- JSON Support -->
+    <!-- ✅ JSON Support -->
     <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
         <version>20240303</version>
     </dependency>
 
-    <!-- Logging -->
-    <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>2.20.0</version>
-    </dependency>
-    <!-- Extent Reports (optional) -->
-    <dependency>
-        <groupId>com.aventstack</groupId>
-        <artifactId>extentreports</artifactId>
-        <version>5.1.1</version>
-    </dependency>
-    
-    <!-- Log4j2 API -->
+    <!-- ✅ Logging (Log4j2) -->
     <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-api</artifactId>
         <version>2.20.0</version>
     </dependency>
-     <!-- extent reportp -->
+    <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>2.20.0</version>
+    </dependency>
+
+    <!-- ✅ SLF4J Logging (for Appium logs) -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>2.0.9</version>
+    </dependency>
+
+    <!-- ✅ Extent Reports -->
     <dependency>
         <groupId>com.aventstack</groupId>
         <artifactId>extentreports</artifactId>
@@ -76,4 +93,19 @@
 </dependencies>
 
 
+   <build>
+    <plugins>
+     
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <suiteXmlFiles>
+            <suiteXmlFile>testng.xml</suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
