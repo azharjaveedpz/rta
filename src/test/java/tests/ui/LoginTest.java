@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 import com.aventstack.extentreports.Status;
 
 import base.BaseTest;
-import pages.LoginPage;
+import pages.ui.LoginPage;
 
 public class LoginTest extends BaseTest {
 	private static final Logger logger = LogManager.getLogger(TestLaunchBrowser.class);
