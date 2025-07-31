@@ -1,4 +1,4 @@
-package pages;
+package pages.ui;
 
 import org.openqa.selenium.WebDriver;
 

@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 import com.aventstack.extentreports.Status;
 
 import base.BaseTest;
-import pages.LoginPage;
+import pages.ui.LoginPage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
