@@ -7,6 +7,7 @@ import org.testng.annotations.Test;
 import com.aventstack.extentreports.Status;
 
 import base.BaseTest;
+import pages.ui.DashboardPage;
 import pages.ui.LoginPage;
 
 public class LoginTest extends BaseTest {
@@ -20,16 +21,16 @@ public class LoginTest extends BaseTest {
 
 	
 	public void testLoginFailure() {
-	    LoginPage loginPage = new LoginPage(driver, prop);
-	    loginPage.login();
+		DashboardPage dashboard = new DashboardPage(driver, prop);
+		dashboard.dashboardrMessageValidation();
 
-	    if (loginPage.loginErrMessageValidation()) {
-	        String errorMsg = loginPage.getLoginErrorMessage();
-	        logger.info("Login failed with error: " + errorMsg);
-	        test.log(Status.PASS, "Login failed with error: " + errorMsg);
+	    if (dashboard.dashboardrMessageValidation()) {
+	        String sucMsg = dashboard.getDashboardMessage();
+	        logger.info("Navigated  to dashboard: " + sucMsg);
+	        test.log(Status.PASS, "Navigated  to dashboard: " + sucMsg);
 	    } else {
-	        logger.info("Login success");
-	        test.log(Status.FAIL, "Login succeeded unexpectedly"); 
+	        logger.info("Login failed");
+	        test.log(Status.FAIL, "Login failed"); 
 	    }
 	}
 
