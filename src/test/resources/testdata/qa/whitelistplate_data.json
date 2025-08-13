@@ -1,0 +1,13 @@
+{
+  "validRecord": {
+    "plateNumber": "TN223A4BCD",
+    "plateSource": "Dubai",
+    "plateType": "Private",
+    "plateColor": "Blue",
+    "fromDate": "2025-08-12T22:13:06.406Z",
+    "toDate": "2025-08-13T22:13:06.406Z",
+    "plateStatus": "Active",
+    "exemptionReason_ID": 1
+  }
+  
+}

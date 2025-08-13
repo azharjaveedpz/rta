@@ -3,6 +3,7 @@ package base;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Properties;
 
 import org.openqa.selenium.WebDriver;
@@ -35,11 +36,12 @@ public class BaseTest {
 	        extent = ExtentManager.getInstance();
 	        test = extent.createTest(method.getName());
 
-	        String testType = prop.getProperty("testType", "mobile");
+	        String testType = prop.getProperty("testType", "mobile"); // unified name
 
 	        if (testType.equalsIgnoreCase("web")) {
 	            driver = DriverFactory.getDriver(prop);
 	            driver.get(prop.getProperty("base.url"));
+	            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 	            test.info("Web Test Started");
 
 	        } else if (testType.equalsIgnoreCase("mobile")) {
@@ -47,8 +49,8 @@ public class BaseTest {
 	            test.info("Mobile Test Started");
 
 	        } else if (testType.equalsIgnoreCase("api")) {
-	        	  driver = null;
-	        	    test.info("API Test - No browser");
+	            driver = null;
+	            test.info("API Test - No browser");
 	        } else {
 	            throw new RuntimeException("Invalid test type in config: " + testType);
 	        }
@@ -80,24 +82,27 @@ public class BaseTest {
 
 	    @AfterMethod
 	    public void tearDown(ITestResult result) throws IOException {
+	        String testType = prop.getProperty("testType", "mobile"); // same key as setUp
+
 	        if (result.getStatus() == ITestResult.FAILURE) {
 	            test.fail(result.getThrowable());
 
-	            String screenshotPath = ScreenshotUtils.captureScreenshot(driver, result.getName());
-
-	            if (screenshotPath != null) {
-	                test.fail("Failure Screenshot:",
-	                    MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+	            // Only take screenshot for non-API tests
+	            if (!"api".equalsIgnoreCase(testType) && driver != null) {
+	                String screenshotPath = ScreenshotUtils.captureScreenshot(driver, result.getName());
+	                if (screenshotPath != null) {
+	                    test.fail("Failure Screenshot:",
+	                        MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+	                }
 	            }
-
 	        } else if (result.getStatus() == ITestResult.SUCCESS) {
 	            test.pass("Test passed");
-
 	        } else if (result.getStatus() == ITestResult.SKIP) {
 	            test.skip("Test skipped");
 	        }
 
-	        if (driver != null) {
+	        // Quit driver only if not API
+	        if (driver != null && !"api".equalsIgnoreCase(testType)) {
 	            driver.quit();
 	        }
 
