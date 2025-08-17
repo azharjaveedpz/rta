@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-public class PayloadGeneratorForDublicate {
+public class PayloadGeneratorForPastDate {
 
-	public static String generatePlatePayloadForDub() {
+	public static String generatePlatePayloadForPastDate() {
 	    Faker faker = new Faker();
 
 	    String plateNumber = faker.regexify("[A-Z]{2}[0-9]{3}[A-Z]{1}[0-9]{1}[A-Z]{2}");
@@ -22,8 +22,8 @@ public class PayloadGeneratorForDublicate {
 	    List<String> type = Arrays.asList("Private", "Commercial", "Motorcycle", "Taxi");
 	    String plateType = type.get(faker.number().numberBetween(0, type.size()));
 
-	    String fromDate = "2025-10-12T22:13:06.406Z";
-	    String toDate = "2025-10-13T22:13:06.406Z";
+	    String fromDate = "2025-07-15T22:13:06.406Z";
+	    String toDate = "2025-08-13T22:13:06.406Z";
 
 	    // Instead of strings, use numeric IDs
 	    List<Integer> exemptionReasonIDs = Arrays.asList(1, 2, 3);
@@ -33,7 +33,7 @@ public class PayloadGeneratorForDublicate {
 	    int value = faker.number().numberBetween(1, 1000);
 
 	    JSONObject payload = new JSONObject();
-	    payload.put("plateNumber", "TN223A4BCD");
+	    payload.put("plateNumber", plateNumber);
 	    payload.put("plateSource", plateSource);
 	    payload.put("plateType", plateType);
 	    payload.put("plateColor", plateColor);

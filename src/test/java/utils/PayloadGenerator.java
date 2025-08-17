@@ -22,8 +22,8 @@ public class PayloadGenerator {
 	    List<String> type = Arrays.asList("Private", "Commercial", "Motorcycle", "Taxi");
 	    String plateType = type.get(faker.number().numberBetween(0, type.size()));
 
-	    String fromDate = "2025-08-12T22:13:06.406Z";
-	    String toDate = "2025-08-13T22:13:06.406Z";
+	    String fromDate = "2025-10-12T22:13:06.406Z";
+	    String toDate = "2025-10-13T22:13:06.406Z";
 
 	    // Instead of strings, use numeric IDs
 	    List<Integer> exemptionReasonIDs = Arrays.asList(1, 2, 3);
