@@ -21,8 +21,7 @@ public class LoginTest extends BaseTest {
 
 	
 	public void testLoginFailure() {
-		DashboardPage dashboard = new DashboardPage(driver, prop);
-		dashboard.dashboardrMessageValidation();
+		DashboardPage dashboard = new DashboardPage(driver, prop, test);		dashboard.dashboardrMessageValidation();
 
 	    if (dashboard.dashboardrMessageValidation()) {
 	        String sucMsg = dashboard.getDashboardMessage();
