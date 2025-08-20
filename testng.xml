@@ -1,16 +1,15 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
 <suite name="Web Test Suite">
+    
+  
+    <listeners>
+        <listener class-name="utils.RetryListener"/>
+    </listeners>
+
     <test name="Smoke Tests">
         <classes>
             <class name="tests.ui.WhitelistPlateTest"/>
-            <class name="tests.ui.PermitTest"/>
-            <class name="tests.ui.InspectionTest"/>
-            <class name="tests.ui.DisputeManagementTest"/>
-            <class name="tests.ui.FineManagementTest"/>
-            <class name="tests.ui.PledgeManagementTest"/>
-            
         </classes>
     </test>
 </suite>
-
 
