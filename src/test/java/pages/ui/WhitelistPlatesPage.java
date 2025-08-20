@@ -9,6 +9,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -138,7 +139,7 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//input[@placeholder='End date']")
 	private WebElement endSearch;
 
-	@FindBy(xpath = "//body[1]/div[1]/div[1]/div[1]/div[1]/main[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/table[1]/tbody[1]/tr[2]/td[9]/button[1]")
+	@FindBy(xpath = "//tbody/tr[2]/td[9]/button[1]")
 	private WebElement threeDot;
 
 	@FindBy(xpath = "//ul[contains(@class,'ant-dropdown-menu')]//li//span[@class='ant-dropdown-menu-title-content']")
@@ -158,6 +159,39 @@ public class WhitelistPlatesPage {
 
 	@FindBy(xpath = "//button[.='Update']")
 	private WebElement update;
+
+	@FindBy(xpath = "//div[contains(text(),'No data')]")
+	private WebElement noData;
+
+	@FindBy(xpath = "//tbody[@class='ant-table-tbody']//tr[not(contains(@class,'ant-table-measure-row'))]/td[2]")
+	private List<WebElement> plateNameRowTable;
+
+	@FindBy(xpath = "//tbody[@class='ant-table-tbody']//tr[not(contains(@class,'ant-table-measure-row'))]/td[3]")
+	private List<WebElement> plateSourceRowTable;
+	
+	
+	@FindBy(xpath = "//div[contains(@class,'ant-select-selector')]")
+	private WebElement filter;
+
+	@FindBy(xpath = "//div[contains(@class,'ant-select-item-option-content')]")
+	private List<WebElement> filterOptions;
+
+	@FindBy(xpath = "//span[@class='ant-select-selection-item']")
+	private WebElement selectedValue;
+	
+	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Total Plates']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
+	private WebElement totalPlates;
+
+	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Active Plates']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
+	private WebElement activePlates;
+	
+	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Inactive Plates']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
+	private WebElement inactivePlates;
+	
+	@FindBy(xpath = "//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]")
+	private List<WebElement> rowList;
+
+
 	// Actions
 
 	public void clickPlates() {
@@ -187,6 +221,66 @@ public class WhitelistPlatesPage {
 
 		}
 	}
+	
+	public void selectFilterByIndex(int index) {
+	    filter.click(); // open dropdown
+
+	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+	   
+	    List<WebElement> options = wait.until(ExpectedConditions
+	        .visibilityOfAllElements(filterOptions));
+
+	    logger.info("Dropdown contains " + options.size() + " options.");
+	    test.log(Status.INFO, "Dropdown contains " + options.size() + " options.");
+
+	    if (options.isEmpty()) {
+	        throw new RuntimeException("No options found in dropdown!");
+	    }
+	    if (index < 0 || index >= options.size()) {
+	        throw new IllegalArgumentException(
+	            "Invalid index " + index + ", valid range: 0 to " + (options.size() - 1));
+	    }
+
+	    WebElement optionToSelect = options.get(index);
+	    String optionText = optionToSelect.getText().trim();
+	    optionToSelect.click();
+
+	    
+	    wait.until(ExpectedConditions.or(
+	        ExpectedConditions.textToBePresentInElement(selectedValue, optionText),
+	        ExpectedConditions.attributeToBe(selectedValue, "title", optionText)
+	    ));
+
+	    logger.info("Selected filter: " + optionText);
+	    test.log(Status.INFO, "Selected filter: " + optionText);
+	}
+
+
+
+
+
+
+	public void selectFilterByText(String text) {
+	    filter.click(); // open dropdown
+
+	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	    wait.until(ExpectedConditions.visibilityOfAllElements(filterOptions));
+
+	    for (WebElement option : filterOptions) {
+	        if (option.getText().trim().equalsIgnoreCase(text)) {
+	            option.click();
+	            wait.until(ExpectedConditions.textToBePresentInElement(selectedValue, text));
+	            logger.info("Selected filter: " + text);
+	            test.log(Status.INFO, "Selected filter: " + text);
+	            return;
+	        }
+	    }
+	    throw new NoSuchElementException("No option found with text: " + text);
+	}
+
+
+
 
 	public void addNewPlates() {
 		addNewPlateButton.click();
@@ -333,18 +427,38 @@ public class WhitelistPlatesPage {
 	}
 
 	public void startDateRange(int day) {
-		startDate.click();
-		WebElement dateSelection = driver
-				.findElement(By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']"));
-		dateSelection.click();
+	  
+	    startDate.click();
+
+	   
+	    WebElement dateSelection = driver.findElement(
+	        By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']")
+	    );
+
+	  
+	    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", dateSelection);
+	    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", dateSelection);
+
+	    selectedStartDate = String.valueOf(day);
+	    logger.info("Selected Start Date: " + selectedStartDate);
+	    test.log(Status.INFO, "Selected Start Date: " + selectedStartDate);
 	}
 
 	public void startEndRange(int day) {
-		// endtDate.click();
-		WebElement dateSelection = driver
-				.findElement(By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']"));
-		dateSelection.click();
+	   
+	    WebElement dateSelection = driver.findElement(
+	        By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']")
+	    );
+
+	   
+	    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", dateSelection);
+	    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", dateSelection);
+
+	    selectedEndDate = String.valueOf(day);
+	    logger.info("Selected End Date: " + selectedEndDate);
+	    test.log(Status.INFO, "Selected End Date: " + selectedEndDate);
 	}
+
 
 	public void submitPlate() {
 		submit.click();
@@ -393,45 +507,29 @@ public class WhitelistPlatesPage {
 
 	}
 
-	public void searchWhitelist(String expectedPlateNumber, String expectedPlateSource, String expectedPlateType,
-			String expectedPlateColor, String expectedFromDate, String expectedEndDate) {
+	public void searchWhitelistAndValidateResult(String expectedPlateNumber, String expectedPlateSource) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		wait.until(ExpectedConditions.visibilityOf(searchInput));
 
+		searchInput.clear();
 		if (expectedPlateNumber != null) {
 			searchInput.sendKeys(expectedPlateNumber);
 		} else if (expectedPlateSource != null) {
 			searchInput.sendKeys(expectedPlateSource);
-		} else if (expectedPlateType != null) {
-			searchInput.sendKeys(expectedPlateType);
-		} else if (expectedPlateColor != null) {
-			searchInput.sendKeys(expectedPlateColor);
-		} else if (expectedFromDate != null) {
-			searchInput.sendKeys(expectedFromDate);
-		} else if (expectedEndDate != null) {
-			searchInput.sendKeys(expectedEndDate);
 		} else {
 			throw new IllegalArgumentException("At least one search parameter must be provided!");
+		}
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		wait.until(ExpectedConditions.visibilityOf(plateNameTable));
 
 		String actualPlateNumber = plateNameTable.getText().trim();
 		String actualPlateSource = plateSourceTable.getText().trim();
-		String actualPlateType = plateTypeTable.getText().trim();
-		String actualPlateColor = plateColorTable.getText().trim();
-		String actualFromDate = fromTable.getText().trim();
-		String actualEndDate = toTable.getText().trim();
-
-		validatePlateSearchResult(expectedPlateNumber, actualPlateNumber, expectedPlateSource, actualPlateSource,
-				expectedPlateType, actualPlateType, expectedPlateColor, actualPlateColor, expectedFromDate,
-				actualFromDate, expectedEndDate, actualEndDate);
-	}
-
-	private void validatePlateSearchResult(String expectedPlateNumber, String actualPlateNumber,
-			String expectedPlateSource, String actualPlateSource, String expectedPlateType, String actualPlateType,
-			String expectedPlateColor, String actualPlateColor, String expectedFromDate, String actualFromDate,
-			String expectedEndDate, String actualEndDate) {
 
 		if (expectedPlateNumber != null) {
 			validateField("Plate Number", expectedPlateNumber, actualPlateNumber);
@@ -439,19 +537,105 @@ public class WhitelistPlatesPage {
 		if (expectedPlateSource != null) {
 			validateField("Plate Source", expectedPlateSource, actualPlateSource);
 		}
-		if (expectedPlateType != null) {
-			validateField("Plate Type", expectedPlateType, actualPlateType);
-		}
-		if (expectedPlateColor != null) {
-			validateField("Plate Color", expectedPlateColor, actualPlateColor);
-		}
-		if (expectedFromDate != null) {
-			validateField("From Date", expectedFromDate, actualFromDate);
-		}
-		if (expectedEndDate != null) {
-			validateField("End Date", expectedEndDate, actualEndDate);
-		}
 	}
+
+	public void searchWhitelistAndValidateNoData(String searchValue, String expectedNoDataMessage) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(searchInput));
+		searchInput.clear();
+		searchInput.sendKeys(searchValue);
+
+		wait.until(ExpectedConditions.visibilityOf(noData));
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String actualNoData = noData.getText().trim();
+		validateField("No Data Message", expectedNoDataMessage, actualNoData);
+	}
+
+	public void searchWhitelistWithPartialTextAndValidateResult(String expectedPlateNumber,
+	        String expectedPlateSource) {
+	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	    wait.until(ExpectedConditions.visibilityOf(searchInput));
+
+	    searchInput.clear();
+	    if (expectedPlateNumber != null) {
+	        searchInput.sendKeys(expectedPlateNumber);
+	        logger.info("Searching with Plate Number: " + expectedPlateNumber);
+	        test.log(Status.INFO, "Searching with Plate Number: " + expectedPlateNumber);
+	    } else if (expectedPlateSource != null) {
+	        searchInput.sendKeys(expectedPlateSource);
+	        logger.info("Searching with Plate Source: " + expectedPlateSource);
+	        test.log(Status.INFO, "Searching with Plate Source: " + expectedPlateSource);
+	    } else {
+	        throw new IllegalArgumentException("At least one search parameter must be provided!");
+	    }
+
+	    try {
+	        Thread.sleep(3000); 
+	    } catch (InterruptedException e) {
+	        logger.error("Interrupted during sleep", e);
+	        test.log(Status.FAIL, "Interrupted during sleep: " + e.getMessage());
+	    }
+
+	    wait.until(ExpectedConditions.visibilityOfAllElements(plateNameRowTable));
+
+	    List<String> actualPlateNumbers = new ArrayList<>();
+	    for (WebElement element : plateNameRowTable) {
+	        actualPlateNumbers.add(element.getText().trim());
+	    }
+	    logger.info("Fetched Plate Numbers: " + actualPlateNumbers);
+	    test.log(Status.INFO, "Fetched Plate Numbers: " + actualPlateNumbers);
+
+	    List<String> actualPlateSources = new ArrayList<>();
+	    for (WebElement element : plateSourceRowTable) {
+	        actualPlateSources.add(element.getText().trim());
+	    }
+	    logger.info("Fetched Plate Sources: " + actualPlateSources);
+	    test.log(Status.INFO, "Fetched Plate Sources: " + actualPlateSources);
+
+	    if (expectedPlateNumber != null) {
+	        if (actualPlateNumbers.contains(expectedPlateNumber)) {
+	            logger.info(" Plate Number found: " + expectedPlateNumber);
+	            test.log(Status.PASS, "Plate Number found: " + expectedPlateNumber);
+	        } else {
+	            logger.error(" Plate Number not found! Expected: " + expectedPlateNumber + " | Actual: "
+	                    + actualPlateNumbers);
+	            test.log(Status.FAIL, "Plate Number not found! Expected: " + expectedPlateNumber + " | Actual: "
+	                    + actualPlateNumbers);
+	            throw new AssertionError("Plate Number mismatch!");
+	        }
+	    }
+
+	    boolean sourceMatched = false;
+
+	    if (expectedPlateSource != null) {
+	        for (String actualSource : actualPlateSources) {
+	            if (actualSource != null && actualSource.length() >= 3 
+	                    && expectedPlateSource.length() >= 3 
+	                    && actualSource.substring(0, 3).equalsIgnoreCase(expectedPlateSource.substring(0, 3))) {
+	                sourceMatched = true;
+	                break;
+	            }
+	        }
+
+	        if (sourceMatched) {
+	            logger.info("Plate Source found (partial match): " + expectedPlateSource);
+	            test.log(Status.PASS, "Plate Source found (partial match): " + expectedPlateSource);
+	        } else {
+	            logger.error("Plate Source not found! Expected (partial): " + expectedPlateSource 
+	                         + " | Actual: " + actualPlateSources);
+	            test.log(Status.FAIL, "Plate Source not found! Expected (partial): " + expectedPlateSource 
+	                         + " | Actual: " + actualPlateSources);
+	            throw new AssertionError("Plate Source mismatch!");
+	        }
+	    }
+
+	}
+
 
 	private void validateField(String fieldName, String expected, String actual) {
 		if (actual.equalsIgnoreCase(expected)) {
@@ -484,13 +668,13 @@ public class WhitelistPlatesPage {
 
 	public void validateStartDate() {
 		String actualFull = fromTable.getText().trim();
-		String actualDay = actualFull.split(" ")[0];
+		String actualDay = actualFull.split("-")[2];
 		validateField("Start Date", selectedStartDate, actualDay);
 	}
 
 	public void validateEndDate() {
 		String actualFull = toTable.getText().trim();
-		String actualDay = actualFull.split(" ")[0];
+		String actualDay = actualFull.split("-")[2];
 		validateField("End Date", selectedEndDate, actualDay);
 	}
 
@@ -590,6 +774,71 @@ public class WhitelistPlatesPage {
 	public void clearAllFields() {
 		clearText(inputPlateNumber);
 
+	}
+	
+	public void printAndValidatePlateCounts() {
+	 
+	    int total = Integer.parseInt(totalPlates.getText().trim());
+	    int active = Integer.parseInt(activePlates.getText().trim());
+	    int inactive = Integer.parseInt(inactivePlates.getText().trim());
+
+	  
+	    logger.info("Total Plates: " + total);
+	    test.log(Status.INFO, "Total Plates: " + total);
+	    System.out.println("Total Plates: " + total);
+
+	    logger.info("Active Plates: " + active);
+	    test.log(Status.INFO, "Active Plates: " + active);
+	    System.out.println("Active Plates: " + active);
+
+	    logger.info("Inactive Plates: " + inactive);
+	    test.log(Status.INFO, "Inactive Plates: " + inactive);
+	    System.out.println("Inactive Plates: " + inactive);
+
+	   
+	    if (total == active + inactive) {
+	        logger.info("Plate count validation passed: Total = Active + Inactive");
+	        test.log(Status.PASS, "Plate count validation passed: Total = Active + Inactive");
+	    } else {
+	        logger.error("Plate count validation FAILED! Total: " + total + ", Active + Inactive: " + (active + inactive));
+	        test.log(Status.FAIL, "Plate count validation FAILED! Total: " + total + ", Active + Inactive: " + (active + inactive));
+	        throw new AssertionError("Plate count mismatch: Total != Active + Inactive");
+	    }
+	}
+	
+	public void printAndValidateTableCounts() {
+		 
+		 int total = rowList.size();
+		    
+		    
+		    logger.info("Total Plates available: " + total);
+		    test.log(Status.INFO, "Total Plates available: " + total);
+		    System.out.println("Total Plates available: " + total);
+	}
+
+	public void validateTableRowsAgainstTotalPlates() {
+	   
+	    int totalFromLabel = Integer.parseInt(totalPlates.getText().trim());
+
+	   
+	    List<WebElement> rowList = driver.findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]"));
+	    int totalFromTable = rowList.size();
+
+	   
+	    logger.info("Total Plates from label: " + totalFromLabel);
+	    test.log(Status.INFO, "Total Plates from label: " + totalFromLabel);
+	    logger.info("Total Plates from table rows: " + totalFromTable);
+	    test.log(Status.INFO, "Total Plates from table rows: " + totalFromTable);
+	   
+	   
+	    if (totalFromLabel == totalFromTable) {
+	        logger.info("Validation passed: Total plates label matches table row count.");
+	        test.log(Status.PASS, "Validation passed: Total plates label matches table row count.");
+	    } else {
+	        logger.error("Validation FAILED! Total plates label: " + totalFromLabel + ", Table rows: " + totalFromTable);
+	        test.log(Status.FAIL, "Validation FAILED! Total plates label: " + totalFromLabel + ", Table rows: " + totalFromTable);
+	        throw new AssertionError("Total plates mismatch: Label != Table row count");
+	    }
 	}
 
 }
