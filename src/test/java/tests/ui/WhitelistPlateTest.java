@@ -1,20 +1,31 @@
 package tests.ui;
 
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import base.BaseTest;
 import pages.ui.DashboardPage;
 import pages.ui.WhitelistPlatesPage;
 
 public class WhitelistPlateTest extends BaseTest {
-	@Test
-	public void shouldCreatePlateSuccessfully() {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
+
+	private DashboardPage dashboard;
+	private WhitelistPlatesPage plate;
+
+	@BeforeMethod
+	public void setUpPages() {
+		dashboard = new DashboardPage(driver, prop, test);
+		plate = new WhitelistPlatesPage(driver, prop, test);
 
 		dashboard.dashboardrMessageValidation();
 		dashboard.openWhitelistManagementMenu();
 		dashboard.validateWhitelistManagementSubmenuItems();
 		plate.navigateToPlatePage();
+	}
+
+	// ----------------- CREATE PLATE TESTS -----------------
+
+	@Test
+	public void TC_001_shouldCreatePlateSuccessfully() {
 		plate.navigateToAddNewPlatePage();
 		plate.enterPlateNumber();
 		plate.selectPlateSource(1);
@@ -25,20 +36,14 @@ public class WhitelistPlateTest extends BaseTest {
 		plate.startDateRange(24);
 		plate.startEndRange(26);
 		plate.submitPlate();
+
 		plate.validatePlateAdded();
 		plate.validateStartDate();
 		plate.validateEndDate();
 	}
-	
-	@Test
-	public void shouldCreatePlateWithTodaysDateSuccessfully() {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_002_shouldCreatePlateWithTodaysDateSuccessfully() {
 		plate.navigateToAddNewPlatePage();
 		plate.enterPlateNumber();
 		plate.selectPlateSource(1);
@@ -49,20 +54,13 @@ public class WhitelistPlateTest extends BaseTest {
 		plate.startDateRange(20);
 		plate.startEndRange(20);
 		plate.submitPlate();
-		//plate.validatePlateAdded();
+
 		plate.validateStartDate();
 		plate.validateEndDate();
 	}
 
 	@Test
-	public void shouldNotAllowDuplicatePlate() {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
-
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	public void TC_003_shouldNotAllowDuplicatePlate() {
 		plate.navigateToAddNewPlatePage();
 		plate.enterDuplicatePlateNumber("TN223A4BCD");
 		plate.selectPlateSource(1);
@@ -73,245 +71,149 @@ public class WhitelistPlateTest extends BaseTest {
 		plate.startDateRange(24);
 		plate.startEndRange(26);
 		plate.submitPlate();
+
 		plate.validatePlateError("Plate number already exists for the specified period");
 	}
 
-	@Test
-	public void shouldFindPlateWhenSearchingByValidPlateNumber()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
+	// ----------------- SEARCH TESTS -----------------
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_004_shouldFindPlateWhenSearchingByValidPlateNumber() {
 		plate.searchWhitelistAndValidateResult("SJ1234", null);
-		
 	}
-	
-	@Test
-	public void shouldNotFindPlateWhenSearchingByInvalidPlateNumber()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
-		plate.searchWhitelistAndValidateNoData("Commercial",  "No data");
-		
+	@Test
+	public void TC_005_shouldNotFindPlateWhenSearchingByInvalidPlateNumber() {
+		plate.searchWhitelistAndValidateNoData("Commercial", "No data");
 	}
-	
-	@Test
-	public void shouldFindPlatesWhenSearchingByPartialPlateNumber()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_006_shouldFindPlatesWhenSearchingByPartialPlateNumber() {
 		plate.searchWhitelistWithPartialTextAndValidateResult("1234", null);
-		
 	}
-	
 
 	@Test
-	public void shouldFindPlatesWhenSearchingByValidPlateSource()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
-
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
-		//plate.selectFilterByText("Plate Source");
+	public void TC_007_shouldFindPlatesWhenSearchingByValidPlateSource() {
 		plate.selectFilterByIndex(1);
 		plate.searchWhitelistAndValidateResult(null, "Abu Dhabi");
-		
 	}
-	
-	@Test
-	public void shouldNotFindPlatesWhenSearchingByInvalidPlateSource()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
-		//plate.selectFilterByText("Plate Source");
+	@Test
+	public void TC_008_shouldNotFindPlatesWhenSearchingByInvalidPlateSource() {
 		plate.selectFilterByIndex(1);
-		plate.searchWhitelistAndValidateNoData("Commercial",  "No data");
-		
+		plate.searchWhitelistAndValidateNoData("Commercial", "No data");
 	}
-	
-	@Test
-	public void shouldFindPlatesWhenSearchingByPartialPlateSource()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
-		//plate.selectFilterByText("Plate Source");
+	@Test
+	public void TC_009_shouldFindPlatesWhenSearchingByPartialPlateSource() {
 		plate.selectFilterByIndex(1);
 		plate.searchWhitelistWithPartialTextAndValidateResult(null, "Abu");
-		
 	}
 
-	
-	
 	@Test
-	public void shouldFindPlatesWithinValidDateRange()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
-
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
-		plate.searchStartDate(23);
+	public void TC_010_shouldFindPlatesWithinValidDateRange() {
+		plate.searchStartDate(25);
 		plate.searchEndDate(25);
 		plate.validateStartDate();
 		plate.validateEndDate();
-
 	}
-	
-	@Test
-	public void shouldFindPlatesWhenStartDateEqualsEndDate()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_011_shouldFindPlatesWhenStartDateEqualsEndDate() {
 		plate.searchStartDate(24);
 		plate.searchEndDate(24);
 		plate.validateStartDate();
 		plate.validateEndDate();
-
 	}
-	
-	@Test
-	public void shouldFindPlateWhenSearchingByPlateNumberAndSource()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_012_shouldFindPlateWhenSearchingByPlateNumberAndSource() {
 		plate.searchWhitelistAndValidateResult("SJ1234", null);
 		plate.selectFilterByIndex(1);
 		plate.searchWhitelistAndValidateResult(null, "Abu Dhabi");
-		
 	}
-	
-	@Test
-	public void shouldNotFindPlateWhenPlateNumberAndSourceDoNotMatch()   {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_013_shouldNotFindPlateWhenPlateNumberAndSourceDoNotMatch() {
 		plate.searchWhitelistAndValidateResult("SJ1234", null);
 		plate.selectFilterByIndex(1);
-		plate.searchWhitelistAndValidateNoData("Commercial",  "No data");
-		
+		plate.searchWhitelistAndValidateNoData("Commercial", "No data");
 	}
-	
-	@Test
-	public void shouldFindPlateWhenSearchingByPlateNumberAndDateRange()   {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_014_shouldFindPlateWhenSearchingByPlateNumberAndDateRange() {
 		plate.searchWhitelistWithPartialTextAndValidateResult("1234", null);
 		plate.searchStartDate(23);
 		plate.searchEndDate(25);
 		plate.validateStartDate();
 		plate.validateEndDate();
-		
 	}
-	
-	@Test
-	public void shouldFindPlatesWhenSearchingBySourceAndDateRange() throws InterruptedException   {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_015_shouldFindPlatesWhenSearchingBySourceAndDateRange() {
 		plate.selectFilterByIndex(1);
 		plate.searchWhitelistWithPartialTextAndValidateResult(null, "Abu");
-		Thread.sleep(2000);
 		plate.searchStartDate(23);
 		plate.searchEndDate(25);
 		plate.validateStartDate();
 		plate.validateEndDate();
-		
 	}
 
 	@Test
-	public void shouldFindPlateWhenSearchingByPlateNumberSourceAndDateRange() throws InterruptedException  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
-
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	public void TC_016_shouldFindPlateWhenSearchingByPlateNumberSourceAndDateRange() {
 		plate.searchWhitelistWithPartialTextAndValidateResult("1234", null);
 		plate.selectFilterByIndex(1);
 		plate.searchWhitelistWithPartialTextAndValidateResult(null, "Abu");
-		Thread.sleep(2000);
 		plate.searchStartDate(23);
 		plate.searchEndDate(25);
 		plate.validateStartDate();
 		plate.validateEndDate();
-		
 	}
-	
-	@Test
-	public void validatePlateCount() {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	// ----------------- VALIDATION & EDIT -----------------
+
+	@Test
+	public void TC_017_validatePlateCount() {
 		plate.printAndValidatePlateCounts();
 		plate.printAndValidateTableCounts();
 		plate.validateTableRowsAgainstTotalPlates();
-		
-		
 	}
-	@Test
-	public void shouldEditPlate()  {
-		DashboardPage dashboard = new DashboardPage(driver, prop, test);
-		WhitelistPlatesPage plate = new WhitelistPlatesPage(driver, prop, test);
 
-		dashboard.dashboardrMessageValidation();
-		dashboard.openWhitelistManagementMenu();
-		dashboard.validateWhitelistManagementSubmenuItems();
-		plate.navigateToPlatePage();
+	@Test
+	public void TC_018_shouldEditPlateSuccessfully() {
 		plate.clickThreeDotAndValidateMenuList();
 		plate.navigateToEditPlatePage();
 		plate.clearAllFields();
 		plate.enterPlateNumber();
+		plate.startDateRange(24);
+		plate.startEndRange(26);
 		plate.updatePlate();
 		plate.validatePlateAdded();
-
 	}
 
+	// ----------------- VALIDATION & VIEW -----------------
+
+	@Test
+	public void TC_019_TC_viewPlateDetails() {
+		plate.clickThreeDotAndValidateMenuList();
+		plate.navigateToViewPlatePage();
+		plate.getPlateDetails();
+	}
+
+	// ----------------- PAGINAATION VALIDATION -----------------
+
+	@Test
+	public void TC_020_shouldValidateFirstPagePagination() {
+		plate.checkFirstPagePagination();
+	}
+
+	@Test
+	public void TC_021_shouldValidateMiddlePagesPagination() {
+		plate.checkMiddlePagesPagination();
+	}
+
+	@Test
+	public void TC_022_shouldValidateLastPagePagination() {
+		plate.checkLastPagePagination();
+	}
 }
