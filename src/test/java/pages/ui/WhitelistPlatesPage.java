@@ -13,8 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -38,7 +42,7 @@ public class WhitelistPlatesPage {
 	private String selectedStartDate;
 	private String selectedEndDate;
 
-	// Constructor with config passed from BaseTest
+	
 	public WhitelistPlatesPage(WebDriver driver, Properties prop, ExtentTest test) {
 		this.driver = driver;
 		this.test = test;
@@ -60,43 +64,14 @@ public class WhitelistPlatesPage {
 
 	@FindBy(xpath = "//input[@id='plateNumber']")
 	private WebElement inputPlateNumber;
-	// input[@id='plateSource']
-	// Plate Source
-	@FindBy(xpath = "//*[@id='plateSource']/ancestor::div[contains(@class,'ant-select')]//div[contains(@class,'ant-select-selector')]")
-	private WebElement dropdownsPlateSource;
 
-	// Plate Type
-	@FindBy(xpath = "//*[@id='plateType']/ancestor::div[contains(@class,'ant-select')]//div[contains(@class,'ant-select-selector')]")
-	private WebElement dropdownsPlateType;
-
-	// Plate Color
-	@FindBy(xpath = "//*[@id='plateColor']/ancestor::div[contains(@class,'ant-select')]//div[contains(@class,'ant-select-selector')]")
-	private WebElement dropdownsPlateClor;
-
-	// Plate Status
-	@FindBy(xpath = "//*[@id='plateStatus']/ancestor::div[contains(@class,'ant-select')]//div[contains(@class,'ant-select-selector')]")
-	private WebElement dropdownStatus;
-
-	@FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and contains(@class,'ant-select-dropdown-placement-bottomLeft')]//div[contains(@class,'ant-select-item-option-content')]")
-	private List<WebElement> choosePlateSource;
-
-	@FindBy(xpath = "//input[@id='exemptionReason_ID']")
-	private WebElement dropdownsexemptionReason;
-
-	@FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and not(contains(@class,'hidden'))]//div[contains(@class,'ant-select-item-option-content')]")
-	private List<WebElement> choosePlateType;
-
-	@FindBy(xpath = "//div[@id='plateColor_list']//div[contains(@class,'ant-select-item-option-content')]")
-	private List<WebElement> choosePlateColor;
+	// Common locator for options (always use same XPath root for visible dropdowns)
+	@FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and not(contains(@class,'hidden'))]"
+			+ "//div[contains(@class,'ant-select-item-option-content')]")
+	private List<WebElement> dropdownOptions;
 
 	@FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and @aria-hidden='false']")
 	private WebElement activeDropdown;
-
-	@FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and not(contains(@class,'ant-select-dropdown-hidden'))]//div[contains(@class,'ant-select-item-option-content')]")
-	private List<WebElement> chooseExemptionReason;
-
-	@FindBy(xpath = "//div[@id='plateStatus_list']//div[contains(@class,'ant-select-item-option-content')]")
-	private List<WebElement> choosePlateStatus;
 
 	@FindBy(xpath = "//button[.='Submit']")
 	private WebElement submit;
@@ -110,8 +85,27 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//div[@class='ant-picker ant-picker-range ant-picker-large ant-picker-outlined ant-picker-status-error css-ch82n6']//input[@placeholder='End date']")
 	private WebElement endtDate;
 
-	@FindBy(xpath = "//td[@class='ant-table-cell']")
-	private WebElement confirmAddedPlatesNumber;
+	// Locators for each column (index-based)
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[1]")
+	private WebElement confirmAddedPlateNumber;
+
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
+	private WebElement confirmAddedPlateSource;
+
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[3]")
+	private WebElement confirmAddedPlateType;
+
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[4]")
+	private WebElement confirmAddedPlateColor;
+
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[5]")
+	private WebElement confirmAddedFromDate;
+
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[6]")
+	private WebElement confirmAddedToDate;
+
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[7]")
+	private WebElement confirmAddedStatus;
 
 	@FindBy(xpath = "//div[@class='ant-notification-notice-message']")
 	private WebElement dublicatedPlatesNumber;
@@ -233,6 +227,67 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//li[contains(@class,'ant-pagination-total-text')]")
 	private WebElement totalItemPagination;
 
+	@FindBy(xpath = "//th[@aria-label='Plate Source']//span[contains(@class,'ant-table-filter-trigger')]")
+	private WebElement plateSourceFilterBtn;
+
+	private By singleCheckBy = By
+			.xpath("(//div[contains(@class,'ant-tree')]//span[contains(@class,'ant-tree-title')])[2]");
+
+	@FindBy(xpath = "//span[text()='Plate Type']/following-sibling::span[contains(@class,'ant-table-filter-trigger')]")
+	private WebElement plateTypeFilterBtn;
+
+	@FindBy(xpath = "//span[text()='Status']/following-sibling::span[contains(@class,'ant-table-filter-trigger')]\n"
+			+ "")
+	private WebElement statusFilterBtn;
+
+	@FindBy(xpath = "(//div[contains(@class,'ant-table-filter-dropdown')]//input[@placeholder='Search in filters'])[2]")
+	private WebElement searchFilterText;
+
+	@FindBy(xpath = "(//label[contains(@class,'ant-table-filter-dropdown-checkall')]//input[@type='checkbox'])[2]")
+	private WebElement selectAllFilterCheckBox;
+
+	@FindBy(xpath = "(//div[contains(@class,'ant-tree')]//span[contains(@class,'ant-tree-title')])[2]")
+	private WebElement singleCheck;
+
+	@FindBy(xpath = "//button[.='OK']")
+	private WebElement ok;
+
+	// Column 1: Checkbox
+	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[1]//input[@type='checkbox']")
+	private WebElement plateCheckbox;
+
+	// Column 2: Plate Number
+	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[2]")
+	private WebElement plateNumber;
+
+	// Column 3: Plate Source
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
+	private List<WebElement> plateSource;
+
+	// Column 4: Plate Type
+	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[4]")
+	private WebElement plateType;
+
+	// Column 5: Plate Color
+	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[5]")
+	private WebElement plateColor;
+
+	// Column 6: Start Date
+	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[6]")
+	private WebElement fromtDate;
+
+	// Column 7: End Date
+	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[7]")
+	private WebElement endDate;
+
+	// Column 8: Status
+	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[8]")
+	private WebElement plateStatus;
+
+	// Column 9: Action Button
+	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[last()]//button")
+	private WebElement actionButton;
+
 	// Actions
 
 	public void clickPlates() {
@@ -351,7 +406,8 @@ public class WhitelistPlatesPage {
 	}
 
 	public void enterPlateNumber() {
-		String plateNumber = faker.regexify("[A-Z]{2}[0-9]{2}[A-Z]{4}");
+		// String plateNumber = faker.regexify("[A-Z]{2}[0-9]{2}[A-Z]{4}");
+		String plateNumber = faker.regexify("[A-Z]{2} [0-9]{5} [A-Z]{3}");
 		lastGeneratedPlate = plateNumber; // save for later
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -374,127 +430,73 @@ public class WhitelistPlatesPage {
 		test.log(Status.INFO, "Entered Plate Number: " + plateNo);
 	}
 
-	public void selectFromDropdown(WebElement dropdown, List<WebElement> options, int index, String dropdownName) {
+	// Plate Source
+	public void selectPlateSourceByText(String text) {
+		selectDropdownByText("plateSource_Id", text, "Plate Source");
+	}
+
+	public void selectPlateTypeByText(String text) {
+		selectDropdownByText("plateType_Id", text, "Plate Type");
+	}
+
+	public void selectPlateColorByText(String text) {
+		selectDropdownByText("plateColor_Id", text, "Plate Color");
+	}
+
+	public void selectStatusByText(String text) {
+		selectDropdownByText("plateStatus_Id", text, "Status");
+	}
+
+	public void selectExemptionByText(String text) {
+		selectDropdownByText("exemptionReason_ID", text, "Exemption");
+	}
+
+	public void selectDropdownByText(String dropdownId, String text, String dropdownName) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+		// Dynamic dropdown locator
+		By dropdownLocator = By.xpath("//*[@id='" + dropdownId
+				+ "']/ancestor::div[contains(@class,'ant-select')]//div[contains(@class,'ant-select-selector')]");
+
 		int attempts = 0;
+		boolean success = false;
 
-		while (attempts < 3) {
+		while (attempts < 3 && !success) {
 			try {
-				// Open dropdown
-				wait.until(ExpectedConditions.elementToBeClickable(dropdown)).click();
+				// Click dropdown
+				WebElement dropdown = wait.until(ExpectedConditions.elementToBeClickable(dropdownLocator));
+				dropdown.click();
 
-				// Wait for options
-				wait.until(ExpectedConditions.visibilityOfAllElements(options));
+				// Wait for options to load
+				wait.until(ExpectedConditions.visibilityOfAllElements(dropdownOptions));
 
-				if (index >= options.size()) {
-					throw new IllegalArgumentException("Invalid index " + index + " for " + dropdownName
-							+ ". Available options: " + options.size());
+				// Select matching option
+				boolean found = false;
+				for (WebElement option : dropdownOptions) {
+					if (option.getText().trim().equalsIgnoreCase(text.trim())) {
+						option.click();
+						found = true;
+						break;
+					}
 				}
 
-				// Try normal click
-				try {
-					options.get(index).click();
-				} catch (Exception e) {
-					// Fallback → JavaScript click
-					((JavascriptExecutor) driver).executeScript("arguments[0].click();", options.get(index));
+				if (!found) {
+					throw new RuntimeException("Option '" + text + "' not found for " + dropdownName);
 				}
 
-				// ✅ Success, log and exit loop
-				logger.info("Selected " + dropdownName + " by index: " + index);
-				test.log(Status.INFO, "Selected " + dropdownName + " by index: " + index);
-				return;
+				logger.info(" Selected " + dropdownName + " by text: " + text);
+				test.log(Status.INFO, " Selected " + dropdownName + " by text: " + text);
 
+				success = true;
 			} catch (Exception e) {
 				attempts++;
-				logger.warn("Attempt " + attempts + " failed to select " + dropdownName + " → Retrying...", e);
+				logger.warn("Attempt " + attempts + " failed for " + dropdownName + " with text: " + text);
 				if (attempts == 3) {
-					throw e; // After 3 failures, give up
+					throw new RuntimeException(" Failed to select " + dropdownName + " by text after 3 retries", e);
 				}
 			}
 		}
 	}
-
-	public void selectPlateSource(int index) {
-		selectFromDropdown(dropdownsPlateSource, choosePlateType, index, "Plate Source");
-	}
-
-	public void selectPlateType(int index) {
-		selectFromDropdown(dropdownsPlateType, choosePlateType, index, "Plate Type");
-	}
-
-	public void selectPlateColor(int index) {
-		selectFromDropdown(dropdownsPlateClor, choosePlateType, index, "Plate Color");
-	}
-
-	public void selectStatus(int index) {
-		selectFromDropdown(dropdownStatus, choosePlateType, index, "Status");
-	}
-
-	public void selectExemption(int index) {
-
-		dropdownsexemptionReason.click();
-
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
-		WebElement activeDropdown = wait.until(ExpectedConditions
-
-				.visibilityOfElementLocated(By.cssSelector(".ant-select-dropdown:not(.ant-select-dropdown-hidden)")));
-
-		// Get all options
-
-		List<WebElement> options = activeDropdown.findElements(By.cssSelector(".ant-select-item-option-content"));
-
-		if (index >= options.size()) {
-
-			throw new IllegalArgumentException(
-
-					"Index " + index + " out of bounds. Available options: " + options.size());
-
-		}
-
-		String optionText = options.get(index).getText();
-
-		WebElement input = driver.findElement(By.id("exemptionReason_ID"));
-
-		for (int i = 0; i <= index; i++) {
-
-			input.sendKeys(Keys.ARROW_DOWN);
-
-			try {
-
-				Thread.sleep(200);
-
-			} catch (InterruptedException ignored) {
-
-			}
-
-		}
-
-		input.sendKeys(Keys.ENTER);
-
-		logger.info("Selected Exemption Reason by index: " + index + " → " + optionText);
-
-		test.log(Status.INFO, "Selected Exemption Reason by index: " + index + " → " + optionText);
-
-	}
-
-	/*
-	 * public void selectPlateSource(int index) {
-	 * 
-	 * dropdownsPlateSource.click();
-	 * 
-	 * WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-	 * 
-	 * wait.until(ExpectedConditions.visibilityOfAllElements(choosePlateType));
-	 * 
-	 * choosePlateType.get(index).click();
-	 * 
-	 * logger.info("Selected Plate Source by index: " + index);
-	 * 
-	 * test.log(Status.INFO, "Selected Plate Source by index: " + index);
-	 * 
-	 * }
-	 */
 
 	public void startDateRange(int day) {
 
@@ -532,23 +534,150 @@ public class WhitelistPlatesPage {
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlatesNumber));
 
-		String actualPlate = confirmAddedPlatesNumber.getText().trim();
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateNumber));
+
+		String actualPlate = confirmAddedPlateNumber.getText().trim();
 
 		if (actualPlate.equalsIgnoreCase(lastGeneratedPlate)) {
 			logger.info("Plate number successfully added: " + actualPlate);
 			test.log(Status.PASS, "Plate number successfully added: " + actualPlate);
 		} else {
+
 			logger.error("Plate number mismatch! Expected: " + lastGeneratedPlate + ", but found: " + actualPlate);
 			test.log(Status.FAIL,
 					"Plate number mismatch! Expected: " + lastGeneratedPlate + ", but found: " + actualPlate);
+
+			// Capture browser console logs for debugging
+			try {
+				LogEntries logs = driver.manage().logs().get(LogType.BROWSER);
+				for (LogEntry entry : logs) {
+					logger.error("Browser Log: " + entry.getLevel() + " " + entry.getMessage());
+					test.log(Status.INFO, "Browser Log: " + entry.getLevel() + " " + entry.getMessage());
+				}
+			} catch (Exception e) {
+				logger.warn("Could not capture browser logs: " + e.getMessage());
+			}
+
 			throw new AssertionError(
 					"Plate number mismatch! Expected: " + lastGeneratedPlate + ", but found: " + actualPlate);
+		}
+	}
+	// ====== Plate Source ======
+
+	public void validatePlateSource(String expectedSource) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateSource));
+
+		String actualSource = confirmAddedPlateSource.getText().trim();
+
+		if (actualSource.equalsIgnoreCase(expectedSource)) {
+			logger.info("Plate source successfully validated: " + actualSource);
+			test.log(Status.PASS, "Plate source successfully validated: " + actualSource);
+		} else {
+			logger.error("Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+			test.log(Status.FAIL,
+					"Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+			throw new AssertionError(
+					"Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+		}
+	}
+
+	// ====== Plate Type ======
+
+	public void validatePlateType(String expectedType) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateType));
+
+		String actualType = confirmAddedPlateType.getText().trim();
+
+		if (actualType.equalsIgnoreCase(expectedType)) {
+			logger.info("Plate type successfully validated: " + actualType);
+			test.log(Status.PASS, "Plate type successfully validated: " + actualType);
+		} else {
+			logger.error("Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
+			test.log(Status.FAIL, "Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
+			throw new AssertionError("Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
+		}
+	}
+
+	// ====== Plate Color ======
+
+	public void validatePlateColor(String expectedColor) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateColor));
+
+		String actualColor = confirmAddedPlateColor.getText().trim();
+
+		if (actualColor.equalsIgnoreCase(expectedColor)) {
+			logger.info("Plate color successfully validated: " + actualColor);
+			test.log(Status.PASS, "Plate color successfully validated: " + actualColor);
+		} else {
+			logger.error("Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
+			test.log(Status.FAIL, "Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
+			throw new AssertionError(
+					"Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
+		}
+	}
+
+	// ====== Status ======
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[5]")
+	private WebElement confirmAddedPlateStatus;
+
+	public void validatePlateStatus(String expectedStatus) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateStatus));
+
+		String actualStatus = confirmAddedPlateStatus.getText().trim();
+
+		if (actualStatus.equalsIgnoreCase(expectedStatus)) {
+			logger.info("Plate status successfully validated: " + actualStatus);
+			test.log(Status.PASS, "Plate status successfully validated: " + actualStatus);
+		} else {
+			logger.error("Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
+			test.log(Status.FAIL,
+					"Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
+			throw new AssertionError(
+					"Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
+		}
+	}
+
+	// ====== From Date ======
+
+	public void validateFromDate(String expectedDate) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(confirmAddedFromDate));
+
+		String actualDate = confirmAddedFromDate.getText().trim();
+
+		if (actualDate.equalsIgnoreCase(expectedDate)) {
+			logger.info("From Date successfully validated: " + actualDate);
+			test.log(Status.PASS, "From Date successfully validated: " + actualDate);
+		} else {
+			logger.error("From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+			test.log(Status.FAIL, "From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+			throw new AssertionError("From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+		}
+	}
+
+	// ====== To Date ======
+
+	public void validateToDate(String expectedDate) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(confirmAddedToDate));
+
+		String actualDate = confirmAddedToDate.getText().trim();
+
+		if (actualDate.equalsIgnoreCase(expectedDate)) {
+			logger.info("To Date successfully validated: " + actualDate);
+			test.log(Status.PASS, "To Date successfully validated: " + actualDate);
+		} else {
+			logger.error("To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+			test.log(Status.FAIL, "To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+			throw new AssertionError("To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
 		}
 	}
 
@@ -1156,4 +1285,95 @@ public class WhitelistPlatesPage {
 		}
 	}
 
+	public void selectPlateSource(String plateSourceName) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+		try {
+			// Click filter button
+			wait.until(ExpectedConditions.elementToBeClickable(plateSourceFilterBtn));
+			((JavascriptExecutor) driver).executeScript("arguments[0].click();", plateSourceFilterBtn);
+
+			// Wait for dropdown
+			wait.until(ExpectedConditions.visibilityOfElementLocated(
+					By.xpath("//div[contains(@class,'ant-dropdown') and not(contains(@class,'hidden'))]")));
+
+			// Build dynamic xpath using the given plateSourceName
+			String dynamicXpath = String.format(
+					"//span[@class='ant-tree-checkbox' and contains(@aria-label,'Select %s')]", plateSourceName);
+
+			WebElement checkBox = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(dynamicXpath)));
+			((JavascriptExecutor) driver).executeScript("arguments[0].click();", checkBox);
+
+			logger.info("Checkbox for Plate Source '" + plateSourceName + "' clicked successfully");
+			test.log(Status.PASS, "Checkbox for Plate Source '" + plateSourceName + "' clicked successfully");
+
+		} catch (Exception e) {
+			logger.error("Failed to select Plate Source: " + plateSourceName, e);
+			test.log(Status.FAIL, "Failed to select Plate Source: " + plateSourceName + " - " + e.getMessage());
+			throw new AssertionError("Plate Source selection failed", e);
+		}
+	}
+
+	public void selectFilter() {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+		try {
+			// Wait until the OK button is clickable
+			WebElement okBtn = wait.until(ExpectedConditions.elementToBeClickable(ok));
+			okBtn.click();
+
+			logger.info("OK button clicked successfully");
+			test.log(Status.PASS, "OK button clicked successfully");
+
+		} catch (Exception e) {
+			logger.error("Failed to click OK button", e);
+			test.log(Status.FAIL, "Failed to click OK button - " + e.getMessage());
+			throw new AssertionError("Failed to click OK button", e);
+		}
+	}
+
+	public void validateFilterList(String expectedPlateSource) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			// Wait until table is refreshed with filtered rows
+			wait.until(ExpectedConditions.visibilityOfAllElements(plateSource));
+
+			boolean allMatched = true;
+
+			for (int i = 0; i < plateSource.size(); i++) {
+				String actualValue = plateSource.get(i).getText().trim();
+
+				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
+					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
+							+ actualValue);
+					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
+							+ ", actual = " + actualValue);
+					allMatched = false;
+				} else {
+					logger.info("Row " + (i + 1) + " matched: " + actualValue);
+					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
+				}
+			}
+
+			if (!allMatched) {
+				throw new AssertionError(
+						"One or more rows did not match the expected Plate Source: " + expectedPlateSource);
+			}
+
+			logger.info("All rows matched the expected Plate Source: " + expectedPlateSource);
+			test.log(Status.PASS, "All rows matched the expected Plate Source: " + expectedPlateSource);
+
+		} catch (Exception e) {
+			logger.error("Validation failed for Plate Source filter: " + expectedPlateSource, e);
+			test.log(Status.FAIL,
+					"Validation failed for Plate Source filter: " + expectedPlateSource + " - " + e.getMessage());
+			throw new AssertionError("Validation failed for Plate Source filter", e);
+		}
+	}
 }
