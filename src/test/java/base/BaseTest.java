@@ -8,6 +8,8 @@ import java.util.Properties;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.testng.Assert;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterClass;
@@ -28,99 +30,208 @@ import utils.ConfigReader;
 import utils.ExtentManager;
 import utils.ScreenshotUtils;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.devtools.HasDevTools;
+
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.testng.ITestContext;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeMethod;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.MediaEntityBuilder;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
+import utils.ConfigReader;
+import utils.ExtentManager;
+import utils.ScreenshotUtils;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.testng.ITestContext;
+import org.testng.ITestResult;
+import org.testng.annotations.*;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.time.Duration;
+import java.util.Properties;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.MediaEntityBuilder;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.MediaEntityBuilder;
+
+import org.testng.ITestContext;
+import org.testng.ITestResult;
+import org.testng.annotations.*;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.time.Duration;
+import java.util.Properties;
+import java.util.logging.Level;
+
 public class BaseTest {
-    protected WebDriver driver;
-    protected Properties prop;
-    protected ExtentReports extent;
-    protected ExtentTest test;
 
-    @BeforeMethod
-    public void setUp(Method method) {
-        prop = ConfigReader.initProperties();
-        extent = ExtentManager.getInstance();
+	protected WebDriver driver;
+	protected AppiumDriver mobileDriver;
+	protected Properties prop;
+	protected static ExtentReports extent;
+	protected ExtentTest test;
 
-        // Create test node with class + method name
-        test = extent.createTest(method.getDeclaringClass().getSimpleName() + " :: " + method.getName());
+	@BeforeSuite(alwaysRun = true)
+	public void beforeSuite() {
+		extent = ExtentManager.getInstance();
+	}
 
-        String testType = prop.getProperty("testType", "mobile");
+	@BeforeMethod(alwaysRun = true)
+	public void setUp(Method method) {
+		prop = ConfigReader.initProperties();
 
-        if (testType.equalsIgnoreCase("web")) {
-            driver = DriverFactory.getDriver(prop);
-            driver.get(prop.getProperty("base.url"));
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-            test.info("Web Test Started");
+		// Create a fresh node in ExtentReports for each test method
+		test = extent.createTest(method.getDeclaringClass().getSimpleName() + " :: " + method.getName());
 
-        } else if (testType.equalsIgnoreCase("mobile")) {
-            driver = setupMobileDriver();
-            test.info("Mobile Test Started");
+		String testType = prop.getProperty("testType", "mobile").toLowerCase();
 
-        } else if (testType.equalsIgnoreCase("api")) {
-            driver = null;
-            test.info("API Test - No browser");
+		switch (testType) {
+		case "web":
+			setupWebDriver();
+			break;
+		case "mobile":
+			setupMobileDriver();
+			break;
+		case "api":
+			test.info("API Test - No browser needed");
+			driver = null;
+			mobileDriver = null;
+			break;
+		default:
+			throw new RuntimeException("Invalid testType in config: " + testType);
+		}
+	}
 
-        } else {
-            throw new RuntimeException("Invalid test type in config: " + testType);
-        }
-    }
+	// ================= Web =================
+	private void setupWebDriver() {
+		driver = DriverFactory.getDriver(prop);
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+		driver.get(prop.getProperty("base.url"));
 
-    private AppiumDriver setupMobileDriver() {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setCapability("platformName", prop.getProperty("platformName"));
-        caps.setCapability("deviceName", prop.getProperty("deviceName"));
-        caps.setCapability("platformVersion", prop.getProperty("platformVersion"));
-        caps.setCapability("automationName", prop.getProperty("automationName"));
-        caps.setCapability("browserName", prop.getProperty("browserName"));
-        caps.setCapability("chromedriverExecutable", prop.getProperty("chromedriverExecutable"));
+		captureBrowserErrors(); // capture startup errors
+		test.info("Web Test Started");
+	}
 
-        try {
-            System.out.println("Launching Appium session with capabilities: " + caps);
-            URL appiumURL = new URL("http://127.0.0.1:4723");
-            return new AndroidDriver(appiumURL, caps);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Appium driver init failed: " + e.getMessage(), e);
-        }
-    }
+	// ================= Mobile =================
+	private void setupMobileDriver() {
+		try {
+			DesiredCapabilities caps = new DesiredCapabilities();
+			caps.setCapability("platformName", prop.getProperty("platformName"));
+			caps.setCapability("deviceName", prop.getProperty("deviceName"));
+			caps.setCapability("platformVersion", prop.getProperty("platformVersion"));
+			caps.setCapability("automationName", prop.getProperty("automationName"));
+			caps.setCapability("browserName", prop.getProperty("browserName"));
+			caps.setCapability("chromedriverExecutable", prop.getProperty("chromedriverExecutable"));
 
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(ITestResult result) throws IOException {
-        String testType = prop.getProperty("testType", "mobile");
+			mobileDriver = new AndroidDriver(new URL("http://127.0.0.1:4723"), caps);
+			test.info("Mobile Test Started");
+		} catch (Exception e) {
+			throw new RuntimeException("Appium driver initialization failed: " + e.getMessage(), e);
+		}
+	}
 
-        if (result.getStatus() == ITestResult.FAILURE) {
-            test.fail(result.getThrowable());
-            if (!"api".equalsIgnoreCase(testType) && driver != null) {
-                String screenshotPath = ScreenshotUtils.captureScreenshot(driver, result.getName());
-                if (screenshotPath != null) {
-                    test.fail("Failure Screenshot:",
-                            MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
-                }
-            }
-        } else if (result.getStatus() == ITestResult.SUCCESS) {
-            test.pass("Test passed");
-        } else if (result.getStatus() == ITestResult.SKIP) {
-            test.skip("Test skipped");
-        }
+	// ================= Capture Browser Console Errors =================
+	private void captureBrowserErrors() {
+		if (driver == null)
+			return;
 
-        if (driver != null && !"api".equalsIgnoreCase(testType)) {
-            driver.quit();
-        }
+		try {
+			LogEntries logEntries = driver.manage().logs().get(LogType.BROWSER);
+			for (LogEntry entry : logEntries) {
+				String message = entry.getLevel() + " " + entry.getMessage();
 
-        // flush immediately if only a single test is running
-        if (result.getTestContext().getSuite().getAllMethods().size() == 1) {
-            ExtentManager.flushReport();
-        }
-    }
+				if (entry.getLevel().equals(Level.SEVERE)) {
+					test.log(Status.FAIL, "Browser Console Error: " + message);
+					System.err.println("Browser Console Error: " + message);
+				} else {
+					test.log(Status.WARNING, "Browser Console Log: " + message);
+				}
+			}
+		} catch (Exception e) {
+			test.warning("Unable to capture browser console logs: " + e.getMessage());
+		}
+	}
 
-    @AfterClass(alwaysRun = true)
-    public void afterClass() {
-        // flush report after all tests in the class (for IDE class run)
-        ExtentManager.flushReport();
-    }
+	// ================= TearDown =================
+	@AfterMethod(alwaysRun = true)
+	public void tearDown(ITestResult result) throws IOException {
+		String testType = prop.getProperty("testType", "mobile").toLowerCase();
 
-    @AfterSuite(alwaysRun = true)
-    public void afterSuite(ITestContext context) {
-        // log summary and flush after full suite run
-        ExtentManager.logSummary(context);
-        ExtentManager.flushReport();
-    }
+		// Always capture logs after test run
+		if ("web".equals(testType)) {
+			captureBrowserErrors();
+		}
+
+		if (result.getStatus() == ITestResult.FAILURE) {
+			test.fail(result.getThrowable());
+			if (!"api".equals(testType)) {
+				WebDriver activeDriver = ("web".equals(testType) ? driver : mobileDriver);
+				if (activeDriver != null) {
+					String screenshotPath = ScreenshotUtils.captureScreenshot(activeDriver, result.getName());
+					if (screenshotPath != null) {
+						test.fail("Failure Screenshot:",
+								MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+					}
+				}
+			}
+		} else if (result.getStatus() == ITestResult.SUCCESS) {
+			test.pass("Test passed");
+		} else if (result.getStatus() == ITestResult.SKIP) {
+			test.skip("Test skipped");
+		}
+
+		// Quit drivers
+		if ("web".equals(testType) && driver != null)
+			driver.quit();
+		if ("mobile".equals(testType) && mobileDriver != null)
+			mobileDriver.quit();
+	}
+
+	@AfterSuite(alwaysRun = true)
+	public void afterSuite(ITestContext context) {
+		ExtentManager.flushReport(); 
+	}
 }

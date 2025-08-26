@@ -17,7 +17,7 @@ import java.io.IOException;
 
 public class ExtentManager {
     private static ExtentReports extent;
-    private static String reportPath;  
+    private static String reportPath;
 
     public static ExtentReports getInstance() {
         if (extent == null) {
@@ -31,7 +31,7 @@ public class ExtentManager {
         String reportsDir = System.getProperty("user.dir") + "/reports";
         new File(reportsDir).mkdirs();
 
-        reportPath = reportsDir + "/TestReport_" + timestamp + ".html";  // ✅ save path in static variable
+        reportPath = reportsDir + "/TestReport_" + timestamp + ".html";
 
         ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath);
         sparkReporter.config().setReportName("Automation Test Report");
@@ -41,30 +41,25 @@ public class ExtentManager {
         extent.attachReporter(sparkReporter);
     }
 
-    // ✅ log summary after suite
-    public static void logSummary(ITestContext context) {
-        int passed = context.getPassedTests().size();
-        int failed = context.getFailedTests().size();
-        int skipped = context.getSkippedTests().size();
-        int total = passed + failed + skipped;
-
-        ExtentTest summary = getInstance().createTest("Test Execution Summary");
-        summary.info("Total Tests: " + total);
-
-        if (passed > 0) summary.pass("Passed: " + passed);
-        if (failed > 0) summary.fail("Failed: " + failed);
-        if (skipped > 0) summary.skip("Skipped: " + skipped);
-    }
-
-    // ✅ flush once at the end & auto-open in browser
     public static void flushReport() {
         if (extent != null) {
             extent.flush();
             try {
-                Desktop.getDesktop().browse(new File(reportPath).toURI());
+                if (reportPath != null) {
+                    File reportFile = new File(reportPath);
+                    if (reportFile.exists()) {
+                        // Open in default system browser
+                        Desktop.getDesktop().browse(reportFile.toURI());
+                    }
+                }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Failed to open report automatically: " + e.getMessage());
             }
         }
+    }
+
+
+    public static String getReportPath() {
+        return reportPath;
     }
 }

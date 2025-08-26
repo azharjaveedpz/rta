@@ -4,12 +4,9 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import pages.api.WhitelistPlateAPIPage;
 import tests.ui.TestLaunchBrowser;
+import utils.ApiAssertions;
 import utils.DataReader;
 import utils.PayloadGenerator;
-import utils.PayloadGeneratorForCurrentDate;
-import utils.PayloadGeneratorForDate;
-import utils.PayloadGeneratorForDublicate;
-import utils.PayloadGeneratorForPastDate;
 
 import org.testng.annotations.Test;
 
@@ -18,215 +15,201 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import base.BaseTest;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import static io.restassured.RestAssured.given;
-
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class WhitelistPlateAPITests extends BaseTest{
+import org.testng.Assert;
 
-	private static final Logger logger = LogManager.getLogger(TestLaunchBrowser.class);
-    private static final String BASE_URL = "https://devparkingapi.kandaprojects.live/api/WhitelistPlate";
-    WhitelistPlateAPIPage apiPage = new WhitelistPlateAPIPage();
+import io.restassured.response.Response;
+import org.testng.annotations.Test;
 
-    // Helper method to send request and validate status code
-  
-        @Test
-        public void TC01_ValidateWhitelistPlateCreation() throws Exception {
-            logger.info("Running Test: TC01_ValidRecordCreation");
+import org.slf4j.LoggerFactory;
+import com.aventstack.extentreports.ExtentTest;
+import org.testng.annotations.Test;
 
-            PayloadGenerator generator = new PayloadGenerator();
-            String payload = generator.generatePlatePayload();
+import com.aventstack.extentreports.Status;
 
-            Response response = apiPage.sendRequest(payload);
+public class WhitelistPlateAPITests extends BaseTest {
 
-            int statusCode = response.getStatusCode();
-            String responseBody = response.asPrettyString();
-            long responseTime = response.getTime();
+	private static final Logger logger = LogManager.getLogger(WhitelistPlateAPITests.class);
 
-            logger.info("Response Status: {}", statusCode);
-            logger.info("Response Body: {}", responseBody);
-            logger.info("Response Time: {} ms", responseTime);
+	private WhitelistPlateAPIPage apiPage = new WhitelistPlateAPIPage();
 
-            test.log(Status.INFO, "Response Code: " + statusCode);
-            test.log(Status.INFO, "Response Time: " + responseTime + " ms");
-            test.log(Status.INFO, "Response Body:<br><pre>" + responseBody + "</pre>");
+	@Test
+	public void TC01_shouldCreatePlateSuccessfully() {
+		String payload = PayloadGenerator.generateDefaultPlatePayload();
+		Response response = apiPage.sendAndLogRequest(payload, test, logger);
 
-            // Status code check
-            if (statusCode == 200 || statusCode == 201) {
-                test.log(Status.PASS, "Valid record created successfully. Status: " + statusCode);
-            } else {
-                test.log(Status.FAIL, "Expected 200 or 201 but got " + statusCode);
-                throw new AssertionError("Expected status code 200/201 but got " + statusCode);
-            }
+		ApiAssertions.assertStatusCode(response, 200, "Plate created successfully", "❌ Plate creation failed", test,
+				logger);
 
-            // ID validation
-            String id = response.jsonPath().getString("data.id");
-            if (id != null && !id.isEmpty()) {
-                logger.info("Record ID generated: {}", id);
-                test.log(Status.PASS, "Record ID generated: " + id);
-            } else {
-                test.log(Status.FAIL, "No ID generated in the response.");
-                throw new AssertionError("No ID generated in the response.");
-            }
+		ApiAssertions.assertResponseContains(response, "plateNumber", "Response contains plateNumber",
+				"plateNumber missing in response", test, logger);
+	}
 
-            // Success message validation
-            String successMessage = response.jsonPath().getString("en_Msg");
-            if ("Record created successfully".equalsIgnoreCase(successMessage)) {
-                test.log(Status.PASS, "Success message validated: " + successMessage);
-            } else {
-                test.log(Status.FAIL, "Unexpected success message: " + successMessage);
-                throw new AssertionError("Unexpected success message: " + successMessage);
-            }
-        }
+	@Test
+	public void TC02_shouldCreatePlateWithByLawFalse() {
+		String payload = PayloadGenerator.generateisByLawPlatePayload();
+		Response response = apiPage.sendAndLogRequest(payload, test, logger);
 
-        @Test
+		ApiAssertions.assertStatusCode(response, 200, "Plate created with ByLaw=false",
+				"Failed to create plate with ByLaw=false", test, logger);
+	}
 
+	@Test
+	public void TC03_shouldNotCreateDuplicatePlate() {
+		String payload = PayloadGenerator.generateDuplicatePlatePayload();
+		apiPage.sendAndLogRequest(payload, test, logger); // create first
+		Response response = apiPage.sendAndLogRequest(payload, test, logger); // try duplicate
 
-        public void TC02_ValidateWhitelistPlateCreationWithInvalidDate() throws Exception {
-            logger.info("Running Test: TC02_InvalidDate");
+		ApiAssertions.assertStatusCode(response, 400, "Duplicate plate correctly rejected",
+				"Duplicate plate should not be allowed", test, logger);
+	}
 
-            PayloadGeneratorForDate generator = new PayloadGeneratorForDate();
-            String payload = generator.generatePlatePayloadForDate();
+	@Test
 
-            Response response = apiPage.sendRequest(payload);
+	public void TC04_shouldFetchPlateById() {
+		int plateId = 123;
+		String expectedPlateNumber = "CCC 1234 DBX"; // use dynamic value if created earlier
 
-            int statusCode = response.getStatusCode();
-            String responseBody = response.asPrettyString();
-            long responseTime = response.getTime();
+		// 🔹 Fetch plate by ID
+		Response response = apiPage.getAndLogPlateById(plateId, test, logger);
 
-            logger.info("Response Status: {}", statusCode);
-            logger.info("Response Body: {}", responseBody);
+		ApiAssertions.assertStatusCode(response, 200, "Plate fetched successfully by ID", "Failed to fetch plate by ID",
+				test, logger);
 
-            test.log(Status.INFO, "Response Code: " + statusCode);
-            test.log(Status.INFO, "Response Time: " + responseTime + " ms");
-            test.log(Status.INFO, "Response Body:<br><pre>" + responseBody + "</pre>");
+		String actualPlateNumber = response.jsonPath().getString("plateNumber");
 
-            JsonPath jsonPath = new JsonPath(responseBody);
-            String actualMessage = jsonPath.getString("validationErrors[0].enMessage");
+		Assert.assertNotNull(actualPlateNumber, "plateNumber is null in response");
+		Assert.assertFalse(actualPlateNumber.isEmpty(), "plateNumber is empty in response");
+		Assert.assertEquals(actualPlateNumber, expectedPlateNumber, "plateNumber does not match expected value");
 
-            if (statusCode == 428 && "From date cannot be after To date".equals(actualMessage)) {
-                test.log(Status.PASS, "API correctly rejected invalid dates with correct message.");
-            } else {
-                test.log(Status.FAIL, "Expected status 428 and message 'From date cannot be after To date', but got Status: "
-                        + statusCode + ", Message: " + actualMessage);
-                throw new AssertionError("Validation failed: Status=" + statusCode + ", Message=" + actualMessage);
-            }
-        }
+		if (test != null) {
+			test.pass("plateNumber matched successfully: " + actualPlateNumber);
+		}
+		logger.info("plateNumber matched successfully: {}", actualPlateNumber);
+	}
 
-        @Test
-        public void TC03_ValidateWhitelistPlateCreationWithExistingPlateNumber() throws Exception {
-            logger.info("Running Test: TC03_DublicateRecord");
+	@Test
+	public void TC05_shouldReturn404ForInvalidPlateId() {
+		int invalidId = 99999;
+		Response response = apiPage.getAndLogPlateById(invalidId, test, logger);
+		ApiAssertions.assertStatusCode(response, 404, "Correctly returned 404 for invalid plateId",
+				"Expected 404 but got different status", test, logger);
+	}
 
-            PayloadGeneratorForDublicate generator = new PayloadGeneratorForDublicate();
-            String payload = generator.generatePlatePayloadForDub();
+	@Test
+	public void TC06_shouldFetchPlatesWithPagination() {
+		int pageNumberReq = 1;
+		int pageSizeReq = 1;
+		String query = "?pageNumber=" + pageNumberReq + "&pageSize=" + pageSizeReq;
 
-            Response response = apiPage.sendRequest(payload);
+		Response response = apiPage.getAndLogPlatesWithQuery(query, test, logger);
+		ApiAssertions.assertStatusCode(response, 200, "Pagination request succeeded", "Pagination request failed",
+				test, logger);
+		// Pagination Metadata Validation
+		int pageNumber = response.jsonPath().getInt("pageNumber");
+		int pageSize = response.jsonPath().getInt("pageSize");
+		int totalCount = response.jsonPath().getInt("totalCount");
 
-            int statusCode = response.getStatusCode();
-            String responseBody = response.asPrettyString();
-            long responseTime = response.getTime();
+		Assert.assertEquals(pageNumberReq, pageNumber, "pageNumber mismatch");
+		Assert.assertEquals(pageSizeReq, pageSize, "pageSize mismatch");
+		Assert.assertTrue(totalCount > 0, "totalCount should be greater than 0");
 
-            logger.info("Response Status: {}", statusCode);
-            logger.info("Response Body: {}", responseBody);
+		List<Map<String, Object>> plates = response.jsonPath().getList("data");
+		Assert.assertFalse(plates.isEmpty(), "Data array is empty");
+		// Plate Number Validation
+		String plateNumber = response.jsonPath().getString("data[0].plateNumber");
+		Assert.assertNotNull(plateNumber, "plateNumber is missing in first record");
+		test.pass("Pagination response validated successfully" + plateNumber);
+	}
 
-            test.log(Status.INFO, "Response Code: " + statusCode);
-            test.log(Status.INFO, "Response Time: " + responseTime + " ms");
-            test.log(Status.INFO, "Response Body:<br><pre>" + responseBody + "</pre>");
+	@Test
+	public void TC07_shouldHandleInvalidPagination() {
+		String query = "?pageNumber=-1&pageSize=0";
+		Response response = apiPage.getAndLogPlatesWithQuery(query, test, logger);
+		ApiAssertions.assertStatusCode(response, 400, "Invalid pagination correctly rejected",
+				"Invalid pagination should return 400", test, logger);
+	}
 
-            JsonPath jsonPath = new JsonPath(responseBody);
-            String actualMessage = jsonPath.getString("en_Msg");
+	@Test
+	public void TC08_shouldFetchPlatesWithFiltering() {
+		String query = "?plateNumber=AP03BL0101";
+		Response response = apiPage.getAndLogPlatesWithQuery(query, test, logger);
+		ApiAssertions.assertStatusCode(response, 200, "Filter request succeeded", "Filter request failed", test,
+				logger);
+		ApiAssertions.assertResponseContains(response, "AP03BL0101", "Response contains filtered plate",
+				"Filtered plate missing in response", test, logger);
+	}
 
-            if (statusCode == 409 && "Plate number already exists for the specified period".equals(actualMessage)) {
-                test.log(Status.PASS, "API correctly rejected invalid dates with correct message.");
-            } else {
-                test.log(Status.FAIL, "Expected status 428 and message 'From date cannot be after To date', but got Status: "
-                        + statusCode + ", Message: " + actualMessage);
-                throw new AssertionError("Validation failed: Status=" + statusCode + ", Message=" + actualMessage);
-            }
-        }
-        @Test
-        public void TC04_ValidateWhitelistPlateCreationWithPastDate() throws Exception {
-            logger.info("Running Test: TC03_PastRecord");
+	@Test
+	public void TC09_shouldFetchPlatesWithPaginationAndSorting() {
+		int pageNumberReq = 1;
+		int pageSizeReq = 1;
+		String sortField = "pageNumber";
+		String sortOrder = "asc"; // or "desc"
 
-            PayloadGeneratorForPastDate generator = new PayloadGeneratorForPastDate();
-            String payload = generator.generatePlatePayloadForPastDate();
+		// Add sort parameters
+		String query = "?pageNumber=" + pageNumberReq + "&pageSize=" + pageSizeReq + "&sortField=" + sortField
+				+ "&sortOrder=" + sortOrder;
+		Response response = apiPage.getAndLogPlatesWithQuery(query, test, logger);
+		ApiAssertions.assertStatusCode(response, 200, "Pagination+Sorting request succeeded",
+				"Pagination+Sorting request failed", test, logger);
+		int pageNumber = response.jsonPath().getInt("pageNumber");
+		int pageSize = response.jsonPath().getInt("pageSize");
+		Assert.assertEquals(pageNumberReq, pageNumber, "pageNumber mismatch");
+		Assert.assertEquals(pageSizeReq, pageSize, "pageSize mismatch");
+		List<Integer> ids = response.jsonPath().getList("data.id");
+		Assert.assertFalse(ids.isEmpty(), "No records found in data");
+		// Check Sorting (ascending or descending)
+		List<Integer> sorted = new ArrayList<>(ids);
+		if ("asc".equalsIgnoreCase(sortOrder)) {
+			Collections.sort(sorted);
+		} else {
+			Collections.sort(sorted, Collections.reverseOrder());
+		}
+		Assert.assertEquals(sorted, ids, "Records are not sorted by " + sortField + " in " + sortOrder + " order");
+		test.pass("Pagination and sorting validated successfully");
+	}
 
-            Response response = apiPage.sendRequest(payload);
+	@Test
+	public void TC10_shouldFetchPlatesWithSortingAscending() {
+		String query = "?sortBy=plateNumber&sortOrder=asc";
 
-            int statusCode = response.getStatusCode();
-            String responseBody = response.asPrettyString();
-            long responseTime = response.getTime();
+		Response response = apiPage.getAndLogPlatesWithQuery(query, test, logger);
+		ApiAssertions.assertStatusCode(response, 200, "Sorting request succeeded", "Sorting request failed", test,
+				logger);
+		List<String> plateNumbers = response.jsonPath().getList("data.plateNumber");
+		Assert.assertFalse(plateNumbers.isEmpty(), "Plate list should not be empty");
+		logger.info("Fetched plate numbers: {}", plateNumbers);
+		test.info("Fetched plate numbers: " + plateNumbers);
+		List<String> expectedSorted = new ArrayList<>(plateNumbers);
+		expectedSorted.sort((p1, p2) -> {
+			return p1.compareToIgnoreCase(p2);
+		});
+		logger.info("Expected sorted list (ascending): {}", expectedSorted);
+		test.info("Expected sorted list (ascending): " + expectedSorted);
+		Assert.assertEquals(plateNumbers, expectedSorted, "Plate numbers are not sorted correctly (ascending)");
+		test.pass("Plate numbers are sorted correctly in ascending order");
+	}
 
-            logger.info("Response Status: {}", statusCode);
-            logger.info("Response Body: {}", responseBody);
+	@Test
+	public void TC11_shouldEditPlateSuccessfully() {
 
-            test.log(Status.INFO, "Response Code: " + statusCode);
-            test.log(Status.INFO, "Response Time: " + responseTime + " ms");
-            test.log(Status.INFO, "Response Body:<br><pre>" + responseBody + "</pre>");
-
-            JsonPath jsonPath = new JsonPath(responseBody);
-            String actualMessage = jsonPath.getString("validationErrors[0].enMessage");
-
-            if (statusCode == 428 && "From date is in the past".equals(actualMessage)) {
-                test.log(Status.PASS, "API correctly rejected invalid dates with correct message.");
-            } else {
-                test.log(Status.FAIL, "Expected status 428 and message 'From date cannot be after To date', but got Status: "
-                        + statusCode + ", Message: " + actualMessage);
-                throw new AssertionError("Validation failed: Status=" + statusCode + ", Message=" + actualMessage);
-            }
-        }
-
-        @Test
-        public void TC04_ValidateWhitelistPlateCreationWithTodaysDate() throws Exception {
-            logger.info("Running Test: TC04_CurrentRecord");
-
-            PayloadGeneratorForCurrentDate generator = new PayloadGeneratorForCurrentDate();
-            String payload = generator.generatePlatePayloadForCurDate();
-
-            Response response = apiPage.sendRequest(payload);
-
-            int statusCode = response.getStatusCode();
-            String responseBody = response.asPrettyString();
-            long responseTime = response.getTime();
-
-            logger.info("Response Status: {}", statusCode);
-            logger.info("Response Body: {}", responseBody);
-            logger.info("Response Time: {} ms", responseTime);
-
-            test.log(Status.INFO, "Response Code: " + statusCode);
-            test.log(Status.INFO, "Response Time: " + responseTime + " ms");
-            test.log(Status.INFO, "Response Body:<br><pre>" + responseBody + "</pre>");
-
-            // Status code check
-            if (statusCode == 200 || statusCode == 201) {
-                test.log(Status.PASS, "Valid record created successfully. Status: " + statusCode);
-            } else {
-                test.log(Status.FAIL, "Expected 200 or 201 but got " + statusCode);
-                throw new AssertionError("Expected status code 200/201 but got " + statusCode);
-            }
-
-            // ID validation
-            String id = response.jsonPath().getString("data.id");
-            if (id != null && !id.isEmpty()) {
-                logger.info("Record ID generated: {}", id);
-                test.log(Status.PASS, "Record ID generated: " + id);
-            } else {
-                test.log(Status.FAIL, "No ID generated in the response.");
-                throw new AssertionError("No ID generated in the response.");
-            }
-
-            // Success message validation
-            String successMessage = response.jsonPath().getString("en_Msg");
-            if ("Record created successfully".equalsIgnoreCase(successMessage)) {
-                test.log(Status.PASS, "Success message validated: " + successMessage);
-            } else {
-                test.log(Status.FAIL, "Unexpected success message: " + successMessage);
-                throw new AssertionError("Unexpected success message: " + successMessage);
-            }
-        }
+		int plateId = 42;
+		String payload = PayloadGenerator.generateEditPlatePayload(plateId);
+		Response response = apiPage.sendAndLogRequest(payload, test, logger);
+		ApiAssertions.assertStatusCode(response, 200, "✅ Plate edited successfully", "❌ Plate edit failed", test,
+				logger);
+		ApiAssertions.assertResponseContains(response, "plateNumber", "Response contains updated plateNumber",
+				"plateNumber missing in response", test, logger);
+		ApiAssertions.assertResponseContains(response, "editBy", "Response contains editBy",
+				"editBy missing in response", test, logger);
+	}
 
 }

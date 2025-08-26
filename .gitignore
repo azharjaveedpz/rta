@@ -1,5 +1,22 @@
+# Eclipse Core files
+.classpath
+.project
+.settings/
+
+# Eclipse launch configs
+*.launch
+
+# Build output
 target/
+bin/
+build/
+
+# Reports & logs
 logs/
 reports/
 test-output/
 *.log
+
+# OS-specific junk
+.DS_Store
+Thumbs.db

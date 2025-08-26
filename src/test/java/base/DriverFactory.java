@@ -7,37 +7,37 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.safari.SafariDriver;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-
 public class DriverFactory {
-    private static WebDriver driver;
 
-    public static WebDriver getDriver(Properties prop) {
-        String browser = prop.getProperty("browser", "chrome").toLowerCase();
+	public static WebDriver getDriver(Properties prop) {
+		String browser = prop.getProperty("browser", "chrome").toLowerCase();
+		WebDriver driver;
 
-        switch (browser) {
-            case "chrome":
-                WebDriverManager.chromedriver().setup();
-                ChromeOptions chromeOptions = new ChromeOptions();
+		switch (browser) {
+		case "chrome":
+			ChromeOptions chromeOptions = new ChromeOptions();
 
-                if (Boolean.parseBoolean(prop.getProperty("headless", "false"))) {
-                    chromeOptions.addArguments("--headless=new");
-                }
-                if (Boolean.parseBoolean(prop.getProperty("incognito", "false"))) {
-                    chromeOptions.addArguments("--incognito");
-                }
+			if (Boolean.parseBoolean(prop.getProperty("headless", "false"))) {
+				chromeOptions.addArguments("--headless=new");
+			}
+			if (Boolean.parseBoolean(prop.getProperty("incognito", "false"))) {
+				chromeOptions.addArguments("--incognito");
+			}
 
-                chromeOptions.addArguments("--start-maximized", "--disable-notifications");
-                driver = new ChromeDriver(chromeOptions);
-                break;
+			chromeOptions.addArguments("--start-maximized", "--disable-notifications");
 
-            case "safari":
-                driver = new SafariDriver(); // macOS only
-                break;
+			// Selenium Manager will download and configure ChromeDriver automatically
+			driver = new ChromeDriver(chromeOptions);
+			break;
 
-            default:
-                throw new RuntimeException("Browser not supported: " + browser);
-        }
-        return driver;
-    }
+		case "safari":
+			driver = new SafariDriver(); // SafariDriver comes bundled with Safari on macOS
+			break;
+
+		default:
+			throw new RuntimeException("Browser not supported: " + browser);
+		}
+
+		return driver;
+	}
 }
