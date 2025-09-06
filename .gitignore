@@ -1,4 +1,6 @@
-# Eclipse Core files
+# -------------------------
+# Eclipse
+# -------------------------
 .classpath
 .project
 .settings/
@@ -6,17 +8,27 @@
 # Eclipse launch configs
 *.launch
 
-# Build output
-target/
-bin/
-build/
+# -------------------------
+# Maven
+# -------------------------
+/target/
 
-# Reports & logs
+# -------------------------
+# Logs & Reports
+# -------------------------
 logs/
 reports/
 test-output/
 *.log
 
-# OS-specific junk
+# -------------------------
+# OS Specific
+# -------------------------
 .DS_Store
 Thumbs.db
+
+# -------------------------
+# Misc
+# -------------------------
+*.tmp
+*.swp

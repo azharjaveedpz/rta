@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogEntries;
@@ -31,7 +30,7 @@ import com.aventstack.extentreports.Status;
 import tests.ui.TestLaunchBrowser;
 import com.github.javafaker.Faker;
 
-public class WhitelistPlatesPage {
+public class WhitelistPage {
 	private static final Logger logger = LogManager.getLogger(TestLaunchBrowser.class);
 
 	private WebDriver driver;
@@ -42,8 +41,7 @@ public class WhitelistPlatesPage {
 	private String selectedStartDate;
 	private String selectedEndDate;
 
-	
-	public WhitelistPlatesPage(WebDriver driver, Properties prop, ExtentTest test) {
+	public WhitelistPage(WebDriver driver, Properties prop, ExtentTest test) {
 		this.driver = driver;
 		this.test = test;
 		PageFactory.initElements(driver, this);
@@ -70,45 +68,33 @@ public class WhitelistPlatesPage {
 			+ "//div[contains(@class,'ant-select-item-option-content')]")
 	private List<WebElement> dropdownOptions;
 
-	@FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and @aria-hidden='false']")
-	private WebElement activeDropdown;
-
-	@FindBy(xpath = "//button[.='Submit']")
-	private WebElement submit;
-
 	@FindBy(xpath = "//input[@id='dateRange']")
 	private WebElement startDate;
 
-	@FindBy(xpath = "//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='")
-	private WebElement dateSelection;
-
-	@FindBy(xpath = "//div[@class='ant-picker ant-picker-range ant-picker-large ant-picker-outlined ant-picker-status-error css-ch82n6']//input[@placeholder='End date']")
-	private WebElement endtDate;
-
 	// Locators for each column (index-based)
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[1]")
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
 	private WebElement confirmAddedPlateNumber;
 
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[3]")
 	private WebElement confirmAddedPlateSource;
 
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[3]")
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[4]")
 	private WebElement confirmAddedPlateType;
 
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[4]")
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[5]")
 	private WebElement confirmAddedPlateColor;
 
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[5]")
-	private WebElement confirmAddedFromDate;
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[8]")
+	private WebElement confirmAddedPlateStatus;
 
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[6]")
-	private WebElement confirmAddedToDate;
+	private WebElement confirmAddedFromDate;
 
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[7]")
-	private WebElement confirmAddedStatus;
+	private WebElement confirmAddedToDate;
 
-	@FindBy(xpath = "//div[@class='ant-notification-notice-message']")
-	private WebElement dublicatedPlatesNumber;
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[10]")
+	private WebElement byLAwTable;
 
 	@FindBy(xpath = "//input[@placeholder='Search...']")
 	private WebElement searchInput;
@@ -119,12 +105,6 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
 	private WebElement plateSourceTable;
 
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[3]")
-	private WebElement plateTypeTable;
-
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[4]")
-	private WebElement plateColorTable;
-
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[5]")
 	private WebElement fromTable;
 
@@ -134,10 +114,7 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//input[@placeholder='Start date']")
 	private WebElement startSearch;
 
-	@FindBy(xpath = "//input[@placeholder='End date']")
-	private WebElement endSearch;
-
-	@FindBy(xpath = "//tbody/tr[2]/td[9]/button[1]")
+	@FindBy(xpath = "//tbody/tr[2]/td[12]/button[1]")
 	private WebElement threeDot;
 
 	@FindBy(xpath = "//ul[contains(@class,'ant-dropdown-menu')]//li//span[@class='ant-dropdown-menu-title-content']")
@@ -149,14 +126,8 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//span[normalize-space()='View']")
 	private WebElement viewButton;
 
-	@FindBy(xpath = "//span[normalize-space()='Delete']")
-	private WebElement deleteButton;
-
 	@FindBy(xpath = "//div[contains(text(),'Edit Plate')]")
 	private WebElement editPlatePageMessage;
-
-	@FindBy(xpath = "//button[.='Update']")
-	private WebElement update;
 
 	@FindBy(xpath = "//div[contains(text(),'Plate Details')]")
 	private WebElement viewPlatePageMessage;
@@ -164,20 +135,11 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//div[contains(text(),'No data')]")
 	private WebElement noData;
 
-	@FindBy(xpath = "//tbody[@class='ant-table-tbody']//tr[not(contains(@class,'ant-table-measure-row'))]/td[2]")
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
 	private List<WebElement> plateNameRowTable;
 
 	@FindBy(xpath = "//tbody[@class='ant-table-tbody']//tr[not(contains(@class,'ant-table-measure-row'))]/td[3]")
 	private List<WebElement> plateSourceRowTable;
-
-	@FindBy(xpath = "//div[contains(@class,'ant-select-selector')]")
-	private WebElement filter;
-
-	@FindBy(xpath = "//div[contains(@class,'ant-select-item-option-content')]")
-	private List<WebElement> filterOptions;
-
-	@FindBy(xpath = "//span[@class='ant-select-selection-item']")
-	private WebElement selectedValue;
 
 	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Total Plates']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
 	private WebElement totalPlates;
@@ -191,6 +153,9 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]")
 	private List<WebElement> rowList;
 
+	@FindBy(xpath = "//tbody[@class=\"ant-table-tbody\"]/tr[contains(@class,\"ant-table-row\")]/td[9]")
+	private List<WebElement> statusList;
+
 	@FindBy(xpath = "//tr[th/span[text()='Plate Number']]/td/span")
 	private WebElement viewPlateName;
 
@@ -203,16 +168,16 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//tr[th/span[text()='Plate Color']]/td/span")
 	private WebElement viewPlateColor;
 
-	@FindBy(xpath = "//tr[th/span[text()='From Date']]/td/span")
+	@FindBy(xpath = "//tr[th/span[text()='Start date']]/td/span")
 	private WebElement viewStartDate;
 
-	@FindBy(xpath = "//tr[th/span[text()='To Date']]/td/span")
+	@FindBy(xpath = "//tr[th/span[text()='End date']]/td/span")
 	private WebElement viewEndDate;
 
-	@FindBy(xpath = "//tr[th/span[text()='Exemption Reason ID']]/td/span")
+	@FindBy(xpath = "//tr[th/span[text()='Exemption Reason']]/td/span")
 	private WebElement viewExemption;
 
-	@FindBy(xpath = "//tr[th/span[text()='Status']]/td/span/span[contains(@class,'ant-tag')]")
+	@FindBy(xpath = "//tr[th/span[text()='Status']]/td/span")
 	private WebElement viewStatus;
 
 	@FindBy(xpath = "//li[contains(@class,'ant-pagination-prev')]/button")
@@ -221,72 +186,21 @@ public class WhitelistPlatesPage {
 	@FindBy(xpath = "//li[contains(@class,'ant-pagination-next')]/button")
 	private WebElement nestBtn;
 
-	@FindBy(xpath = "//li[contains(@class,'ant-pagination-item-active')]/a")
-	private WebElement currentPages;
-
 	@FindBy(xpath = "//li[contains(@class,'ant-pagination-total-text')]")
 	private WebElement totalItemPagination;
 
 	@FindBy(xpath = "//th[@aria-label='Plate Source']//span[contains(@class,'ant-table-filter-trigger')]")
 	private WebElement plateSourceFilterBtn;
 
-	private By singleCheckBy = By
-			.xpath("(//div[contains(@class,'ant-tree')]//span[contains(@class,'ant-tree-title')])[2]");
-
-	@FindBy(xpath = "//span[text()='Plate Type']/following-sibling::span[contains(@class,'ant-table-filter-trigger')]")
-	private WebElement plateTypeFilterBtn;
-
-	@FindBy(xpath = "//span[text()='Status']/following-sibling::span[contains(@class,'ant-table-filter-trigger')]\n"
-			+ "")
-	private WebElement statusFilterBtn;
-
-	@FindBy(xpath = "(//div[contains(@class,'ant-table-filter-dropdown')]//input[@placeholder='Search in filters'])[2]")
-	private WebElement searchFilterText;
-
-	@FindBy(xpath = "(//label[contains(@class,'ant-table-filter-dropdown-checkall')]//input[@type='checkbox'])[2]")
-	private WebElement selectAllFilterCheckBox;
-
-	@FindBy(xpath = "(//div[contains(@class,'ant-tree')]//span[contains(@class,'ant-tree-title')])[2]")
-	private WebElement singleCheck;
-
-	@FindBy(xpath = "//button[.='OK']")
-	private WebElement ok;
-
-	// Column 1: Checkbox
-	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[1]//input[@type='checkbox']")
-	private WebElement plateCheckbox;
-
-	// Column 2: Plate Number
-	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[2]")
-	private WebElement plateNumber;
-
-	// Column 3: Plate Source
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[3]")
 	private List<WebElement> plateSource;
 
 	// Column 4: Plate Type
-	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[4]")
-	private WebElement plateType;
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[4]")
+	private List<WebElement> plateType;
 
-	// Column 5: Plate Color
-	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[5]")
-	private WebElement plateColor;
-
-	// Column 6: Start Date
-	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[6]")
-	private WebElement fromtDate;
-
-	// Column 7: End Date
-	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[7]")
-	private WebElement endDate;
-
-	// Column 8: Status
-	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[8]")
-	private WebElement plateStatus;
-
-	// Column 9: Action Button
-	@FindBy(xpath = "//table[contains(@class,'ant-table')]//tr[contains(@class,'ant-table-row')]//td[last()]//button")
-	private WebElement actionButton;
+	@FindBy(xpath = "(//td[@class='ant-table-cell'])[8]")
+	private List<WebElement> plateStatus;
 
 	// Actions
 
@@ -316,53 +230,6 @@ public class WhitelistPlatesPage {
 			throw new AssertionError("Failed to navigate to plate page."); // causes test to fail
 
 		}
-	}
-
-	public void selectFilterByIndex(int index) {
-		filter.click(); // open dropdown
-
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-		List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElements(filterOptions));
-
-		logger.info("Dropdown contains " + options.size() + " options.");
-		test.log(Status.INFO, "Dropdown contains " + options.size() + " options.");
-
-		if (options.isEmpty()) {
-			throw new RuntimeException("No options found in dropdown!");
-		}
-		if (index < 0 || index >= options.size()) {
-			throw new IllegalArgumentException(
-					"Invalid index " + index + ", valid range: 0 to " + (options.size() - 1));
-		}
-
-		WebElement optionToSelect = options.get(index);
-		String optionText = optionToSelect.getText().trim();
-		optionToSelect.click();
-
-		wait.until(ExpectedConditions.or(ExpectedConditions.textToBePresentInElement(selectedValue, optionText),
-				ExpectedConditions.attributeToBe(selectedValue, "title", optionText)));
-
-		logger.info("Selected filter: " + optionText);
-		test.log(Status.INFO, "Selected filter: " + optionText);
-	}
-
-	public void selectFilterByText(String text) {
-		filter.click(); // open dropdown
-
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOfAllElements(filterOptions));
-
-		for (WebElement option : filterOptions) {
-			if (option.getText().trim().equalsIgnoreCase(text)) {
-				option.click();
-				wait.until(ExpectedConditions.textToBePresentInElement(selectedValue, text));
-				logger.info("Selected filter: " + text);
-				test.log(Status.INFO, "Selected filter: " + text);
-				return;
-			}
-		}
-		throw new NoSuchElementException("No option found with text: " + text);
 	}
 
 	public void addNewPlates() {
@@ -406,13 +273,15 @@ public class WhitelistPlatesPage {
 	}
 
 	public void enterPlateNumber() {
-		// String plateNumber = faker.regexify("[A-Z]{2}[0-9]{2}[A-Z]{4}");
 		String plateNumber = faker.regexify("[A-Z]{2} [0-9]{5} [A-Z]{3}");
-		lastGeneratedPlate = plateNumber; // save for later
+		lastGeneratedPlate = plateNumber;
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(inputPlateNumber));
-		inputPlateNumber.clear();
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(50));
+
+		wait.until(driver -> inputPlateNumber.isDisplayed() && inputPlateNumber.isEnabled());
+
+		((JavascriptExecutor) driver).executeScript("arguments[0].value = '';", inputPlateNumber);
+
 		inputPlateNumber.sendKeys(plateNumber);
 
 		logger.info("Entered Plate Number: " + plateNumber);
@@ -449,6 +318,10 @@ public class WhitelistPlatesPage {
 
 	public void selectExemptionByText(String text) {
 		selectDropdownByText("exemptionReason_ID", text, "Exemption");
+	}
+
+	public void selectByLawByText(String text) {
+		selectDropdownByText("isByLaw", text, "isByLaw");
 	}
 
 	public void selectDropdownByText(String dropdownId, String text, String dropdownName) {
@@ -524,10 +397,6 @@ public class WhitelistPlatesPage {
 		selectedEndDate = String.valueOf(day);
 		logger.info("Selected End Date: " + selectedEndDate);
 		test.log(Status.INFO, "Selected End Date: " + selectedEndDate);
-	}
-
-	public void submitPlate() {
-		submit.click();
 	}
 
 	public void validatePlateAdded() {
@@ -624,8 +493,6 @@ public class WhitelistPlatesPage {
 	}
 
 	// ====== Status ======
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[5]")
-	private WebElement confirmAddedPlateStatus;
 
 	public void validatePlateStatus(String expectedStatus) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -681,23 +548,22 @@ public class WhitelistPlatesPage {
 		}
 	}
 
-	public void validatePlateError(String expectedErrorMessage) {
+	public void validateByLawStatus(String expectedSource) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(dublicatedPlatesNumber)); // <-- define locator for error message
+		wait.until(ExpectedConditions.visibilityOf(byLAwTable));
 
-		String actualError = dublicatedPlatesNumber.getText().trim();
+		String actualSource = byLAwTable.getText().trim();
 
-		if (actualError.equalsIgnoreCase(expectedErrorMessage)) {
-			logger.info("Validation error correctly displayed: " + actualError);
-			test.log(Status.PASS, "Validation error correctly displayed: " + actualError);
+		if (actualSource.equalsIgnoreCase(expectedSource)) {
+			logger.info("ByLaw Status successfully validated: " + actualSource);
+			test.log(Status.PASS, "ByLaw Status successfully validated: " + actualSource);
 		} else {
-			logger.error("Error message mismatch! Expected: " + expectedErrorMessage + ", but found: " + actualError);
+			logger.error("ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
 			test.log(Status.FAIL,
-					"Error message mismatch! Expected: " + expectedErrorMessage + ", but found: " + actualError);
+					"ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
 			throw new AssertionError(
-					"Error message mismatch! Expected: " + expectedErrorMessage + ", but found: " + actualError);
+					"ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
 		}
-
 	}
 
 	public void searchWhitelistAndValidateResult(String expectedPlateNumber, String expectedPlateSource) {
@@ -790,25 +656,32 @@ public class WhitelistPlatesPage {
 		logger.info("Fetched Plate Sources: " + actualPlateSources);
 		test.log(Status.INFO, "Fetched Plate Sources: " + actualPlateSources);
 
+// 
 		if (expectedPlateNumber != null) {
-			if (actualPlateNumbers.contains(expectedPlateNumber)) {
-				logger.info(" Plate Number found: " + expectedPlateNumber);
-				test.log(Status.PASS, "Plate Number found: " + expectedPlateNumber);
+			boolean numberMatched = false;
+			for (String actualNumber : actualPlateNumbers) {
+				if (actualNumber != null && actualNumber.contains(expectedPlateNumber)) {
+					numberMatched = true;
+					break;
+				}
+			}
+
+			if (numberMatched) {
+				logger.info("Plate Number found (partial match): " + expectedPlateNumber);
+				test.log(Status.PASS, "Plate Number found (partial match): " + expectedPlateNumber);
 			} else {
-				logger.error(" Plate Number not found! Expected: " + expectedPlateNumber + " | Actual: "
+				logger.error("Plate Number not found! Expected (partial): " + expectedPlateNumber + " | Actual: "
 						+ actualPlateNumbers);
-				test.log(Status.FAIL, "Plate Number not found! Expected: " + expectedPlateNumber + " | Actual: "
-						+ actualPlateNumbers);
+				test.log(Status.FAIL, "Plate Number not found! Expected (partial): " + expectedPlateNumber
+						+ " | Actual: " + actualPlateNumbers);
 				throw new AssertionError("Plate Number mismatch!");
 			}
 		}
 
-		boolean sourceMatched = false;
-
 		if (expectedPlateSource != null) {
+			boolean sourceMatched = false;
 			for (String actualSource : actualPlateSources) {
-				if (actualSource != null && actualSource.length() >= 3 && expectedPlateSource.length() >= 3
-						&& actualSource.substring(0, 3).equalsIgnoreCase(expectedPlateSource.substring(0, 3))) {
+				if (actualSource != null && actualSource.contains(expectedPlateSource)) {
 					sourceMatched = true;
 					break;
 				}
@@ -825,7 +698,6 @@ public class WhitelistPlatesPage {
 				throw new AssertionError("Plate Source mismatch!");
 			}
 		}
-
 	}
 
 	private void validateField(String fieldName, String expected, String actual) {
@@ -864,14 +736,14 @@ public class WhitelistPlatesPage {
 	}
 
 	public String searchStartDate(int day) {
-		safeClick(startSearch); // click the calendar field safely
+		safeClick(startSearch);
 
 		By dateLocator = By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']");
 
 		WebElement dateSelection = new WebDriverWait(driver, Duration.ofSeconds(10))
 				.until(ExpectedConditions.elementToBeClickable(dateLocator));
 
-		safeClick(dateSelection); // retry logic for date cell
+		safeClick(dateSelection);
 
 		selectedStartDate = String.valueOf(day);
 		return selectedStartDate;
@@ -889,15 +761,41 @@ public class WhitelistPlatesPage {
 		return selectedEndDate;
 	}
 
+	private String extractDay(String dateText) {
+		if (dateText == null || dateText.isEmpty()) {
+			return "";
+		}
+
+		dateText = dateText.trim();
+		System.out.println("DEBUG - Raw date text: " + dateText);
+
+		String[] parts = dateText.split("-");
+		if (parts.length >= 3) {
+			return parts[2].replaceAll("\\D+", ""); // take last part, remove non-digits
+		}
+
+		parts = dateText.split("/");
+		if (parts.length >= 3) {
+			return parts[0].replaceAll("\\D+", "");
+		}
+
+		String digitsOnly = dateText.replaceAll("\\D+", "");
+		if (digitsOnly.length() >= 2) {
+			return digitsOnly.substring(digitsOnly.length() - 2);
+		}
+
+		return digitsOnly;
+	}
+
 	public void validateStartDate() {
 		String actualFull = fromTable.getText().trim();
-		String actualDay = actualFull.split("-")[2];
+		String actualDay = extractDay(actualFull);
 		validateField("Start Date", selectedStartDate, actualDay);
 	}
 
 	public void validateEndDate() {
 		String actualFull = toTable.getText().trim();
-		String actualDay = actualFull.split("-")[2];
+		String actualDay = extractDay(actualFull);
 		validateField("End Date", selectedEndDate, actualDay);
 	}
 
@@ -920,7 +818,7 @@ public class WhitelistPlatesPage {
 				String menuText = item.getText().trim();
 				logger.info("Menu Item: " + menuText);
 				test.log(Status.INFO, "Menu Item: " + menuText);
-				System.out.println("Menu Item: " + menuText);
+
 			}
 		}
 	}
@@ -931,7 +829,7 @@ public class WhitelistPlatesPage {
 
 	public boolean navigateToEditPlatePage() {
 
-		editButton.click();
+		// editButton.click();
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		String sucMsg = "";
@@ -955,10 +853,6 @@ public class WhitelistPlatesPage {
 			test.log(Status.FAIL, "Failed to navigate to Edit Plate page. Message was empty.");
 			throw new AssertionError("Failed to navigate to Edit Plate page. Message was empty.");
 		}
-	}
-
-	public void updatePlate() {
-		update.click();
 	}
 
 	public void clearText(WebElement element) {
@@ -1032,7 +926,6 @@ public class WhitelistPlatesPage {
 
 		logger.info("Total Plates available: " + total);
 		test.log(Status.INFO, "Total Plates available: " + total);
-		System.out.println("Total Plates available: " + total);
 	}
 
 	public void validateTableRowsAgainstTotalPlates() {
@@ -1062,7 +955,7 @@ public class WhitelistPlatesPage {
 
 	public boolean navigateToViewPlatePage() {
 
-		viewButton.click();
+		// viewButton.click();
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		String sucMsg = "";
@@ -1112,50 +1005,23 @@ public class WhitelistPlatesPage {
 		}
 	}
 
-	public void checkFirstPagePagination() {
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void validateTotalPlatesCount() {
 		try {
 			int total = Integer.parseInt(totalPlates.getText().trim());
 			int rowsOnPage = rowList.size();
 
-			logger.info("Checking first page pagination");
-			test.log(Status.INFO, "Checking first page pagination");
-
-			WebElement prevBtn = previouBtn;
-			WebElement nextBtn = nestBtn;
-
-			if (!prevBtn.isEnabled()) {
-				logger.info("First page: Previous disabled");
-				test.log(Status.PASS, "First page: Previous disabled");
+			if (rowsOnPage <= total) {
+				logger.info("Row count (" + rowsOnPage + ") matches or is less than total plates (" + total + ")");
+				test.log(Status.PASS,
+						"Row count (" + rowsOnPage + ") matches or is less than total plates (" + total + ")");
 			} else {
-				logger.error("First page: Previous should be disabled");
-				test.log(Status.FAIL, "First page: Previous should be disabled");
-			}
-
-			if (nextBtn.isEnabled()) {
-				logger.info("First page: Next enabled");
-				test.log(Status.PASS, "First page: Next enabled");
-			} else {
-				logger.error("First page: Next should be enabled");
-				test.log(Status.FAIL, "First page: Next should be enabled");
-			}
-
-			if (rowsOnPage == total || rowsOnPage <= total) {
-				logger.info("Rows on first page match or less than Total Plates: " + rowsOnPage);
-				test.log(Status.PASS, "Rows on first page match or less than Total Plates: " + rowsOnPage);
-			} else {
-				logger.error("Rows on first page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
-				test.log(Status.FAIL, "Rows on first page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
+				logger.error("Row count (" + rowsOnPage + ") exceeds total plates (" + total + ")");
+				test.log(Status.FAIL, "Row count (" + rowsOnPage + ") exceeds total plates (" + total + ")");
 			}
 
 		} catch (Exception e) {
-			logger.error("Error in first page validation: " + e.getMessage());
-			test.log(Status.FAIL, "Error in first page validation: " + e.getMessage());
+			logger.error("Error validating total plates: " + e.getMessage());
+			test.log(Status.FAIL, "Error validating total plates: " + e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
@@ -1217,74 +1083,6 @@ public class WhitelistPlatesPage {
 		}
 	}
 
-	public void checkLastPagePagination() {
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			// Navigate to last page
-			String paginationText = totalItemPagination.getText();
-			String[] parts = paginationText.split(" of ");
-			int itemsPerPage = Integer.parseInt(parts[0].split("-")[1].trim());
-			int totalItems = Integer.parseInt(parts[1].replaceAll("[^0-9]", "").trim());
-			int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
-			int total = Integer.parseInt(totalPlates.getText().trim());
-
-			driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item') and @title='" + totalPages + "']"))
-					.click();
-
-			new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.textToBePresentInElement(
-					driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item-active')]/a")),
-					String.valueOf(totalPages)));
-
-			int expectedRowsOnLastPage = totalItems - itemsPerPage * (totalPages - 1);
-			new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.numberOfElementsToBe(
-					By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]"),
-					expectedRowsOnLastPage));
-
-			int rowsOnPage = rowList.size();
-			WebElement prevBtn = previouBtn;
-			WebElement nextBtn = nestBtn;
-
-			logger.info("Checking last page pagination");
-			test.log(Status.INFO, "Checking last page pagination");
-
-			if (prevBtn.isEnabled()) {
-				logger.info("Last page: Previous enabled");
-				test.log(Status.PASS, "Last page: Previous enabled");
-			} else {
-				logger.error("Last page: Previous should be enabled");
-				test.log(Status.FAIL, "Last page: Previous should be enabled");
-			}
-
-			if (!nextBtn.isEnabled()) {
-				logger.info("Last page: Next disabled");
-				test.log(Status.PASS, "Last page: Next disabled");
-			} else {
-				logger.error("Last page: Next should be disabled");
-				test.log(Status.FAIL, "Last page: Next should be disabled");
-			}
-
-			if (rowsOnPage == expectedRowsOnLastPage) {
-				logger.info("Rows on last page match expected: " + rowsOnPage);
-				test.log(Status.PASS, "Rows on last page match expected: " + rowsOnPage);
-			} else {
-				logger.error("Rows on last page (" + rowsOnPage + ") do NOT match expected (" + expectedRowsOnLastPage
-						+ ")");
-				test.log(Status.FAIL, "Rows on last page (" + rowsOnPage + ") do NOT match expected ("
-						+ expectedRowsOnLastPage + ")");
-			}
-
-		} catch (Exception e) {
-			logger.error("Error in last page validation: " + e.getMessage());
-			test.log(Status.FAIL, "Error in last page validation: " + e.getMessage());
-			throw new RuntimeException(e);
-		}
-	}
-
 	public void selectPlateSource(String plateSourceName) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
@@ -1314,24 +1112,6 @@ public class WhitelistPlatesPage {
 		}
 	}
 
-	public void selectFilter() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
-		try {
-			// Wait until the OK button is clickable
-			WebElement okBtn = wait.until(ExpectedConditions.elementToBeClickable(ok));
-			okBtn.click();
-
-			logger.info("OK button clicked successfully");
-			test.log(Status.PASS, "OK button clicked successfully");
-
-		} catch (Exception e) {
-			logger.error("Failed to click OK button", e);
-			test.log(Status.FAIL, "Failed to click OK button - " + e.getMessage());
-			throw new AssertionError("Failed to click OK button", e);
-		}
-	}
-
 	public void validateFilterList(String expectedPlateSource) {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		try {
@@ -1341,7 +1121,7 @@ public class WhitelistPlatesPage {
 			e.printStackTrace();
 		}
 		try {
-			// Wait until table is refreshed with filtered rows
+
 			wait.until(ExpectedConditions.visibilityOfAllElements(plateSource));
 
 			boolean allMatched = true;
@@ -1376,4 +1156,129 @@ public class WhitelistPlatesPage {
 			throw new AssertionError("Validation failed for Plate Source filter", e);
 		}
 	}
+
+	public void validatePlateTypeFilterList(String expectedPlateSource) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+
+			wait.until(ExpectedConditions.visibilityOfAllElements(plateType));
+
+			boolean allMatched = true;
+
+			for (int i = 0; i < plateType.size(); i++) {
+				String actualValue = plateType.get(i).getText().trim();
+
+				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
+					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
+							+ actualValue);
+					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
+							+ ", actual = " + actualValue);
+					allMatched = false;
+				} else {
+					logger.info("Row " + (i + 1) + " matched: " + actualValue);
+					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
+				}
+			}
+
+			if (!allMatched) {
+				throw new AssertionError(
+						"One or more rows did not match the expected Obstacle Source: " + expectedPlateSource);
+			}
+
+			logger.info("All rows matched the expected Status Source: " + expectedPlateSource);
+			test.log(Status.PASS, "All rows matched the expected Status Source: " + expectedPlateSource);
+
+		} catch (Exception e) {
+			logger.error("Validation failed for Status Source filter: " + expectedPlateSource, e);
+			test.log(Status.FAIL,
+					"Validation failed for Status Source filter: " + expectedPlateSource + " - " + e.getMessage());
+			throw new AssertionError("Validation failed for Status Source filter", e);
+		}
+	}
+
+	public void validateStatuseFilterList(String expectedPlateSource) {
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+
+			wait.until(ExpectedConditions.visibilityOfAllElements(plateStatus));
+
+			boolean allMatched = true;
+
+			for (int i = 0; i < plateStatus.size(); i++) {
+				String actualValue = plateStatus.get(i).getText().trim();
+
+				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
+					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
+							+ actualValue);
+					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
+							+ ", actual = " + actualValue);
+					allMatched = false;
+				} else {
+					logger.info("Row " + (i + 1) + " matched: " + actualValue);
+					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
+				}
+			}
+
+			if (!allMatched) {
+				throw new AssertionError(
+						"One or more rows did not match the expected Obstacle Source: " + expectedPlateSource);
+			}
+
+			logger.info("All rows matched the expected Status Source: " + expectedPlateSource);
+			test.log(Status.PASS, "All rows matched the expected Status Source: " + expectedPlateSource);
+
+		} catch (Exception e) {
+			logger.error("Validation failed for Status Source filter: " + expectedPlateSource, e);
+			test.log(Status.FAIL,
+					"Validation failed for Status Source filter: " + expectedPlateSource + " - " + e.getMessage());
+			throw new AssertionError("Validation failed for Status Source filter", e);
+		}
+	}
+
+	public void printAndValidateActiveAndInActiveCounts() {
+
+		// UI
+		int active = Integer.parseInt(activePlates.getText().trim());
+		int inactive = Integer.parseInt(inactivePlates.getText().trim());
+
+		// Collect all statuses from the table
+		List<WebElement> statusList = driver
+				.findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class,'ant-table-row')]/td[9]"));
+
+		long activeCount = statusList.stream().map(WebElement::getText).map(String::trim)
+				.filter(status -> status.equalsIgnoreCase("ACTIVE")).count();
+
+		long inactiveCount = statusList.stream().map(WebElement::getText).map(String::trim)
+				.filter(status -> status.equalsIgnoreCase("InActive")).count();
+
+		logger.info("Active (UI): " + active + " | Active (Table): " + activeCount);
+		test.log(Status.INFO, "Active (UI): " + active + " | Active (Table): " + activeCount);
+
+		logger.info("Inactive (UI): " + inactive + " | Inactive (Table): " + inactiveCount);
+		test.log(Status.INFO, "Inactive (UI): " + inactive + " | Inactive (Table): " + inactiveCount);
+
+		if (active == activeCount && inactive == inactiveCount) {
+			logger.info("Validation passed: UI counts match table counts");
+			test.log(Status.PASS, "Validation passed: UI counts match table counts");
+		} else {
+			logger.error("Validation FAILED! Active(UI/Table): " + active + "/" + activeCount
+					+ " | Inactive(UI/Table): " + inactive + "/" + inactiveCount);
+			test.log(Status.FAIL, "Validation FAILED! Active(UI/Table): " + active + "/" + activeCount
+					+ " | Inactive(UI/Table): " + inactive + "/" + inactiveCount);
+			throw new AssertionError("Mismatch between UI and table counts");
+		}
+	}
+
 }

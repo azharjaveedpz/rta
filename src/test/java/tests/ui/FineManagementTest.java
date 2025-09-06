@@ -13,7 +13,7 @@ import pages.ui.DashboardPage;
 import pages.ui.FineManagementPage;
 import pages.ui.LoginPage;
 import pages.ui.PermitPage;
-import pages.ui.WhitelistPlatesPage;
+import pages.ui.WhitelistPage;
 
 public class FineManagementTest extends BaseTest {
 	private static final Logger logger = LogManager.getLogger(TestLaunchBrowser.class);

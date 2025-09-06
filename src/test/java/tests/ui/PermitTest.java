@@ -12,7 +12,7 @@ import base.BaseTest;
 import pages.ui.DashboardPage;
 import pages.ui.LoginPage;
 import pages.ui.PermitPage;
-import pages.ui.WhitelistPlatesPage;
+import pages.ui.WhitelistPage;
 
 public class PermitTest extends BaseTest {
 	private static final Logger logger = LogManager.getLogger(TestLaunchBrowser.class);
