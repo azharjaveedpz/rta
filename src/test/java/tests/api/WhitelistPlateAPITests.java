@@ -2,7 +2,7 @@ package tests.api;
 
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import pages.api.WhitelistPlateAPIPage;
+import pages.api.WhitelistPlateAPI;
 import tests.ui.TestLaunchBrowser;
 import utils.ApiAssertions;
 import utils.DataReader;
@@ -38,7 +38,7 @@ public class WhitelistPlateAPITests extends BaseTest {
 
 	private static final Logger logger = LogManager.getLogger(WhitelistPlateAPITests.class);
 
-	private WhitelistPlateAPIPage apiPage = new WhitelistPlateAPIPage();
+	private WhitelistPlateAPI apiPage = new WhitelistPlateAPI();
 
 	@Test
 	public void TC01_shouldCreatePlateSuccessfully() {
@@ -204,12 +204,12 @@ public class WhitelistPlateAPITests extends BaseTest {
 		int plateId = 42;
 		String payload = PayloadGenerator.generateEditPlatePayload(plateId);
 		Response response = apiPage.sendAndLogRequest(payload, test, logger);
-		ApiAssertions.assertStatusCode(response, 200, "✅ Plate edited successfully", "❌ Plate edit failed", test,
+		ApiAssertions.assertStatusCode(response, 200, " Plate edited successfully", "Plate edit failed", test,
 				logger);
 		ApiAssertions.assertResponseContains(response, "plateNumber", "Response contains updated plateNumber",
 				"plateNumber missing in response", test, logger);
 		ApiAssertions.assertResponseContains(response, "editBy", "Response contains editBy",
 				"editBy missing in response", test, logger);
 	}
-
+	
 }

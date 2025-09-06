@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 
 import static io.restassured.RestAssured.given;
 
-public class WhitelistPlateAPIPage {
+public class WhitelistPlateAPI {
 
 	private static final String BASE_URL = "https://devparkingapi.kandaprojects.live/api";
 	private static final String WHITELIST_PLATE_ENDPOINT = "/WhitelistPlate";

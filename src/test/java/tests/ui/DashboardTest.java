@@ -24,7 +24,8 @@ public class DashboardTest extends BaseTest {
    	public void validateWhitelistSubMenu() {
        	DashboardPage dashboard = new DashboardPage(driver, prop, test);        
           dashboard.dashboardrMessageValidation();
-          dashboard.openWhitelistManagementMenu();
+          
+          dashboard.clickWhitelistManagement();
           dashboard.validateWhitelistManagementSubmenuItems();
 
        }

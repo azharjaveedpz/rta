@@ -48,7 +48,10 @@ public class DashboardPage {
     @FindBy(xpath = "//h3[normalize-space()='Dashboard']")
     private WebElement dashboardMessage;
     
-    @FindBy(xpath = "//span[normalize-space()='Whitelist Management']")
+    @FindBy(xpath = "//span[normalize-space()='Configuration']")
+    private WebElement selectConfiguration;
+    
+    @FindBy(xpath = "//a[normalize-space()='Whitelist']")
     private WebElement selectWhitelistManagement;
     
     @FindBy(xpath = "//li[@class='ant-menu-item ant-menu-item-only-child']")
@@ -60,13 +63,13 @@ public class DashboardPage {
     @FindBy(xpath = "//h3[normalize-space()='Permits Search']")
     private WebElement permitMessage;
     
-    @FindBy(xpath = "//a[.='Inspection Obstacles']")
-    private WebElement selectInspection;
+    @FindBy(xpath = "//a[.='Obstacles']")
+    private WebElement selectObstacle;
     
     @FindBy(xpath = "//h3[.='Inspection Obstacles']")
     private WebElement inspectionMessage;
     
-    @FindBy(xpath = "//a[.='Dispute Management']")
+    @FindBy(xpath = "//a[normalize-space()='Disputes']")
     private WebElement selectDisputeManagement;
     
     @FindBy(xpath = "//h3[normalize-space()='Dispute Management']")
@@ -78,7 +81,7 @@ public class DashboardPage {
     @FindBy(xpath = "//h3[normalize-space()='Fines Management']")
     private WebElement fineMessage;
     
-    @FindBy(xpath = "//a[normalize-space()='Pledges Management']")
+    @FindBy(xpath = "//a[normalize-space()='Pledges']")
     private WebElement selectPledgeManagement;
     
     @FindBy(xpath = "//h3[.='Pledges Management']")
@@ -95,7 +98,25 @@ public class DashboardPage {
         }
     }
     public void clickWhitelistManagement() {
-    	selectWhitelistManagement.click();
+    	
+    	
+    	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selectWhitelistManagement));
+        link.click();
+
+        logger.info("Clicked on plates");
+        test.info("Clicked on plates");
+    }
+    
+    public void clickConfiguration() {
+  
+    	
+    	 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+         WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selectConfiguration));
+         link.click();
+
+         logger.info("Clicked on configuration");
+         test.info("Clicked on configurationt");
     }
     
     
@@ -174,8 +195,14 @@ public class DashboardPage {
         }
     }
 
-    public void clickInspection() {
-    	selectInspection.click();
+    public void clickObstacle() {
+    	
+    	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selectObstacle));
+        link.click();
+
+        logger.info("Clicked on obstacles");
+        test.info("Clicked on obstacles");
     }
     
     
@@ -202,7 +229,13 @@ public class DashboardPage {
     }
     
     public void clickDisputeManagement() {
-    	selectDisputeManagement.click();
+    	
+    	 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+         WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selectDisputeManagement));
+         link.click();
+
+         logger.info("Clicked on disputes");
+         test.info("Clicked on disputes");
     }
     
     
@@ -255,11 +288,20 @@ public class DashboardPage {
         }
     }
 
+   
+    
+    private By pledgeLink = By.xpath("//a[normalize-space()='Pledges']");
+
     public void clickPledgeManagement() {
-    	selectPledgeManagement.click();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(pledgeLink));
+        link.click();
+
+        logger.info("Clicked on Pledge Management");
+        test.info("Clicked on Pledge Management");
     }
-    
-    
+
+
     public String getPledgeMessage() {
         try {
             return pledgeMessage.getText().trim();
