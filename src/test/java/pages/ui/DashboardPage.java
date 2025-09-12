@@ -87,6 +87,14 @@ public class DashboardPage {
     @FindBy(xpath = "//h3[.='Pledges Management']")
     private WebElement pledgeMessage;
 
+ // ================= Step Logging =================
+ 	public void step(String stepDescription, Runnable action) {
+ 	    // Log step in Extent
+ 	    test.info("Step: " + stepDescription);
+
+ 	    // Execute the actual action
+ 	    action.run();
+ 	}
 
 
     // Actions
@@ -98,26 +106,39 @@ public class DashboardPage {
         }
     }
     public void clickWhitelistManagement() {
-    	
+    	step("Click Whitelist Menu", () -> {
     	
     	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selectWhitelistManagement));
         link.click();
 
         logger.info("Clicked on plates");
-        test.info("Clicked on plates");
+        test.pass("Clicked on plates");
+        try {
+            Thread.sleep(4000); // wait for splash/dashboard
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    	 });
     }
     
     public void clickConfiguration() {
-  
-    	
-    	 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-         WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selectConfiguration));
-         link.click();
+        step("Click Configuration Menu", () -> {
+            try {
+                Thread.sleep(3000); // wait for splash/dashboard
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-         logger.info("Clicked on configuration");
-         test.info("Clicked on configurationt");
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+            WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selectConfiguration));
+            link.click();
+
+            logger.info("Configuration menu opened successfully");
+            test.pass("Configuration menu opened successfully");
+        });
     }
+
     
     
     
@@ -196,13 +217,21 @@ public class DashboardPage {
     }
 
     public void clickObstacle() {
+    	   step("Click Obstacle Menu", () -> {
     	
     	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         WebElement link = wait.until(ExpectedConditions.elementToBeClickable(selectObstacle));
         link.click();
 
         logger.info("Clicked on obstacles");
-        test.info("Clicked on obstacles");
+        test.pass("Clicked on obstacles");
+        try {
+            Thread.sleep(4000); // wait for splash/dashboard
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+       });
+
     }
     
     
@@ -215,6 +244,7 @@ public class DashboardPage {
     }
     //code
     public boolean inspectionPageMessageValidation() {
+    	
         String successMsg = getInspectionMessage();
 
         if (successMsg != null && !successMsg.trim().isEmpty()) {
@@ -293,12 +323,19 @@ public class DashboardPage {
     private By pledgeLink = By.xpath("//a[normalize-space()='Pledges']");
 
     public void clickPledgeManagement() {
+    	  step("Click Pledge Menu", () -> {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         WebElement link = wait.until(ExpectedConditions.elementToBeClickable(pledgeLink));
         link.click();
 
-        logger.info("Clicked on Pledge Management");
-        test.info("Clicked on Pledge Management");
+        logger.info("Pledge menu opened successfully");
+        test.pass("Pledge menu opened successfully");
+        try {
+            Thread.sleep(4000); // wait for splash/dashboard
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    	  });
     }
 
 

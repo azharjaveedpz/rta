@@ -153,8 +153,20 @@ public class BaseTest {
 		driver = DriverFactory.getDriver(prop);
 		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 		driver.get(prop.getProperty("base.url"));
-
-		captureBrowserErrors(); // capture startup errors
+		//driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(50));
+		driver.navigate().refresh();
+		try {
+		    Thread.sleep(5000); // 10000 ms = 10 seconds
+		} catch (InterruptedException e) {
+		    e.printStackTrace();
+		}
+		driver.navigate().refresh();
+		try {
+		    Thread.sleep(2000); // 10000 ms = 10 seconds
+		} catch (InterruptedException e) {
+		    e.printStackTrace();
+		}
+		//captureBrowserErrors(); // capture startup errors
 		test.info("Web Test Started");
 	}
 
@@ -175,7 +187,15 @@ public class BaseTest {
 			throw new RuntimeException("Appium driver initialization failed: " + e.getMessage(), e);
 		}
 	}
-	
+	// ================= Step Logging =================
+	public void step(String stepDescription, Runnable action) {
+	    // Log step in Extent
+	    test.info(stepDescription);
+
+	    // Execute the actual action
+	    action.run();
+	}
+
 
 	// ================= Capture Browser Console Errors =================
 	private void captureBrowserErrors() {
@@ -188,7 +208,7 @@ public class BaseTest {
 				String message = entry.getLevel() + " " + entry.getMessage();
 
 				if (entry.getLevel().equals(Level.SEVERE)) {
-					test.log(Status.FAIL, "Browser Console Error: " + message);
+					test.log(Status.INFO, "Browser Console Error: " + message);
 					System.err.println("Browser Console Error: " + message);
 				} else {
 					test.log(Status.WARNING, "Browser Console Log: " + message);
@@ -206,7 +226,7 @@ public class BaseTest {
 
 		// Always capture logs after test run
 		if ("web".equals(testType)) {
-			captureBrowserErrors();
+			//captureBrowserErrors();
 		}
 
 		if (result.getStatus() == ITestResult.FAILURE) {

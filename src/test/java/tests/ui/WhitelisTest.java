@@ -24,7 +24,7 @@ public class WhitelisTest extends BaseTest {
 
 		// login.login("azhar@gmail.com","Azhar@123");
 		// dashboard.dashboardrMessageValidation();
-		Thread.sleep(1500);
+		//Thread.sleep(1500);
 		dashboard.clickConfiguration();
 		dashboard.clickWhitelistManagement();
 
@@ -33,16 +33,16 @@ public class WhitelisTest extends BaseTest {
 	// ----------------- CREATE PLATE TESTS -----------------
 
 	@Test
-	public void TC_001_shouldCreatePlateSuccessfully() {
+	public void TC_001_shouldCreatePlateSuccessfullyWithTrueByLaw() {
 		plate.navigateToAddNewPlatePage();
 		plate.enterPlateNumber();
 		plate.selectPlateSourceByText("Ajman");
 		plate.selectPlateTypeByText("Private");
 		plate.selectPlateColorByText("White");
-		plate.selectStatusByText("Active");
 		plate.selectExemptionByText("Government Vehicle");
-		plate.startDateRange(29);
-		plate.startEndRange(30);
+		plate.selectByLawByText("True");
+		common.startDateRange(29);
+		common.startEndRange(30);
 		common.submit();
 		common.validateToastMessage("Plate added successfully!");
 
@@ -51,33 +51,37 @@ public class WhitelisTest extends BaseTest {
 		plate.validatePlateType("Private");
 		plate.validatePlateColor("White");
 		plate.validatePlateStatus("Active");
+		plate.validateByLawStatus("True");
+
 		plate.validateFromDate("2025-09-29");
 		plate.validateToDate("2025-09-30");
-		// plate.validateStartDate();
-		// plate.validateEndDate();
+		
 	}
 
 	@Test
-	public void TC_002_shouldCreatePlateWithInactiveStatusSuccessfully() {
+	public void TC_002_shouldCreatePlateSuccessfullyWithFalseByLaw() {
 		plate.navigateToAddNewPlatePage();
 		plate.enterPlateNumber();
-		plate.selectPlateSourceByText("Sharjah"); // Dubai , Ajman ,Sharjah,Ras Al Khaimah,Fujairah,Umm Al Quwain
-		plate.selectPlateTypeByText("Taxi"); // Commercial , Motorcycle ,Taxi,Private
-		plate.selectPlateColorByText("Black"); // White,Black,Red,Blue,Orange,Green,Yellow,Purple
-		plate.selectStatusByText("Inactive"); // Inactive , Active
-		plate.selectExemptionByText("Diplomatic Vehicle"); // Diplomatic Vehicle ,Government Vehicle ,Emergency Vehicle
-		plate.startDateRange(29);
-		plate.startEndRange(30);
+		plate.selectPlateSourceByText("Ajman");
+		plate.selectPlateTypeByText("Private");
+		plate.selectPlateColorByText("White");
+		plate.selectExemptionByText("Government Vehicle");
+		plate.selectByLawByText("False");
+		common.startDateRange(29);
+		common.startEndRange(30);
 		common.submit();
 		common.validateToastMessage("Plate added successfully!");
 
 		plate.validatePlateAdded();
-		plate.validatePlateSource("Sharjah");
-		plate.validatePlateType("Taxi");
-		plate.validatePlateColor("Black");
-		plate.validatePlateStatus("Inactive");
+		plate.validatePlateSource("Ajman");
+		plate.validatePlateType("Private");
+		plate.validatePlateColor("White");
+		plate.validatePlateStatus("Active");
+		plate.validateByLawStatus("False");
+
 		plate.validateFromDate("2025-09-29");
 		plate.validateToDate("2025-09-30");
+		
 	}
 
 	@Test
@@ -87,115 +91,97 @@ public class WhitelisTest extends BaseTest {
 		plate.selectPlateSourceByText("Ajman");
 		plate.selectPlateTypeByText("Private");
 		plate.selectPlateColorByText("White");
-		plate.selectStatusByText("Active");
 		plate.selectExemptionByText("Government Vehicle");
-		plate.startDateRange(28);
-		plate.startEndRange(28);
+		plate.selectByLawByText("True");
+		common.startDateRange(12);
+		common.startEndRange(12);
 		common.submit();
 		common.validateToastMessage("Plate added successfully!");
 
 		plate.validatePlateAdded();
-		plate.validateFromDate("2025-09-29");
-		plate.validateToDate("2025-09-30");
+		plate.validateFromDate("2025-09-12");
+		plate.validateToDate("2025-09-12");
 	}
 
 	@Test
-	public void TC_004_shouldNotAllowDuplicatePlate() {
+	public void TC_004_shouldNotAllowDuplicatePlateCreation() {
 		plate.navigateToAddNewPlatePage();
-		plate.enterDuplicatePlateNumber("IU 53478 JZI");
+		plate.enterDuplicatePlateNumber("FU 43758 WSE");
 		plate.selectPlateSourceByText("Ajman");
 		plate.selectPlateTypeByText("Private");
 		plate.selectPlateColorByText("White");
-		plate.selectStatusByText("Active");
 		plate.selectExemptionByText("Government Vehicle");
-		plate.startDateRange(29);
-		plate.startEndRange(30);
+		plate.selectByLawByText("True");
+		common.startDateRange(29);
+		common.startEndRange(30);
 		common.submit();
 		common.validateToastMessage("Plate number already exists for the specified period");
 	}
-
 	@Test
-	public void TC_001_shouldCreatePlateSuccessfullyWithTrueByLaw() {
-		plate.navigateToAddNewPlatePage();
+	public void TC_005_shouldEditExistingPlateSuccessfully() {
+		plate.clickThreeDotAndValidateMenuList();
+		common.edit();
+		plate.navigateToEditPlatePage();
+		plate.clearAllFields();
 		plate.enterPlateNumber();
-		plate.selectPlateSourceByText("Ajman");
-		plate.selectPlateTypeByText("Private");
-		plate.selectPlateColorByText("White");
-		plate.selectStatusByText("Active");
-		plate.selectExemptionByText("Government Vehicle");
-		plate.selectByLawByText("True");
-		plate.startDateRange(29);
-		plate.startEndRange(30);
-		common.submit();
-		common.validateToastMessage("Plate added successfully!");
-
-		// plate.validatePlateAdded();
-		plate.validateByLawStatus("True");
-
-	}
-
-	@Test
-	public void TC_001_shouldCreatePlateSuccessfullyWithFalseByLaw() {
-		plate.navigateToAddNewPlatePage();
-		plate.enterPlateNumber();
-		plate.selectPlateSourceByText("Ajman");
-		plate.selectPlateTypeByText("Private");
-		plate.selectPlateColorByText("White");
-		plate.selectStatusByText("Active");
-		plate.selectExemptionByText("Government Vehicle");
+		common.startDateRange(28);
+		common.startEndRange(30);
+		plate.selectStatusByText("InActive");
 		plate.selectByLawByText("False");
-		plate.startDateRange(29);
-		plate.startEndRange(30);
-		common.submit();
-		common.validateToastMessage("Plate added successfully!");
 
-		// plate.validatePlateAdded();
+		common.update();
+		common.validateToastMessage("Plate updated successfully!");
+		plate.validatePlateAdded();
+		plate.validatePlateStatus("InActive");
 		plate.validateByLawStatus("False");
-
+		plate.validateFromDate("2025-09-28");
+		plate.validateToDate("2025-09-30");
 	}
+	
+	
 	// ----------------- SEARCH TESTS -----------------
 
 	@Test
-	public void TC_005_shouldFindPlateWhenSearchingByValidPlateNumber() {
+	public void TC_006_shouldFindPlateByValidPlateNumber()  {
 		common.searchAndValidateResult("plate number", "KK 49389 NNB");
 	}
 
 	@Test
-	public void TC_006_shouldFindPlateWithLowerCaseData() {
+	public void TC_007_shouldFindPlateByLowerCasePlateNumber() {
 		common.searchAndValidateResult("plate number", "kk 49389 nnb");
 	}
 
 	@Test
-	public void TC_007_shouldFindPlateeWithCamelCase() {
+	public void TC_008_shouldFindPlateByCamelCasePlateNumber() {
 		common.searchAndValidateResult("plate number", "kK 49389 nnB");
 	}
 
 	@Test
-	public void TC_008_shouldNotFindPlateWhenSearchingByInvalidPlateNumber() {
+	public void TC_009_shouldNotFindPlateByInvalidPlateNumber() {
 		common.searchWhitelistAndValidateNoData("AZHAR", "No data");
 	}
 
 	@Test
-	public void TC_009_shouldFindPlatesWithinValidDateRange() {
-		plate.searchStartDate(24);
-		plate.searchEndDate(28);
+	public void TC_010_shouldFindPlatesWithinValidDateRange() {
+		common.searchStartDate(24);
+		common.searchEndDate(28);
 		plate.validateFromDate("2025-09-24");
 		plate.validateToDate("2025-09-28");
 	}
 
 	@Test
-	public void TC_010_shouldFindPlatesWhenStartDateEqualsEndDate() {
-		plate.searchStartDate(24);
-		plate.searchEndDate(24);
+	public void TC_011_shouldFindPlatesWhenStartDateEqualsEndDate() {
+		common.searchStartDate(24);
+		common.searchEndDate(24);
 		plate.validateFromDate("2025-09-24");
 		plate.validateToDate("2025-09-28");
 	}
 
 	@Test
-	public void TC_011_shouldFindPlateWhenSearchingByPlateNumberAndDateRange() {
+	public void TC_012_shouldFindPlateByPlateNumberAndDateRange() {
 		common.searchAndValidateResult("plate number", "KK 49389 NNB");
-		plate.searchStartDate(24);
-		plate.searchEndDate(25);
+		common.searchStartDate(24);
+		common.searchEndDate(25);
 		plate.validateFromDate("2025-09-24");
 		plate.validateToDate("2025-09-25");
 	}
@@ -203,32 +189,18 @@ public class WhitelisTest extends BaseTest {
 	// ----------------- VALIDATION & EDIT -----------------
 
 	@Test
-	public void TC_012_validatePlateCount() {
+	public void TC_013_shouldValidatePlateCountsAgainstTableRows() {
 		plate.printAndValidatePlateCounts();
 		plate.printAndValidateTableCounts();
 		plate.validateTableRowsAgainstTotalPlates();
 	}
 
-	@Test
-	public void TC_013_shouldEditPlateSuccessfully() {
-		plate.clickThreeDotAndValidateMenuList();
-		common.edit();
-		plate.navigateToEditPlatePage();
-		plate.clearAllFields();
-		plate.enterPlateNumber();
-		plate.startDateRange(29);
-		plate.startEndRange(30);
-		common.update();
-		common.validateToastMessage("Plate updated successfully!");
-		plate.validatePlateAdded();
-		plate.validateFromDate("2025-09-29");
-		plate.validateToDate("2025-09-30");
-	}
+	
 
 	// ----------------- VALIDATION & VIEW -----------------
 
 	@Test
-	public void TC_014_TC_viewPlateDetails() {
+	public void TC_014_shouldViewPlateDetailsSuccessfully() {
 		plate.clickThreeDotAndValidateMenuList();
 		common.view();
 		plate.navigateToViewPlatePage();
@@ -244,7 +216,8 @@ public class WhitelisTest extends BaseTest {
 	}
 
 	@Test
-	public void TC_016_shouldValidateMiddlePagesPagination() {
+	public void TC_016_shouldValidateMiddlePagesPagination() throws InterruptedException {
+		Thread.sleep(2000);
 		plate.checkMiddlePagesPagination();
 	}
 
@@ -258,7 +231,7 @@ public class WhitelisTest extends BaseTest {
 	// ----------------- FILTER & SORT VALIDATION -----------------
 
 	@Test
-	public void TC_018_shouldFilterPlatesBySourceSuccessfully() throws InterruptedException {
+	public void TC_018_shouldFilterPlatesBySource() throws InterruptedException {
 
 		common.selectFilterButton("Sharjah"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
@@ -267,7 +240,7 @@ public class WhitelisTest extends BaseTest {
 	}
 
 	@Test
-	public void TC_019_shouldFilterPlatesByTypeSuccessfully() throws InterruptedException {
+	public void TC_019_shouldFilterPlatesByType() throws InterruptedException {
 
 		common.selectSecondFilterButton("Private"); // Reported, Removed
 		common.selectOK();
@@ -276,7 +249,7 @@ public class WhitelisTest extends BaseTest {
 	}
 
 	@Test
-	public void TC_020_shouldFilterPlatesByStatusSuccessfully() throws InterruptedException {
+	public void TC_020_shouldFilterPlatesByStatus() throws InterruptedException {
 
 		common.selectFourthFilterButton("InActive"); // Reported, Removed
 		common.selectOK();
@@ -290,7 +263,7 @@ public class WhitelisTest extends BaseTest {
 
 	// ----------------- SEARCH + FILTER VALIDATION (Single Filter)
 	@Test
-	public void TC_021_shouldSearchPllateNumberAndFilterByPlateSource() {
+	public void TC_021_shouldSearchByPlateNumberAndFilterBySource() {
 		common.searchAndValidateResult("plate number", "KK 49389 NNB");
 		common.selectFilterButton("Ajman"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
@@ -299,11 +272,11 @@ public class WhitelisTest extends BaseTest {
 	}
 
 	@Test
-	public void TC_022_shouldSearchPllateNumberAndFilterByPlateType() {
+	public void TC_022_shouldSearchByPlateNumberAndFilterByType() {
 		common.searchAndValidateResult("plate number", "KK 49389 NNB");
-		common.selectSecondFilterButton("Private"); // Reported, Removed
+		common.selectSecondFilterButton("Taxi"); // Reported, Removed
 		common.selectOK();
-		plate.validatePlateTypeFilterList("Private");
+		plate.validatePlateTypeFilterList("Taxi");
 
 	}
 
@@ -324,12 +297,12 @@ public class WhitelisTest extends BaseTest {
 	@Test
 	public void TC_024_shouldSearchPlateNumberAndFilterBySourceAndStatus() {
 		common.searchAndValidateResult("plate number", "KK 49389 NNB");
-		common.selectSecondFilterButton("Private"); // Reported, Removed
+		common.selectSecondFilterButton("Taxi"); // Reported, Removed
 		common.selectOK();
-		plate.validatePlateTypeFilterList("Private");
-		common.selectFourthFilterButton("ACTIVE"); // Reported, Removed
+		plate.validatePlateTypeFilterList("Taxi");
+		common.selectFourthFilterButton("InActive"); // Reported, Removed
 		common.selectFilterTwoOK();
-		plate.validateStatuseFilterList("ACTIVE");
+		plate.validateStatuseFilterList("InActive");
 	}
 
 	@Test
@@ -338,15 +311,15 @@ public class WhitelisTest extends BaseTest {
 		common.selectFilterButton("Ajman"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
 
-		common.selectSecondFilterButton("Private"); // Reported, Removed
+		common.selectSecondFilterButton("Taxi"); // Reported, Removed
 		common.selectFilterTwoOK();
 
-		common.selectFourthFilterButton("ACTIVE"); // Reported, Removed
+		common.selectFourthFilterButton("InActive"); // Reported, Removed
 		common.selectFilterThreeOK();
 
 		plate.validateFilterList("Ajman");
-		plate.validatePlateTypeFilterList("Private");
-		plate.validateStatuseFilterList("ACTIVE");
+		plate.validatePlateTypeFilterList("Taxi");
+		plate.validateStatuseFilterList("InActive");
 	}
 
 	@Test
@@ -355,9 +328,9 @@ public class WhitelisTest extends BaseTest {
 		common.selectFilterButton("Ajman"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
 		plate.validateFilterList("Ajman");
-		common.selectFourthFilterButton("ACTIVE"); // Reported, Removed
+		common.selectFourthFilterButton("InActive"); // Reported, Removed
 		common.selectFilterTwoOK();
-		plate.validateStatuseFilterList("ACTIVE");
+		plate.validateStatuseFilterList("InActive");
 	}
 
 	@Test
@@ -366,7 +339,8 @@ public class WhitelisTest extends BaseTest {
 	}
 	
 	@Test
-	public void TC_028_validateActiveAndInActivePlateCount() {
+	public void TC_028_shouldValidateActiveAndInactivePlateCounts() throws InterruptedException {
+		Thread.sleep(3000);
 		plate.printAndValidateActiveAndInActiveCounts();
 		
 	}

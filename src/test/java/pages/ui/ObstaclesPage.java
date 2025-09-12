@@ -10,6 +10,7 @@ import org.openqa.selenium.WebDriver;
 import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -42,335 +43,152 @@ public class ObstaclesPage {
 		PageFactory.initElements(driver, this);
 
 	}
+	// ======== STEP WRAPPERS ========
+    private <T> T step(String description, Supplier<T> action) {
+        test.info("Step: " + description);
+        try {
+            T result = action.get();
+          //  test.pass("Step passed: " + description);
+            return result;
+        } catch (Exception e) {
+            test.fail("Step failed: " + description + " → " + e.getMessage());
+            throw e;
+        }
+    }
 
-	// WebElements using @FindBy
+    private void step(String description, Runnable action) {
+        step(description, () -> { action.run(); return true; });
+    }
+	// ======== WEBELEMENTS ========
+    @FindBy(xpath = "//button[.='Add New']") private WebElement addNewInspectionButton;
+    @FindBy(xpath = "//div[contains(text(),'Add New Inspection Obstacle')]") private WebElement addInspectionPageMessage;
+    @FindBy(xpath = "//input[@id='ObstacleNumber']") private WebElement ObstacleNumber;
+    @FindBy(xpath = "//input[@id='Zone']") private WebElement zoneType;
+    @FindBy(xpath = "//input[@id='Area']") private WebElement dropdownsArea;
+    @FindBy(xpath = "//input[@id='SourceOfObstacle']") private WebElement dropdowObstacle;
+    @FindBy(xpath = "//input[@id='ClosestPaymentDevice']") private WebElement paymentDevice;
+    @FindBy(xpath = "//textarea[@id='Comments']") private WebElement comments;
+    @FindBy(id = "Photo") private WebElement imageUpload;
+    @FindBy(xpath = "//button[.='Submit']") private WebElement submit;
+    @FindBy(xpath = "//td[@class='ant-table-cell']") private WebElement confirmAddedInspectionObstacleNumber;
+    @FindBy(xpath = "(//td[@class='ant-table-cell'])[1]") private WebElement zoneCell;
+    @FindBy(xpath = "(//td[@class='ant-table-cell'])[2]") private WebElement areaCell;
+    @FindBy(xpath = "(//td[@class='ant-table-cell'])[3]") private WebElement obstacleCell;
+    @FindBy(xpath = "(//td[@class='ant-table-cell'])[4]") private WebElement statusCell;
+    @FindBy(xpath = "//span[@aria-label='more']/ancestor::button") private WebElement threeDot;
+    @FindBy(xpath = "//ul[contains(@class,'ant-dropdown-menu')]//li") private List<WebElement> menuList;
+    @FindBy(xpath = "//div[contains(text(),'Inspection Obstacle Details')]") private WebElement viewObstaclePageMessage;
+    @FindBy(xpath = "//tr[th/span[text()='Zone']]/td/span") private WebElement viewZoneType;
+    @FindBy(xpath = "//tr[th/span[text()='Area']]/td/span") private WebElement viewArea;
+    @FindBy(xpath = "//tr[th/span[text()='Source Of Obstacle']]/td/span") private WebElement viewSourcebstaclle;
+    @FindBy(xpath = "//tr[th/span[text()='Closest Payment Device']]/td/span") private WebElement viewDevice;
+    @FindBy(xpath = "//tr[th/span[text()='Comments']]/td/span") private WebElement viewComments;
+    @FindBy(xpath = "//tr[th/span[text()='Status']]/td/span") private WebElement viewStatus;
+    @FindBy(xpath = "//div[contains(@class,'ant-space')]//div[contains(@class,'ant-image')]//img") private List<WebElement> viewDocuments;
+    @FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Total Obstacles']/following-sibling::div//span[@class='ant-statistic-content-value-int']") private WebElement totalObstacle;
+    @FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Reported Obstacles']/following-sibling::div//span[@class='ant-statistic-content-value-int']") private WebElement reportedObstacle;
+    @FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Removed Obstacles']/following-sibling::div//span[@class='ant-statistic-content-value-int']") private WebElement removedObstacle;
+    @FindBy(xpath = "//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]") private List<WebElement> rowList;
+    @FindBy(xpath = "//li[contains(@class,'ant-pagination-prev')]/button") private WebElement previouBtn;
+    @FindBy(xpath = "//li[contains(@class,'ant-pagination-next')]/button") private WebElement nestBtn;
+    @FindBy(xpath = "//li[contains(@class,'ant-pagination-total-text')]") private WebElement totalItemPagination;
+    @FindBy(xpath = "(//td[@class='ant-table-cell'])[3]") private List<WebElement> obstacleSource;
+    @FindBy(xpath = "(//td[@class='ant-table-cell'])[4]") private List<WebElement> statusSource;
+    @FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and not(contains(@class,'hidden'))]//div[contains(@class,'ant-select-item-option-content')]") private List<WebElement> chooseList;
 
-	@FindBy(xpath = "//button[.='Add New']")
-	private WebElement addNewInspectionButton;
-
-	@FindBy(xpath = "//div[contains(text(),'Add New Inspection Obstacle')]")
-	private WebElement addInspectionPageMessage;
-
-	@FindBy(xpath = "//input[@id='ObstacleNumber']")
-	private WebElement ObstacleNumber;
-
-	@FindBy(xpath = "//input[@id='Zone']")
-	private WebElement zoneType;
-
-	@FindBy(xpath = "//input[@id='Area']")
-	private WebElement dropdownsArea;
-
-	@FindBy(xpath = "//input[@id='SourceOfObstacle']")
-	private WebElement dropdowObstacle;
-
-	@FindBy(xpath = "//input[@id='ClosestPaymentDevice']")
-	private WebElement paymentDevice;
-
-	@FindBy(xpath = "//input[@id='ReportedBy']")
-	private WebElement reported;
-
-	@FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and not(contains(@class,'hidden'))]//div[contains(@class,'ant-select-item-option-content')]")
-	private List<WebElement> chooseList;
-
-	@FindBy(xpath = "//textarea[@id='Comments']")
-	private WebElement comments;
-
-	@FindBy(id = "Photo")
-	private WebElement imageUpload;
-
-	@FindBy(xpath = "//button[.='Submit']")
-	private WebElement submit;
-
-	@FindBy(xpath = "//td[@class='ant-table-cell']")
-	private WebElement confirmAddedInspectionObstacleNumber;
-
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[1]")
-	private WebElement zoneCell;
-
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
-	private WebElement areaCell;
-
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[3]")
-	private WebElement obstacleCell;
-
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[4]")
-	private WebElement statusCell;
-
-	@FindBy(xpath = "//span[@aria-label='more']/ancestor::button")
-	private WebElement threeDot;
-
-	@FindBy(xpath = "//ul[contains(@class,'ant-dropdown-menu')]//li")
-	private List<WebElement> menuList;
-
-	@FindBy(xpath = "//div[contains(text(),'Inspection Obstacle Details')]")
-	private WebElement viewObstaclePageMessage;
-
-	@FindBy(xpath = "//tr[th/span[text()='Zone']]/td/span")
-	private WebElement viewZoneType;
-
-	@FindBy(xpath = "//tr[th/span[text()='Area']]/td/span")
-	private WebElement viewArea;
-
-	@FindBy(xpath = "//tr[th/span[text()='Source Of Obstacle']]/td/span")
-	private WebElement viewSourcebstaclle;
-
-	@FindBy(xpath = "//tr[th/span[text()='Closest Payment Device']]/td/span")
-	private WebElement viewDevice;
-
-	@FindBy(xpath = "//tr[th/span[text()='Comments']]/td/span")
-	private WebElement viewComments;
-
-	@FindBy(xpath = "//tr[th/span[text()='Status']]/td/span")
-	private WebElement viewStatus;
-
-	@FindBy(xpath = "//div[contains(@class,'ant-space')]//div[contains(@class,'ant-image')]//img")
-	private List<WebElement> viewDocuments;
-
-	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Total Obstacles']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
-	private WebElement totalObstacle;
-
-	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Reported Obstacles']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
-	private WebElement reportedObstacle;
-
-	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Removed Obstacles']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
-	private WebElement removedObstacle;
-
-	@FindBy(xpath = "//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]")
-	private List<WebElement> rowList;
-
-	@FindBy(xpath = "//li[contains(@class,'ant-pagination-prev')]/button")
-	private WebElement previouBtn;
-
-	@FindBy(xpath = "//li[contains(@class,'ant-pagination-next')]/button")
-	private WebElement nestBtn;
-
-	@FindBy(xpath = "//li[contains(@class,'ant-pagination-total-text')]")
-	private WebElement totalItemPagination;
-
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[3]")
-	private List<WebElement> obstacleSource;
-
-	@FindBy(xpath = "(//td[@class='ant-table-cell'])[4]")
-	private List<WebElement> statusSource;
 	// Actions
 
-	public boolean navigateToAddObstaclePage() {
-		addNewInspectionButton.click();
+    public boolean navigateToAddObstaclePage() {
+        return step("Navigate to Add New Inspection Page", () -> {
+            addNewInspectionButton.click();
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(addInspectionPageMessage));
+            String sucMsg = messageElement.getText().trim();
+            if (sucMsg.isEmpty()) throw new AssertionError("Add New Inspection page message was empty");
+            logger.info("Navigated to Add New Inspection page: " + sucMsg);
+            test.pass("Navigated to Add New Inspection page: " + sucMsg);
+            return true;
+        });
+    }
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		String sucMsg = "";
+    public void selectZone(String zoneName) {
+        step("Select Zone: " + zoneName, () -> selectFromDropdown(zoneType, zoneName));
+    }
 
-		try {
+    public void selectArea(String areaName) {
+        step("Select Area: " + areaName, () -> selectFromDropdown(dropdownsArea, areaName));
+    }
 
-			WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(addInspectionPageMessage));
-			sucMsg = messageElement.getText().trim();
-		} catch (TimeoutException e) {
-			logger.error("Add New Inspection page message not found within timeout.");
-			test.log(Status.FAIL, "Add New Inspection page message not found within timeout.");
-			throw new AssertionError("Add New Inspection page message not found within timeout.", e);
-		}
+    public void selectObstacle(String obsName) {
+        step("Select Obstacle: " + obsName, () -> selectFromDropdown(dropdowObstacle, obsName));
+    }
 
-		if (sucMsg != null && !sucMsg.isEmpty()) {
-			logger.info("Navigated to Add New Inspection page: " + sucMsg);
-			test.log(Status.PASS, "Navigated to Add New Inspection page: " + sucMsg);
-			return true;
-		} else {
-			logger.error("Failed to navigate to Add New Inspection page. Message was empty.");
-			test.log(Status.FAIL, "Failed to navigate to Add New Inspection page. Message was empty.");
-			throw new AssertionError("Failed to navigate to Add New Inspection page. Message was empty.");
-		}
-	}
+    private void selectFromDropdown(WebElement dropdown, String value) {
+        dropdown.click();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOfAllElements(chooseList));
+        for (WebElement option : chooseList) {
+            if (option.getText().equalsIgnoreCase(value)) {
+                option.click();
+                logger.info("Selected: " + value);
+                test.pass("Selected: " + value);
+                return;
+            }
+        }
+        throw new RuntimeException("Option not found: " + value);
+    }
 
-	public void selectZone(String zoneName) {
-		zoneType.click();
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOfAllElements(chooseList));
+    public void enterDeviceAndReportedDetails() {
+        step("Enter Device details", () -> {
+            String[] devices = { "Laptop", "Mobile", "Pager", "Tab", "Palm Tab" };
+            String device = devices[new java.util.Random().nextInt(devices.length)];
+            sendKeysWithWait(paymentDevice, device, "device name");
+        });
+    }
 
-		for (WebElement option : chooseList) {
-			if (option.getText().equalsIgnoreCase(zoneName)) {
-				option.click();
-				logger.info("Selected Zone by text: " + zoneName);
-				test.log(Status.INFO, "Selected Zone by text: " + zoneName);
-				return;
-			}
-		}
+    public void enterComments() {
+        step("Enter Comments", () -> sendKeysWithWait(comments, faker.lorem().sentence(), "Comments"));
+    }
 
-		throw new RuntimeException("Zone not found: " + zoneName);
-	}
+    private void sendKeysWithWait(WebElement element, String value, String fieldName) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOf(element));
+        element.sendKeys(value);
+        logger.info("Entered " + fieldName + ": " + value);
+        test.pass("Entered " + fieldName + ": " + value);
+    }
 
-	public void selectArea(String areaName) {
-		dropdownsArea.click();
+    public void uploadPhoto() {
+        step("Upload Photo", () -> {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Photo")));
+            String filePath = System.getProperty("user.dir") + "/src/test/java/utils/sample.png";
+            imageUpload.sendKeys(filePath);
+            logger.info("Uploaded photo from: " + filePath);
+            test.pass("Uploaded photo from: " + filePath);
+        });
+    }
+	
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOfAllElements(chooseList));
+    public void validateZone(String expected) { step("Validate Zone", () -> validateCell(zoneCell, expected, "Zone")); }
+    public void validateArea(String expected) { step("Validate Area", () -> validateCell(areaCell, expected, "Area")); }
+    public void validateObstacle(String expected) { step("Validate Obstacle", () -> validateCell(obstacleCell, expected, "Obstacle")); }
+    public void validateStatus(String expected) { step("Validate Status", () -> validateCell(statusCell, expected, "Status")); }
 
-		for (WebElement option : chooseList) {
-			if (option.getText().equalsIgnoreCase(areaName)) {
-				option.click();
-				logger.info("Selected are by text: " + areaName);
-				test.log(Status.INFO, "Selected Area by text: " + areaName);
-				return;
-			}
-		}
+    private void validateCell(WebElement element, String expected, String fieldName) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOf(element));
+        String actual = element.getText().trim();
+        if (!actual.equalsIgnoreCase(expected))
+            throw new AssertionError(fieldName + " mismatch! Expected: " + expected + ", Found: " + actual);
+        logger.info(fieldName + " validated: " + actual);
+        test.pass(fieldName + " validated: " + actual);
+    }
 
-		throw new RuntimeException("Area not found: " + areaName);
-	}
-
-	public void selectObstacle(String obsName) {
-		dropdowObstacle.click();
-
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOfAllElements(chooseList));
-
-		for (WebElement option : chooseList) {
-			if (option.getText().equalsIgnoreCase(obsName)) {
-				option.click();
-				logger.info("Selected Obstacle by text: " + obsName);
-				test.log(Status.INFO, "Selected Obstacle by text: " + obsName);
-				return;
-			}
-		}
-
-		throw new RuntimeException("Obstacle not found: " + obsName);
-	}
-
-	public void enterDeviceAndReportedDetails() {
-
-		String[] devices = { "Laptop", "Mobile", "Pager", "Tab", "Palm Tab" };
-
-		String device = devices[new java.util.Random().nextInt(devices.length)];
-
-		// Enter values
-		sendKeysWithWait(paymentDevice, device, "device name");
-
-	}
-
-	private void sendKeysWithWait(WebElement element, String value, String fieldName) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(element));
-		// element.clear();
-		element.sendKeys(value);
-
-		logger.info("Entered " + fieldName + ": " + value);
-		test.log(Status.INFO, "Entered " + fieldName + ": " + value);
-	}
-
-	public void enterComments() {
-
-		String com = faker.lorem().sentence();
-
-		sendKeysWithWait(comments, com, "comment as");
-	}
-
-	public void uploadPhoto() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Photo")));
-
-		String filePath = System.getProperty("user.dir") + "/src/test/java/utils/sample.png";
-		imageUpload.sendKeys(filePath);
-
-		logger.info("Uploaded photo from: " + filePath);
-		test.log(Status.INFO, "Uploaded photo from: " + filePath);
-	}
-
-	public void submitInspectionObstacle() {
-		submit.click();
-		try {
-			Thread.sleep(15000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(confirmAddedInspectionObstacleNumber));
-
-		String actualInspection = confirmAddedInspectionObstacleNumber.getText().trim();
-
-		if (actualInspection.equalsIgnoreCase(lastGeneratedPlate)) {
-			logger.info("Obstacle number successfully added: " + actualInspection);
-			test.log(Status.PASS, "Obstacle number successfully added: " + actualInspection);
-		} else {
-			logger.error(
-					"Obstacle number mismatch! Expected: " + lastGeneratedPlate + ", but found: " + actualInspection);
-			test.log(Status.FAIL,
-					"Obstacle number mismatch! Expected: " + lastGeneratedPlate + ", but found: " + actualInspection);
-			throw new AssertionError(
-					"Obstacle number mismatch! Expected: " + lastGeneratedPlate + ", but found: " + actualInspection);
-
-		}
-	}
-
-	public void validateZone(String expectedSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(zoneCell));
-
-		String actualSource = zoneCell.getText().trim();
-
-		if (actualSource.equalsIgnoreCase(expectedSource)) {
-			logger.info("Zone successfully validated: " + actualSource);
-			test.log(Status.PASS, "Zone successfully validated: " + actualSource);
-		} else {
-			logger.error("Zone  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			test.log(Status.FAIL, "Zone  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			throw new AssertionError("Zone  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-		}
-	}
-
-	public void validateArea(String expectedSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(areaCell));
-
-		String actualSource = areaCell.getText().trim();
-
-		if (actualSource.equalsIgnoreCase(expectedSource)) {
-			logger.info("Area type successfully validated: " + actualSource);
-			test.log(Status.PASS, "Area type successfully validated: " + actualSource);
-		} else {
-			logger.error("Area type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			test.log(Status.FAIL, "Area type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			throw new AssertionError(
-					"Area type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-		}
-	}
-
-	public void validateObstacle(String expectedSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(obstacleCell));
-
-		String actualSource = obstacleCell.getText().trim();
-
-		if (actualSource.equalsIgnoreCase(expectedSource)) {
-			logger.info("Obstacle type successfully validated: " + actualSource);
-			test.log(Status.PASS, "Obstacle type successfully validated: " + actualSource);
-		} else {
-			logger.error("Obstacle type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			test.log(Status.FAIL,
-					"Obstacle type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			throw new AssertionError(
-					"Obstacle type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-		}
-	}
-
-	public void validateStatus(String expectedSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(statusCell));
-
-		String actualSource = statusCell.getText().trim();
-
-		if (actualSource.equalsIgnoreCase(expectedSource)) {
-			logger.info("Status type successfully validated: " + actualSource);
-			test.log(Status.PASS, "Status type successfully validated: " + actualSource);
-		} else {
-			logger.error("Status type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			test.log(Status.FAIL,
-					"Status type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			throw new AssertionError(
-					"Status type  mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-		}
-	}
 
 	public void clickThreeDotAndValidateMenuList() {
+		 step("Click three-dot menu and validate items", () -> {
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -393,47 +211,33 @@ public class ObstaclesPage {
 			for (WebElement item : menuList) {
 				String menuText = item.getText().trim();
 				logger.info("Menu Item: " + menuText);
-				test.log(Status.INFO, "Menu Item: " + menuText);
+				test.log(Status.PASS, "Menu Item: " + menuText);
 
 			}
 		}
+		 });
 	}
 
-	public boolean navigateToViewPage() {
-
-		// viewButton.click();
-
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		String sucMsg = "";
-
-		try {
-
-			WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(viewObstaclePageMessage));
-			sucMsg = messageElement.getText().trim();
-		} catch (TimeoutException e) {
-			logger.error("View  page message not found within timeout.");
-			test.log(Status.FAIL, "View  page message not found within timeout.");
-			throw new AssertionError("View  page message not found within timeout.", e);
-		}
-
-		if (sucMsg != null && !sucMsg.isEmpty()) {
-			logger.info("Navigated to View  page: " + sucMsg);
-			test.log(Status.PASS, "Navigated to View  page: " + sucMsg);
-			return true;
-		} else {
-			logger.error("Failed to navigate to View  page. Message was empty.");
-			test.log(Status.FAIL, "Failed to navigate to View  page. Message was empty.");
-			throw new AssertionError("Failed to navigate to View Plate page. Message was empty.");
-		}
-	}
+	 public boolean navigateToViewPage() {
+	        return step("Navigate to View page", () -> {
+	            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	            WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(viewObstaclePageMessage));
+	            String sucMsg = messageElement.getText().trim();
+	            if (sucMsg.isEmpty()) throw new AssertionError("View page message was empty");
+	            logger.info("Navigated to View page: " + sucMsg);
+	            test.pass("Navigated to View page: " + sucMsg);
+	            return true;
+	        });
+	    }
 
 	public void getObstacleDetails() {
-		validateAndPrint("Zone Type", viewZoneType.getText());
-		validateAndPrint("Area Type", viewArea.getText());
-		validateAndPrint("Source Of Obstacle", viewSourcebstaclle.getText());
-		validateAndPrint("Device Used", viewDevice.getText());
-		validateAndPrint("Comments", viewComments.getText());
-		validateAndPrint("Status", viewStatus.getText());
+		step("Get Obstacle Details", () -> {
+            validateAndPrint("Zone Type", viewZoneType.getText());
+            validateAndPrint("Area Type", viewArea.getText());
+            validateAndPrint("Source Of Obstacle", viewSourcebstaclle.getText());
+            validateAndPrint("Device Used", viewDevice.getText());
+            validateAndPrint("Comments", viewComments.getText());
+            validateAndPrint("Status", viewStatus.getText());
 
 		int docCount = viewDocuments.size();
 		if (docCount == 0) {
@@ -449,6 +253,7 @@ public class ObstaclesPage {
 				test.log(Status.INFO, "Document Path: " + imgPath);
 			}
 		}
+		 });
 	}
 
 	private void validateAndPrint(String fieldName, String value) {
@@ -465,79 +270,91 @@ public class ObstaclesPage {
 	}
 
 	public void validateTotalObstacleCount() {
-		try {
-			int total = Integer.parseInt(totalObstacle.getText().trim());
-			int rowsOnPage = rowList.size();
+	    step("Validate that table row count does not exceed Total Obstacles", () -> {
+	        try {
+	            int total = Integer.parseInt(totalObstacle.getText().trim());
+	            int rowsOnPage = rowList.size();
 
-			if (rowsOnPage <= total) {
-				logger.info("Row count (" + rowsOnPage + ") matches or is less than total obstacle (" + total + ")");
-				test.log(Status.PASS,
-						"Row count (" + rowsOnPage + ") matches or is less than total obstacle (" + total + ")");
-			} else {
-				logger.error("Row count (" + rowsOnPage + ") exceeds total obstacle (" + total + ")");
-				test.log(Status.FAIL, "Row count (" + rowsOnPage + ") exceeds total obstacle (" + total + ")");
-			}
+	            if (rowsOnPage <= total) {
+	                logger.info("Row count (" + rowsOnPage + ") matches or is less than total obstacle (" + total + ")");
+	                test.pass("Row count (" + rowsOnPage + ") matches or is less than total obstacle (" + total + ")");
+	            } else {
+	                logger.error("Row count (" + rowsOnPage + ") exceeds total obstacle (" + total + ")");
+	                test.fail("Row count (" + rowsOnPage + ") exceeds total obstacle (" + total + ")");
+	            }
 
-		} catch (Exception e) {
-			logger.error("Error validating total obstacle: " + e.getMessage());
-			test.log(Status.FAIL, "Error validating total obstacle: " + e.getMessage());
-			throw new RuntimeException(e);
-		}
+	        } catch (Exception e) {
+	            logger.error("Error validating total obstacle: " + e.getMessage());
+	            test.fail("Error validating total obstacle: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
 
-	public void printAndValidateOgstacleCounts() {
+	public void printAndValidateObstacleCounts() {
+	    step("Print and validate obstacle counts", () -> {
+	        int total = Integer.parseInt(totalObstacle.getText().trim());
+	        int reported = Integer.parseInt(reportedObstacle.getText().trim());
+	        int removed = Integer.parseInt(removedObstacle.getText().trim());
 
-		int total = Integer.parseInt(totalObstacle.getText().trim());
-		int report = Integer.parseInt(reportedObstacle.getText().trim());
-		int remove = Integer.parseInt(removedObstacle.getText().trim());
+	        // Log counts
+	        logger.info("Total obstacles: " + total);
+	        test.info("Total obstacles: " + total);
 
-		logger.info("Total obstacle: " + total);
-		test.log(Status.INFO, "Total obstacle: " + total);
+	        logger.info("Reported obstacles: " + reported);
+	        test.info("Reported obstacles: " + reported);
 
-		logger.info("reported obstacle: " + report);
-		test.log(Status.INFO, "reported obstacle: " + report);
+	        logger.info("Removed obstacles: " + removed);
+	        test.info("Removed obstacles: " + removed);
 
-		logger.info("removed obstacle: " + remove);
-		test.log(Status.INFO, "removds obstacle: " + remove);
-
-		if (total == report + remove) {
-			logger.info("obstacle count validation passed: Total = report + remove");
-			test.log(Status.PASS, "obstacle count validation passed: Total = report + remove");
-		} else {
-			logger.error(
-					"obstacle count validation FAILED! Total: " + total + ", Active + Inactive: " + (report + remove));
-			test.log(Status.FAIL,
-					"obstacle count validation FAILED! Total: " + total + ", Active + Inactive: " + (report + remove));
-			throw new AssertionError("Plate count mismatch: Total != Active + Inactive");
-		}
+	        // Validate total = reported + removed
+	        if (total == reported + removed) {
+	            logger.info("Obstacle count validation passed: Total = Reported + Removed");
+	            test.pass("Obstacle count validation passed: Total = Reported + Removed");
+	        } else {
+	            String message = "Obstacle count validation FAILED! Total: " + total + ", Reported + Removed: " + (reported + removed);
+	            logger.error(message);
+	            test.fail(message);
+	            throw new AssertionError("Obstacle count mismatch: Total != Reported + Removed");
+	        }
+	    });
 	}
+
+	
 
 	public void validateTableRowsAgainstTotalObstacle() {
+	    step("Validate table rows against total obstacle label", () -> {
+	        int totalFromLabel = Integer.parseInt(totalObstacle.getText().trim());
 
-		int totalFromLabel = Integer.parseInt(totalObstacle.getText().trim());
+	        List<WebElement> tableRows = driver.findElements(
+	            By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]")
+	        );
+	        int totalFromTable = tableRows.size();
 
-		List<WebElement> rowList = driver
-				.findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]"));
-		int totalFromTable = rowList.size();
+	        // Log values
+	        logger.info("Total Obstacle from label: " + totalFromLabel);
+	        test.info("Total Obstacle from label: " + totalFromLabel);
 
-		logger.info("Total Obstacle from label: " + totalFromLabel);
-		test.log(Status.INFO, "Total Obstacle from label: " + totalFromLabel);
-		logger.info("Total Obstacle from table rows: " + totalFromTable);
-		test.log(Status.INFO, "Total Obstacle from table rows: " + totalFromTable);
+	        logger.info("Total Obstacle from table rows: " + totalFromTable);
+	        test.info("Total Obstacle from table rows: " + totalFromTable);
 
-		if (totalFromLabel == totalFromTable) {
-			logger.info("Validation passed: Total Obstacle label matches table row count.");
-			test.log(Status.PASS, "Validation passed: Total Obstacle label matches table row count.");
-		} else {
-			logger.error(
-					"Validation FAILED! Total Obstacle label: " + totalFromLabel + ", Table rows: " + totalFromTable);
-			test.log(Status.FAIL,
-					"Validation FAILED! Total Obstacle label: " + totalFromLabel + ", Table rows: " + totalFromTable);
-			throw new AssertionError("Total Obstacle mismatch: Label != Table row count");
-		}
+	        // Validate counts
+	        if (totalFromLabel == totalFromTable) {
+	            logger.info("Validation passed: Total Obstacle label matches table row count.");
+	            test.pass("Validation passed: Total Obstacle label matches table row count.");
+	        } else {
+	            String message = "Validation FAILED! Total Obstacle label: " + totalFromLabel + ", Table rows: " + totalFromTable;
+	            logger.error(message);
+	            test.fail(message);
+	            throw new AssertionError("Total Obstacle mismatch: Label != Table row count");
+	        }
+	    });
 	}
 
+	
+
 	public void checkMiddlePagesPagination() {
+		 step("Validate Middle Page Pagination", () -> {
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -592,128 +409,118 @@ public class ObstaclesPage {
 			test.log(Status.FAIL, "Error in middle pages validation: " + e.getMessage());
 			throw new RuntimeException(e);
 		}
+		 });
 	}
 
-	public void validateObstacleFilterList(String expectedPlateSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
+	public void validateObstacleFilterList(String expectedObstacleSource) {
+	    step("Validate Obstacle filter list for: " + expectedObstacleSource, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-			wait.until(ExpectedConditions.visibilityOfAllElements(obstacleSource));
+	        // Wait for the list to be visible
+	        wait.until(ExpectedConditions.visibilityOfAllElements(obstacleSource));
 
-			boolean allMatched = true;
+	        boolean allMatched = true;
 
-			for (int i = 0; i < obstacleSource.size(); i++) {
-				String actualValue = obstacleSource.get(i).getText().trim();
+	        for (int i = 0; i < obstacleSource.size(); i++) {
+	            String actualValue = obstacleSource.get(i).getText().trim();
 
-				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
-					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
-							+ actualValue);
-					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
-							+ ", actual = " + actualValue);
-					allMatched = false;
-				} else {
-					logger.info("Row " + (i + 1) + " matched: " + actualValue);
-					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
-				}
-			}
+	            if (!actualValue.equalsIgnoreCase(expectedObstacleSource)) {
+	                String message = "Row " + (i + 1) + " mismatch: expected = " + expectedObstacleSource + ", actual = " + actualValue;
+	                logger.error(message);
+	                test.fail(message);
+	                allMatched = false;
+	            } else {
+	                String message = "Row " + (i + 1) + " matched: " + actualValue;
+	                logger.info(message);
+	                test.pass(message);
+	            }
+	        }
 
-			if (!allMatched) {
-				throw new AssertionError(
-						"One or more rows did not match the expected Obstacle Source: " + expectedPlateSource);
-			}
+	        if (!allMatched) {
+	            throw new AssertionError("One or more rows did not match the expected Obstacle Source: " + expectedObstacleSource);
+	        }
 
-			logger.info("All rows matched the expected Obstacle Source: " + expectedPlateSource);
-			test.log(Status.PASS, "All rows matched the expected Obstacle Source: " + expectedPlateSource);
-
-		} catch (Exception e) {
-			logger.error("Validation failed for Obstacle Source filter: " + expectedPlateSource, e);
-			test.log(Status.FAIL,
-					"Validation failed for Obstacle Source filter: " + expectedPlateSource + " - " + e.getMessage());
-			throw new AssertionError("Validation failed for Obstacle Source filter", e);
-		}
+	        logger.info("All rows matched the expected Obstacle Source: " + expectedObstacleSource);
+	        test.pass("All rows matched the expected Obstacle Source: " + expectedObstacleSource);
+	    });
 	}
 
-	public void validateStatuseFilterList(String expectedPlateSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
+	
 
-			wait.until(ExpectedConditions.visibilityOfAllElements(statusSource));
+	public void validateStatusFilterList(String expectedStatus) {
+	    step("Validate Status filter list for: " + expectedStatus, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-			boolean allMatched = true;
+	        // Wait for status list to be visible
+	        wait.until(ExpectedConditions.visibilityOfAllElements(statusSource));
 
-			for (int i = 0; i < statusSource.size(); i++) {
-				String actualValue = statusSource.get(i).getText().trim();
+	        boolean allMatched = true;
 
-				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
-					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
-							+ actualValue);
-					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
-							+ ", actual = " + actualValue);
-					allMatched = false;
-				} else {
-					logger.info("Row " + (i + 1) + " matched: " + actualValue);
-					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
-				}
-			}
+	        for (int i = 0; i < statusSource.size(); i++) {
+	            String actualValue = statusSource.get(i).getText().trim();
 
-			if (!allMatched) {
-				throw new AssertionError(
-						"One or more rows did not match the expected Obstacle Source: " + expectedPlateSource);
-			}
+	            if (!actualValue.equalsIgnoreCase(expectedStatus)) {
+	                String message = "Row " + (i + 1) + " mismatch: expected = " + expectedStatus + ", actual = " + actualValue;
+	                logger.error(message);
+	                test.fail(message);
+	                allMatched = false;
+	            } else {
+	                String message = "Row " + (i + 1) + " matched: " + actualValue;
+	                logger.info(message);
+	                test.pass(message);
+	            }
+	        }
 
-			logger.info("All rows matched the expected Status Source: " + expectedPlateSource);
-			test.log(Status.PASS, "All rows matched the expected Status Source: " + expectedPlateSource);
+	        if (!allMatched) {
+	            throw new AssertionError("One or more rows did not match the expected Status Source: " + expectedStatus);
+	        }
 
-		} catch (Exception e) {
-			logger.error("Validation failed for Status Source filter: " + expectedPlateSource, e);
-			test.log(Status.FAIL,
-					"Validation failed for Status Source filter: " + expectedPlateSource + " - " + e.getMessage());
-			throw new AssertionError("Validation failed for Status Source filter", e);
-		}
+	        logger.info("All rows matched the expected Status Source: " + expectedStatus);
+	        test.pass("All rows matched the expected Status Source: " + expectedStatus);
+	    });
 	}
-	public void printAndValidateReportedAndRemovedObstacle() {
 
-		// UI
-		int reported = Integer.parseInt(reportedObstacle.getText().trim());
-		int removed = Integer.parseInt(removedObstacle.getText().trim());
+	
+	public void validateReportedAndRemovedObstacles() {
+	    step("Validate Reported and Removed obstacle counts", () -> {
+	        // Get counts from UI
+	        int reportedUI = Integer.parseInt(reportedObstacle.getText().trim());
+	        int removedUI = Integer.parseInt(removedObstacle.getText().trim());
 
-		// Collect all statuses from the table
-		List<WebElement> statusList = driver
-				.findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class,'ant-table-row')]/td[5]"));
+	        // Get statuses from table
+	        List<WebElement> statusList = driver.findElements(
+	                By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class,'ant-table-row')]/td[5]"));
 
-		long activeCount = statusList.stream().map(WebElement::getText).map(String::trim)
-				.filter(status -> status.equalsIgnoreCase("Reported")).count();
+	        long reportedTable = statusList.stream()
+	                .map(WebElement::getText)
+	                .map(String::trim)
+	                .filter(status -> status.equalsIgnoreCase("Reported"))
+	                .count();
 
-		long inactiveCount = statusList.stream().map(WebElement::getText).map(String::trim)
-				.filter(status -> status.equalsIgnoreCase("Removed")).count();
+	        long removedTable = statusList.stream()
+	                .map(WebElement::getText)
+	                .map(String::trim)
+	                .filter(status -> status.equalsIgnoreCase("Removed"))
+	                .count();
 
-		logger.info("Reported (UI): " + reported + " | Reported (Table): " + activeCount);
-		test.log(Status.INFO, "Reported (UI): " + reported + " | Active (Table): " + activeCount);
+	        logger.info("Reported (UI/Table): " + reportedUI + "/" + reportedTable);
+	        test.log(Status.INFO, "Reported (UI/Table): " + reportedUI + "/" + reportedTable);
 
-		logger.info("Removed (UI): " + removed + " | Removed (Table): " + inactiveCount);
-		test.log(Status.INFO, "Inactive (UI): " + removed + " | Inactive (Table): " + inactiveCount);
+	        logger.info("Removed (UI/Table): " + removedUI + "/" + removedTable);
+	        test.log(Status.INFO, "Removed (UI/Table): " + removedUI + "/" + removedTable);
 
-		if (reported == activeCount && removed == inactiveCount) {
-			logger.info("Validation passed: UI counts match table counts");
-			test.log(Status.PASS, "Validation passed: UI counts match table counts");
-		} else {
-			logger.error("Validation FAILED! Reported(UI/Table): " + reported + "/" + activeCount
-					+ " | Inactive(UI/Table): " + removed + "/" + inactiveCount);
-			test.log(Status.FAIL, "Validation FAILED! Reported(UI/Table): " + reported + "/" + activeCount
-					+ " | Inactive(UI/Table): " + removed + "/" + inactiveCount);
-			throw new AssertionError("Mismatch between UI and table counts");
-		}
+	        if (reportedUI == reportedTable && removedUI == removedTable) {
+	            logger.info("Validation passed: UI counts match table counts");
+	            test.log(Status.PASS, "Validation passed: UI counts match table counts");
+	        } else {
+	            String message = "Validation FAILED! Reported(UI/Table): " + reportedUI + "/" + reportedTable
+	                    + " | Removed(UI/Table): " + removedUI + "/" + removedTable;
+	            logger.error(message);
+	            test.log(Status.FAIL, message);
+	            throw new AssertionError(message);
+	        }
+	    });
 	}
+
+
 }
