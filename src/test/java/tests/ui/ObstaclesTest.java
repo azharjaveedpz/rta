@@ -30,7 +30,7 @@ public class ObstaclesTest extends BaseTest {
 		// login.login("azhar@gmail.com", "Azhar@123");
 		// login.dismissChromePasswordAlert();
 		// dashboard.dashboardrMessageValidation();
-		Thread.sleep(1000);
+	
 		dashboard.clickConfiguration();
 		dashboard.clickObstacle();
 
@@ -153,8 +153,8 @@ public class ObstaclesTest extends BaseTest {
 
 		common.selectSecondFilterButton("Reported"); // Reported, Removed
 		common.selectOK();
-		obstacle.validateStatuseFilterList("Reported");
-		obstacle.printAndValidateReportedAndRemovedObstacle();
+		obstacle.validateStatusFilterList("Reported");
+		obstacle.printAndValidateObstacleCounts();
 
 	}
 
@@ -164,9 +164,9 @@ public class ObstaclesTest extends BaseTest {
 	@Test
 	public void TC_016_searchZoneAndFilterByObstacle_shouldReturnMatchingResults() {
 		common.searchAndValidateResult("zone", "West");
-		common.selectFilterButton("Construction"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
+		common.selectFilterButton("Parked Vehicle"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
-		obstacle.validateObstacleFilterList("Construction");
+		obstacle.validateObstacleFilterList("Parked Vehicle");
 	}
 
 	@Test
@@ -174,25 +174,27 @@ public class ObstaclesTest extends BaseTest {
 		common.searchAndValidateResult("zone", "West");
 		common.selectSecondFilterButton("Reported"); // Reported, Removed
 		common.selectOK();
-		obstacle.validateStatuseFilterList("Reported");
+		obstacle.validateStatusFilterList("Reported");
 	}
 
 	@Test
 	public void TC_018_searchAreaAndFilterByObstacle_shouldReturnMatchingResults() {
 		common.selectFilterByText("Area");
 		common.searchAndValidateResult("Area", "Commercial");// Residential,Commercial,Industrial
-		common.selectFilterButton("Construction"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
+		common.selectFilterButton("Parked Vehicle"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
-		obstacle.validateObstacleFilterList("Construction");
+		obstacle.validateObstacleFilterList("Parked Vehicle");
 	}
 
 	@Test
-	public void TC_019_searchAreaAndFilterByStatus_shouldReturnMatchingResults() {
+	public void TC_019_searchAreaAndFilterByStatus_shouldReturnMatchingResults() throws InterruptedException {
 		common.selectFilterByText("Area");
 		common.searchAndValidateResult("Area", "Commercial");
 		common.selectSecondFilterButton("Reported"); // Reported, Removed
-		common.selectFilterTwoOK();
-		obstacle.validateStatuseFilterList("Reported");
+		common.selectOK();
+		obstacle.validateStatusFilterList("Reported");
+		Thread.sleep(3000);
+		obstacle.validateReportedAndRemovedObstacles();
 	}
 
 	// ----------------- SEARCH + FILTER VALIDATION (Multiple Filters)
@@ -201,50 +203,59 @@ public class ObstaclesTest extends BaseTest {
 	public void TC_020_searchZoneAndApplyObstacleAndStatusFilters_shouldReturnMatchingResults()
 			throws InterruptedException {
 		common.searchAndValidateResult("zone", "West");
-		common.selectFilterButton("Construction"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
+		common.selectFilterButton("Parked Vehicle"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
-		obstacle.validateObstacleFilterList("Construction");
+		obstacle.validateObstacleFilterList("Parked Vehicle");
 		common.selectSecondFilterButton("Removed"); // Reported, Removed
 		common.selectFilterTwoOK();
-		obstacle.validateStatuseFilterList("Removed");
+		obstacle.validateStatusFilterList("Removed");
+		Thread.sleep(3000);
+		obstacle.validateReportedAndRemovedObstacles();
 	}
 
 	@Test
-	public void TC_021_searchAreaAndApplyObstacleAndStatusFilters_shouldReturnMatchingResults() {
+	public void TC_021_searchAreaAndApplyObstacleAndStatusFilters_shouldReturnMatchingResults() throws InterruptedException {
 		common.selectFilterByText("Area");
 		common.searchAndValidateResult("Area", "Commercial");// Residential,Commercial,Industrial
-		common.selectFilterButton("Construction"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
-		common.selectOK();
-		obstacle.validateObstacleFilterList("Construction");
-		common.selectSecondFilterButton("Reported"); // Reported, Removed
-		common.selectOK();
-		obstacle.validateStatuseFilterList("Reported");
-	}
-
-	@Test
-	public void TC_022_searchZoneAndApplyMultipleObstacleAndStatusFilters_shouldReturnMatchingResults() {
-		common.searchAndValidateResult("zone", "West");
-		common.selectFilterButton("Construction"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
-		common.selectOK();
-		obstacle.validateObstacleFilterList("Construction");
 		common.selectFilterButton("Parked Vehicle"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
 		obstacle.validateObstacleFilterList("Parked Vehicle");
 		common.selectSecondFilterButton("Reported"); // Reported, Removed
 		common.selectFilterTwoOK();
-		obstacle.validateStatuseFilterList("Reported");
+		obstacle.validateStatusFilterList("Reported");
+		Thread.sleep(3000);
+		obstacle.validateReportedAndRemovedObstacles();
 	}
 
 	@Test
-	public void TC_023_totalObstacleCount_shouldMatchDisplayedRows() {
+	public void TC_022_searchZoneAndApplyMultipleObstacleAndStatusFilters_shouldReturnMatchingResults() throws InterruptedException {
+		common.searchAndValidateResult("zone", "West");
+		
+		common.selectFilterButton("Parked Vehicle"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
+		common.selectOK();
+		obstacle.validateObstacleFilterList("Parked Vehicle");
+		common.selectFilterButton("Construction"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
+		common.selectOK();
+		obstacle.validateObstacleFilterList("Construction");
+		common.selectSecondFilterButton("Reported"); // Reported, Removed
+		common.selectFilterTwoOK();
+		obstacle.validateStatusFilterList("Reported");
+		Thread.sleep(3000);
+		obstacle.validateReportedAndRemovedObstacles();
+	}
+
+	@Test
+	public void TC_023_totalObstacleCount_shouldMatchDisplayedRows() throws InterruptedException {
+		Thread.sleep(3000);
 		obstacle.validateTotalObstacleCount();
-		obstacle.printAndValidateOgstacleCounts();
+		obstacle.printAndValidateObstacleCounts();
 		obstacle.validateTableRowsAgainstTotalObstacle();
 	}
 
 	@Test
-	public void TC_024_totalReportedAndRemovedCount_shouldMatchDisplayedRows() {
-		obstacle.printAndValidateReportedAndRemovedObstacle();
+	public void TC_024_totalReportedAndRemovedCount_shouldMatchDisplayedRows() throws InterruptedException {
+		Thread.sleep(3000);
+		obstacle.validateReportedAndRemovedObstacles();
 
 	}
 }

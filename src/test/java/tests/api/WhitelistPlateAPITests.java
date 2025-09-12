@@ -1,17 +1,12 @@
 package tests.api;
 
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import pages.api.WhitelistPlateAPI;
-import tests.ui.TestLaunchBrowser;
 import utils.ApiAssertions;
-import utils.DataReader;
 import utils.PayloadGenerator;
 
 import org.testng.annotations.Test;
 
-import com.aventstack.extentreports.Status;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import base.BaseTest;
 
@@ -25,14 +20,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.testng.Assert;
 
-import io.restassured.response.Response;
-import org.testng.annotations.Test;
 
-import org.slf4j.LoggerFactory;
-import com.aventstack.extentreports.ExtentTest;
-import org.testng.annotations.Test;
-
-import com.aventstack.extentreports.Status;
 
 public class WhitelistPlateAPITests extends BaseTest {
 

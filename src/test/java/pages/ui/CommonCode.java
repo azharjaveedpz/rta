@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +30,8 @@ import tests.ui.TestLaunchBrowser;
 public class CommonCode {
 
 	private static final Logger logger = LogManager.getLogger(TestLaunchBrowser.class);
-
+	private String selectedStartDate;
+	private String selectedEndDate;
 	private WebDriver driver;
 	protected ExtentReports extent;
 	protected ExtentTest test;
@@ -56,10 +58,10 @@ public class CommonCode {
 	@FindBy(xpath = "//input[@placeholder='Search...']")
 	private WebElement searchInput;
 
-	@FindBy(xpath = "//tr[contains(@class,'ant-table-row')]//td[2]")
+	@FindBy(xpath = "//tr[contains(@class,'ant-table-row')]//td[3]")
 	private List<WebElement> plateNameTable;
 
-	@FindBy(xpath = "//tr[contains(@class,'ant-table-row')]//td[3]")
+	@FindBy(xpath = "//tr[contains(@class,'ant-table-row')]//td[4]")
 	private List<WebElement> plateSourceTable;
 
 	@FindBy(xpath = "//div[contains(@class,'ant-select') and contains(@class,'ant-select-single')]//div[@class='ant-select-selector']")
@@ -111,186 +113,194 @@ public class CommonCode {
 
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
 	private List<WebElement> businessTable;
+	
+	@FindBy(xpath = "//input[@id='dateRange']")
+	private WebElement startDate;
 
+	@FindBy(xpath = "//input[@placeholder='Start date']")
+	private WebElement startSearch;
+	
 	public CommonCode(WebDriver driver, Properties prop, ExtentTest test) {
 		this.driver = driver;
 		this.test = test;
 		PageFactory.initElements(driver, this);
 	}
+	// ================= Step Logging =================
+		protected void step(String description, Runnable action) {
+		    test.info("Step: " + description);
+		    try {
+		        action.run();
+		       // test.pass("Step passed: " + description);
+		    } catch (Exception e) {
+		        test.fail("Step failed: " + description + " → " + e.getMessage());
+		        throw e;
+		    }
+		}
 
+		protected <T> T step(String description, Supplier<T> action) {
+		    test.info("Step: " + description);
+		    try {
+		        T result = action.get();
+		      //  test.pass("Step passed: " + description + " → Result: " + result);
+		        return result;
+		    } catch (Exception e) {
+		        test.fail("Step failed: " + description + " → " + e.getMessage());
+		        throw e;
+		    }
+		}
 	public void submit() {
+		 step("Click Submit button", () -> {   
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		wait.until(ExpectedConditions.elementToBeClickable(submit)).click();
 
 		logger.info("Clicked on Submit  button");
-		test.log(Status.INFO, "Clicked on Submit  button");
+		test.log(Status.PASS, "Clicked on Submit  button");
+		 });
 	}
 
-	public void validateToastMessage(String expectedErrorMessage) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(toastMessage));
+	public void validateToastMessage(String expectedMessage) {
+	    step("Validate toast message", () -> {     
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(toastMessage));
 
-		String actualError = toastMessage.getText().trim();
+	        String actualMessage = toastMessage.getText().trim();
 
-		if (actualError.equalsIgnoreCase(expectedErrorMessage)) {
-			logger.info("Validation  correctly displayed: " + actualError);
-			test.log(Status.PASS, "Validation  correctly displayed: " + actualError);
-		} else {
-			logger.error(" message mismatch! Expected: " + expectedErrorMessage + ", but found: " + actualError);
-			test.log(Status.FAIL,
-					"message mismatch! Expected: " + expectedErrorMessage + ", but found: " + actualError);
-			throw new AssertionError(
-					"message mismatch! Expected: " + expectedErrorMessage + ", but found: " + actualError);
-		}
-
+	        if (actualMessage.equalsIgnoreCase(expectedMessage)) {
+	            logger.info("Toast message correctly displayed: " + actualMessage);
+	            test.pass("Toast message correctly displayed: " + actualMessage);
+	        } else {
+	            logger.error("Toast message mismatch! Expected: " + expectedMessage + ", but found: " + actualMessage);
+	            test.fail("Toast message mismatch! Expected: " + expectedMessage + ", but found: " + actualMessage);
+	            throw new AssertionError(
+	                "Toast message mismatch! Expected: " + expectedMessage + ", but found: " + actualMessage
+	            );
+	        }
+	    });
 	}
+
 
 	public void update() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.elementToBeClickable(update)).click();
+	    step("Click Update button", () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.elementToBeClickable(update)).click();
 
-		logger.info("Clicked on Update  button");
-		test.log(Status.INFO, "Clicked on Update  button");
+	        logger.info("Clicked on Update button");
+	        test.pass("Clicked on Update button"); 
+	    });
 	}
 
-	public void edit() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.elementToBeClickable(editButton)).click();
 
-		logger.info("Clicked on Edit  button");
-		test.log(Status.INFO, "Clicked on Edit  button");
+	public void edit() {
+	    step("Click Edit button", () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.elementToBeClickable(editButton)).click();
+
+	        logger.info("Clicked on Edit button");
+	        test.pass("Clicked on Edit button");
+	    });
 	}
 
 	public void view() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.elementToBeClickable(viewButton)).click();
+	    step("Click View button", () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.elementToBeClickable(viewButton)).click();
 
-		logger.info("Clicked on View  button");
-		test.log(Status.INFO, "Clicked on View  button");
+	        logger.info("Clicked on View button");
+	        test.pass("Clicked on View button");
+	    });
 	}
 
 	public void uploadPhoto() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("document")));
+	    step("Upload docs", () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("document")));
 
-		String filePath = System.getProperty("user.dir") + "/src/test/java/utils/sample.png"; // use jpg/jpeg
-		imageUpload.sendKeys(filePath);
+	        String filePath = System.getProperty("user.dir") + "/src/test/java/utils/sample.png"; // use jpg/jpeg
+	        imageUpload.sendKeys(filePath);
 
-		logger.info("Uploaded photo from: " + filePath);
-		test.log(Status.INFO, "Uploaded photo from: " + filePath);
+	        logger.info("Uploaded photo from: " + filePath);
+	        test.pass("Uploaded photo from: " + filePath);
+	    });
 	}
 
 	public void searchAndValidateResult(String searchType, String expectedValue) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(searchInput));
+	    step("Enter search value: " + expectedValue, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(searchInput));
 
-		if (expectedValue == null || expectedValue.trim().isEmpty()) {
-			throw new IllegalArgumentException("Search value cannot be null or empty!");
-		}
+	        if (expectedValue == null || expectedValue.trim().isEmpty()) {
+	            throw new IllegalArgumentException("Search value cannot be null or empty!");
+	        }
 
-		// Clear & enter value
-		searchInput.clear();
-		searchInput.sendKeys(expectedValue);
+	        searchInput.clear();
+	        searchInput.sendKeys(expectedValue);
 
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+	        try { Thread.sleep(3000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 
-		wait.until(ExpectedConditions.visibilityOfAllElements(plateNameTable));
-		wait.until(ExpectedConditions.visibilityOfAllElements(plateSourceTable));
+	        wait.until(ExpectedConditions.visibilityOfAllElements(plateNameTable));
+	        wait.until(ExpectedConditions.visibilityOfAllElements(plateSourceTable));
+	    });
 
-		List<String> plateNumbers = plateNameTable.stream().map(e -> e.getText().trim()).collect(Collectors.toList());
+	    step("Fetch search results", () -> {
+	        List<String> plateNumbers = plateNameTable.stream().map(e -> e.getText().trim()).collect(Collectors.toList());
+	        List<String> plateSources = plateSourceTable.stream().map(e -> e.getText().trim()).collect(Collectors.toList());
 
-		List<String> plateSources = plateSourceTable.stream().map(e -> e.getText().trim()).collect(Collectors.toList());
+	        List<String> licenceNumbers = new ArrayList<>();
+	        List<String> businesses = new ArrayList<>();
 
-		List<String> licenceNumbers = new ArrayList<>();
-		List<String> businesses = new ArrayList<>();
+	        if (searchType.equalsIgnoreCase("trade number") || searchType.equalsIgnoreCase("business")
+	                || searchType.equalsIgnoreCase("zone") || searchType.equalsIgnoreCase("area")) {
+	            licenceNumbers = licenseNameTable.stream().map(e -> e.getText().trim()).collect(Collectors.toList());
+	            businesses = businessTable.stream().map(e -> e.getText().trim()).collect(Collectors.toList());
+	        }
 
-		if (searchType.equalsIgnoreCase("trade number") || searchType.equalsIgnoreCase("business")
-				|| searchType.equalsIgnoreCase("zone") || searchType.equalsIgnoreCase("area")) {
-			licenceNumbers = licenseNameTable.stream().map(e -> e.getText().trim()).collect(Collectors.toList());
+	        logger.info("Found " + plateNumbers.size() + " rows in search results.");
+	        test.info("Found " + plateNumbers.size() + " rows in search results.");
 
-			businesses = businessTable.stream().map(e -> e.getText().trim()).collect(Collectors.toList());
-		}
+	        switch (searchType.toLowerCase()) {
+	            case "plate number", "fine number", "crm reference", "phone number", "email" -> {
+	                logger.info("Validating Plates/Values | Total: " + plateNumbers.size());
+	                for (int i = 0; i < plateNumbers.size(); i++) {
+	                    String rowData = "Row " + (i + 1) + " => " + searchType + ": " + plateNumbers.get(i);
+	                    logger.info(rowData);
+	                    test.info(rowData);
+	                }
+	                validateField(searchType, expectedValue, plateNumbers.toArray(new String[0]));
+	            }
 
-		logger.info("Found " + plateNumbers.size() + " rows in search results:");
-		test.info("Found " + plateNumbers.size() + " rows in search results:");
+	            case "trade number", "business", "zone", "area" -> {
+	                logger.info("Validating Licences & Businesses | Total: " + licenceNumbers.size());
+	                test.info("Validating Licences & Businesses | Total: " + licenceNumbers.size());
 
-		switch (searchType.toLowerCase()) {
-		case "plate number":
-			logger.info("Validating Plates | Total: " + plateNumbers.size());
-			for (int i = 0; i < plateNumbers.size(); i++) {
-				logger.info("Row " + (i + 1) + " => Plate: " + plateNumbers.get(i));
-				test.log(Status.INFO, "Row " + (i + 1) + " => Plate: " + plateNumbers.get(i));
-			}
-			validateField(searchType, expectedValue, plateNumbers.toArray(new String[0]));
-			break;
+	                for (int i = 0; i < licenceNumbers.size(); i++) {
+	                    String rowData = String.format("Row %d => Licence: %s | Business: %s", i + 1,
+	                            licenceNumbers.get(i), businesses.size() > i ? businesses.get(i) : "N/A");
+	                    logger.info(rowData);
+	                    test.info(rowData);
+	                }
 
-		case "trade number":
-		case "business":
-			logger.info("Validating Licences & Businesses | Total: " + licenceNumbers.size());
-			test.info("Validating Licences & Businesses | Total: " + licenceNumbers.size());
+	                if (!licenceNumbers.isEmpty() || !businesses.isEmpty()) {
+	                    validateField(searchType, expectedValue,
+	                            new String[]{licenceNumbers.get(0)}, new String[]{businesses.get(0)});
+	                } else {
+	                    String errorMsg = "No rows found for validation for searchType: " + searchType;
+	                    logger.error(errorMsg);
+	                    test.fail(errorMsg);
+	                    throw new AssertionError(errorMsg);
+	                }
+	            }
 
-			for (int i = 0; i < licenceNumbers.size(); i++) {
-				String rowData = String.format("Row %d => Licence: %s | Business: %s", i + 1, licenceNumbers.get(i),
-						businesses.size() > i ? businesses.get(i) : "N/A");
-
-				logger.info(rowData);
-				test.log(Status.INFO, rowData);
-			}
-
-			if (!licenceNumbers.isEmpty() || !businesses.isEmpty()) {
-				validateField(searchType, expectedValue, new String[] { licenceNumbers.get(0) },
-						new String[] { businesses.get(0) });
-			} else {
-				logger.error("No licence/business rows found for validation!");
-				test.log(Status.FAIL, "No licence/business rows found for validation!");
-				throw new AssertionError("No licence/business rows found for validation!");
-			}
-			break;
-
-		case "zone":
-		case "area":
-			logger.info("Validating zone & area | Total: " + licenceNumbers.size());
-			test.info("Validating zone & area | Total | Total: " + licenceNumbers.size());
-
-			for (int i = 0; i < licenceNumbers.size(); i++) {
-				String rowData = String.format("Row %d => Licence: %s | Business: %s", i + 1, licenceNumbers.get(i),
-						businesses.size() > i ? businesses.get(i) : "N/A");
-
-				logger.info(rowData);
-				test.log(Status.INFO, rowData);
-			}
-
-			if (!licenceNumbers.isEmpty() || !businesses.isEmpty()) {
-				validateField(searchType, expectedValue, new String[] { licenceNumbers.get(0) },
-						new String[] { businesses.get(0) });
-			} else {
-				logger.error("No zone/area rows found for validation!");
-				test.log(Status.FAIL, "No zone/area  rows found for validation!");
-				throw new AssertionError("No lzone/area  rows found for validation!");
-			}
-			break;
-
-		case "fine number":
-		case "crm reference":
-		case "phone number":
-		case "email":
-			logger.info("Validating " + searchType + " | Total: " + plateNumbers.size());
-			for (int i = 0; i < plateNumbers.size(); i++) {
-				logger.info("Row " + (i + 1) + " => " + searchType + ": " + plateNumbers.get(i));
-				test.log(Status.INFO, "Row " + (i + 1) + " => " + searchType + ": " + plateNumbers.get(i));
-			}
-			validateField(searchType, expectedValue, plateNumbers.toArray(new String[0]));
-			break;
-
-		default:
-			logger.warn("Unknown search type: " + searchType);
-			test.log(Status.WARNING, "Unknown search type: " + searchType);
-		}
+	            default -> {
+	                String warnMsg = "Unknown search type: " + searchType;
+	                logger.warn(warnMsg);
+	                test.warning(warnMsg);
+	            }
+	        }
+	    });
 	}
+
+	
+
 
 	/**
 	 * For single-column validations (partial + first-letter strictness)
@@ -357,6 +367,7 @@ public class CommonCode {
 	}
 
 	public void selectFilterByText(String text) {
+		 step("Select filter: " + text, () -> {
 		filter.click(); // open dropdown
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -372,9 +383,11 @@ public class CommonCode {
 			}
 		}
 		throw new NoSuchElementException("No option found with text: " + text);
-	}
+	});
+ }
 
 	public void checkFirstPagePagination() {
+		 step("Validate First Page Pagination", () -> {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -421,9 +434,11 @@ public class CommonCode {
 			test.log(Status.FAIL, "Error in first page pagination validation: " + e.getMessage());
 			throw new RuntimeException(e);
 		}
+		 });
 	}
 
 	public void checkLastPagePagination() {
+		 step("Validate Last Page Pagination", () -> {
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -479,9 +494,11 @@ public class CommonCode {
 			test.log(Status.FAIL, "Error in last page validation: " + e.getMessage());
 			throw new RuntimeException(e);
 		}
+	 });
 	}
 
 	public void selectFilterButton(String optioneName) {
+		   step("Select filter checkbox: " + optioneName, () -> {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
 		try {
@@ -506,9 +523,11 @@ public class CommonCode {
 			test.log(Status.FAIL, "Failed to select filter Source: " + optioneName + " - " + e.getMessage());
 			throw new AssertionError("filter Source selection failed", e);
 		}
+	});
 	}
 
 	public void selectSecondFilterButton(String optioneName) {
+		 step("Select filter checkbox: " + optioneName, () -> {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
 		try {
@@ -533,9 +552,11 @@ public class CommonCode {
 			test.log(Status.FAIL, "Failed to select filter Source: " + optioneName + " - " + e.getMessage());
 			throw new AssertionError("filter Source selection failed", e);
 		}
+	});
 	}
 
 	public void selectThirdFilterButton(String optioneName) {
+		 step("Select filter checkbox: " + optioneName, () -> {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
 		try {
@@ -560,9 +581,11 @@ public class CommonCode {
 			test.log(Status.FAIL, "Failed to select filter Source: " + optioneName + " - " + e.getMessage());
 			throw new AssertionError("filter Source selection failed", e);
 		}
+	});
 	}
 
 	public void selectFourthFilterButton(String optioneName) {
+		 step("Select filter checkbox: " + optioneName, () -> {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
 		try {
@@ -587,9 +610,11 @@ public class CommonCode {
 			test.log(Status.FAIL, "Failed to select filter Source: " + optioneName + " - " + e.getMessage());
 			throw new AssertionError("filter Source selection failed", e);
 		}
+		 });
 	}
 
 	public void selectOK() {
+		step("Click OK button", () -> {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
 		try {
@@ -605,9 +630,11 @@ public class CommonCode {
 			test.log(Status.FAIL, "Failed to click OK button - " + e.getMessage());
 			throw new AssertionError("Failed to click OK button", e);
 		}
+	 });
 	}
 
 	public void selectFilterTwoOK() {
+		step("Click OK button", () -> {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
 		try {
@@ -623,9 +650,11 @@ public class CommonCode {
 			test.log(Status.FAIL, "Failed to click OK button - " + e.getMessage());
 			throw new AssertionError("Failed to click OK button", e);
 		}
+		 });
 	}
 
 	public void selectFilterThreeOK() {
+		step("Click OK button", () -> {
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
 		try {
@@ -641,6 +670,7 @@ public class CommonCode {
 			test.log(Status.FAIL, "Failed to click OK button - " + e.getMessage());
 			throw new AssertionError("Failed to click OK button", e);
 		}
+	 });
 	}
 
 	public void searchWhitelistAndValidateNoData(String searchValue, String expectedNoDataMessage) {
@@ -659,5 +689,79 @@ public class CommonCode {
 		String actualNoData = noData.getText().trim();
 		validateField("No Data Message", expectedNoDataMessage, actualNoData);
 	}
+	
+	public void startDateRange(int day) {
+		 step("Select Start Date", () -> { 
+		safeClick(startDate);
+
+		WebElement dateSelection = driver
+				.findElement(By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']"));
+
+		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", dateSelection);
+		((JavascriptExecutor) driver).executeScript("arguments[0].click();", dateSelection);
+
+		selectedStartDate = String.valueOf(day);
+		logger.info("Selected Start Date: " + selectedStartDate);
+		test.log(Status.PASS, "Selected Start Date: " + selectedStartDate);
+		 });
+	}
+
+	public void startEndRange(int day) {
+		 step("Select End Date", () -> { 
+		WebElement dateSelection = driver
+				.findElement(By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']"));
+
+		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", dateSelection);
+		((JavascriptExecutor) driver).executeScript("arguments[0].click();", dateSelection);
+
+		selectedEndDate = String.valueOf(day);
+		logger.info("Selected End Date: " + selectedEndDate);
+		test.log(Status.PASS, "Selected End Date: " + selectedEndDate);
+		 });
+	}
+	private void safeClick(WebElement element) {
+		int attempts = 0;
+		while (attempts < 3) {
+			try {
+				waitForClickable(element).click();
+				return;
+			} catch (Exception e) {
+				attempts++;
+				if (attempts == 3)
+					throw e;
+			}
+		}
+	}
+	private WebElement waitForClickable(WebElement element) {
+		return new WebDriverWait(driver, Duration.ofSeconds(15))
+				.until(ExpectedConditions.elementToBeClickable(element));
+	}
+	
+	public String searchStartDate(int day) {
+		safeClick(startSearch);
+
+		By dateLocator = By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']");
+
+		WebElement dateSelection = new WebDriverWait(driver, Duration.ofSeconds(10))
+				.until(ExpectedConditions.elementToBeClickable(dateLocator));
+
+		safeClick(dateSelection);
+
+		selectedStartDate = String.valueOf(day);
+		return selectedStartDate;
+	}
+
+	public String searchEndDate(int day) {
+		By dateLocator = By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']");
+
+		WebElement dateSelection = new WebDriverWait(driver, Duration.ofSeconds(10))
+				.until(ExpectedConditions.elementToBeClickable(dateLocator));
+
+		safeClick(dateSelection); // retry logic for date cell
+
+		selectedEndDate = String.valueOf(day);
+		return selectedEndDate;
+	}
+
 
 }

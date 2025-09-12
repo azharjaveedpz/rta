@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.logging.LogEntries;
@@ -68,8 +69,7 @@ public class WhitelistPage {
 			+ "//div[contains(@class,'ant-select-item-option-content')]")
 	private List<WebElement> dropdownOptions;
 
-	@FindBy(xpath = "//input[@id='dateRange']")
-	private WebElement startDate;
+	
 
 	// Locators for each column (index-based)
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
@@ -216,190 +216,149 @@ public class WhitelistPage {
 		}
 	}
 
-	public boolean navigateToPlatePage() {
-		clickPlates();
-
-		String sucMsg = getPlatesMessage();
-		if (sucMsg != null && !sucMsg.trim().isEmpty()) {
-			logger.info("Navigated to plate page: " + sucMsg);
-			test.log(Status.PASS, "Navigated to plate page: " + sucMsg);
-			return true;
-		} else {
-			logger.error("Failed to navigate to plate page.");
-			test.log(Status.FAIL, "Failed to navigate to plate page.");
-			throw new AssertionError("Failed to navigate to plate page."); // causes test to fail
-
-		}
+	// Step wrapper for reporting
+	private void step(String description, Runnable action) {
+	    test.info("Step: " + description);
+	    try {
+	        action.run();
+	     //   test.pass("Step passed: " + description);
+	       // logger.info("Step passed: " + description);
+	    } catch (Exception e) {
+	        test.fail("Step failed: " + description + " → " + e.getMessage());
+	        logger.error("Step failed: " + description, e);
+	        throw e;
+	    }
 	}
 
-	public void addNewPlates() {
-		addNewPlateButton.click();
-	}
-
-	public String getNewPlatesMessage() {
+	protected <T> T step(String description, Supplier<T> action) {
+		test.info("Step: " + description);
 		try {
-			return addPlatePageMessage.getText().trim();
-		} catch (NoSuchElementException e) {
-			return "";
+			T result = action.get();
+			//test.pass("Step passed: " + description + " → Result: " + result);
+			return result;
+		} catch (Exception e) {
+			test.fail("Step failed: " + description + " → " + e.getMessage());
+			throw e;
 		}
 	}
 
+	// Navigate to Add New Plate page
 	public boolean navigateToAddNewPlatePage() {
+	    return stepReturn("Navigate to Add New Plate page", () -> {
+	        addNewPlateButton.click();
 
-		addNewPlateButton.click();
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(addPlatePageMessage));
+	        String sucMsg = messageElement.getText().trim();
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		String sucMsg = "";
-
-		try {
-
-			WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(addPlatePageMessage));
-			sucMsg = messageElement.getText().trim();
-		} catch (TimeoutException e) {
-			logger.error("Add New Plate page message not found within timeout.");
-			test.log(Status.FAIL, "Add New Plate page message not found within timeout.");
-			throw new AssertionError("Add New Plate page message not found within timeout.", e);
-		}
-
-		if (sucMsg != null && !sucMsg.isEmpty()) {
-			logger.info("Navigated to Add New Plate page: " + sucMsg);
-			test.log(Status.PASS, "Navigated to Add New Plate page: " + sucMsg);
-			return true;
-		} else {
-			logger.error("Failed to navigate to Add New Plate page. Message was empty.");
-			test.log(Status.FAIL, "Failed to navigate to Add New Plate page. Message was empty.");
-			throw new AssertionError("Failed to navigate to Add New Plate page. Message was empty.");
-		}
+	        if (sucMsg.isEmpty()) {
+	            throw new AssertionError("Add New Plate page message was empty.");
+	        }
+	        return sucMsg;
+	    }) != null;
 	}
 
+	// Step wrapper for methods that return a value
+	private <T> T stepReturn(String description, Supplier<T> action) {
+	    test.info("Step: " + description);
+	    try {
+	        T result = action.get();
+	      //  test.pass("Step passed: " + description);
+	       // logger.info("Step passed: " + description);
+	        return result;
+	    } catch (Exception e) {
+	        test.fail("Step failed: " + description + " → " + e.getMessage());
+	        logger.error("Step failed: " + description, e);
+	        throw e;
+	    }
+	}
+
+	// Enter a new plate number
 	public void enterPlateNumber() {
-		String plateNumber = faker.regexify("[A-Z]{2} [0-9]{5} [A-Z]{3}");
-		lastGeneratedPlate = plateNumber;
+	    step("Enter new Plate Number", () -> {
+	        String plateNumber = faker.regexify("[A-Z]{2} [0-9]{5} [A-Z]{3}");
+	        lastGeneratedPlate = plateNumber;
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(50));
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(50));
+	        wait.until(driver -> inputPlateNumber.isDisplayed() && inputPlateNumber.isEnabled());
 
-		wait.until(driver -> inputPlateNumber.isDisplayed() && inputPlateNumber.isEnabled());
+	        ((JavascriptExecutor) driver).executeScript("arguments[0].value = '';", inputPlateNumber);
+	        inputPlateNumber.sendKeys(plateNumber);
 
-		((JavascriptExecutor) driver).executeScript("arguments[0].value = '';", inputPlateNumber);
-
-		inputPlateNumber.sendKeys(plateNumber);
-
-		logger.info("Entered Plate Number: " + plateNumber);
-		test.log(Status.INFO, "Entered Plate Number: " + plateNumber);
+	        logger.info("Entered Plate Number: " + plateNumber);
+	        test.log(Status.PASS, "Entered Plate Number: " + plateNumber);
+	    });
 	}
 
+	// Enter duplicate plate number
 	public void enterDuplicatePlateNumber(String plateNo) {
+	    step("Enter duplicate Plate Number: " + plateNo, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(inputPlateNumber));
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(inputPlateNumber));
-
-		inputPlateNumber.sendKeys(plateNo);
-
-		logger.info("Entered Plate Number: " + plateNo);
-		test.log(Status.INFO, "Entered Plate Number: " + plateNo);
+	        inputPlateNumber.sendKeys(plateNo);
+	        logger.info("Entered Plate Number: " + plateNo);
+	        test.log(Status.PASS, "Entered Plate Number: " + plateNo);
+	    });
 	}
 
-	// Plate Source
-	public void selectPlateSourceByText(String text) {
-		selectDropdownByText("plateSource_Id", text, "Plate Source");
-	}
-
-	public void selectPlateTypeByText(String text) {
-		selectDropdownByText("plateType_Id", text, "Plate Type");
-	}
-
-	public void selectPlateColorByText(String text) {
-		selectDropdownByText("plateColor_Id", text, "Plate Color");
-	}
-
-	public void selectStatusByText(String text) {
-		selectDropdownByText("plateStatus_Id", text, "Status");
-	}
-
-	public void selectExemptionByText(String text) {
-		selectDropdownByText("exemptionReason_ID", text, "Exemption");
-	}
-
-	public void selectByLawByText(String text) {
-		selectDropdownByText("isByLaw", text, "isByLaw");
-	}
-
+	// Select dropdown by text (generic method)
 	public void selectDropdownByText(String dropdownId, String text, String dropdownName) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	    step("Select " + dropdownName + " dropdown: " + text, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-		// Dynamic dropdown locator
-		By dropdownLocator = By.xpath("//*[@id='" + dropdownId
-				+ "']/ancestor::div[contains(@class,'ant-select')]//div[contains(@class,'ant-select-selector')]");
+	        By dropdownLocator = By.xpath("//*[@id='" + dropdownId
+	                + "']/ancestor::div[contains(@class,'ant-select')]//div[contains(@class,'ant-select-selector')]");
 
-		int attempts = 0;
-		boolean success = false;
+	        int attempts = 0;
+	        boolean success = false;
 
-		while (attempts < 3 && !success) {
-			try {
-				// Click dropdown
-				WebElement dropdown = wait.until(ExpectedConditions.elementToBeClickable(dropdownLocator));
-				dropdown.click();
+	        while (attempts < 3 && !success) {
+	            try {
+	                WebElement dropdown = wait.until(ExpectedConditions.elementToBeClickable(dropdownLocator));
+	                dropdown.click();
 
-				// Wait for options to load
-				wait.until(ExpectedConditions.visibilityOfAllElements(dropdownOptions));
+	                wait.until(ExpectedConditions.visibilityOfAllElements(dropdownOptions));
 
-				// Select matching option
-				boolean found = false;
-				for (WebElement option : dropdownOptions) {
-					if (option.getText().trim().equalsIgnoreCase(text.trim())) {
-						option.click();
-						found = true;
-						break;
-					}
-				}
+	                boolean found = false;
+	                for (WebElement option : dropdownOptions) {
+	                    if (option.getText().trim().equalsIgnoreCase(text.trim())) {
+	                        option.click();
+	                        found = true;
+	                        break;
+	                    }
+	                }
 
-				if (!found) {
-					throw new RuntimeException("Option '" + text + "' not found for " + dropdownName);
-				}
+	                if (!found) {
+	                    throw new RuntimeException("Option '" + text + "' not found for " + dropdownName);
+	                }
 
-				logger.info(" Selected " + dropdownName + " by text: " + text);
-				test.log(Status.INFO, " Selected " + dropdownName + " by text: " + text);
-
-				success = true;
-			} catch (Exception e) {
-				attempts++;
-				logger.warn("Attempt " + attempts + " failed for " + dropdownName + " with text: " + text);
-				if (attempts == 3) {
-					throw new RuntimeException(" Failed to select " + dropdownName + " by text after 3 retries", e);
-				}
-			}
-		}
+	                logger.info("Selected " + dropdownName + " by text: " + text);
+	                test.log(Status.PASS, "Selected " + dropdownName + " by text: " + text);
+	                success = true;
+	            } catch (Exception e) {
+	                attempts++;
+	                logger.warn("Attempt " + attempts + " failed for " + dropdownName + " with text: " + text);
+	                if (attempts == 3) {
+	                    throw new RuntimeException("Failed to select " + dropdownName + " by text after 3 retries", e);
+	                }
+	            }
+	        }
+	    });
 	}
 
-	public void startDateRange(int day) {
+	// Example specialized dropdowns
+	public void selectPlateSourceByText(String text) { selectDropdownByText("plateSource_Id", text, "Plate Source"); }
+	public void selectPlateTypeByText(String text) { selectDropdownByText("plateType_Id", text, "Plate Type"); }
+	public void selectPlateColorByText(String text) { selectDropdownByText("plateColor_Id", text, "Plate Color"); }
+	public void selectStatusByText(String text) { selectDropdownByText("plateStatus_Id", text, "Status"); }
+	public void selectExemptionByText(String text) { selectDropdownByText("exemptionReason_ID", text, "Exemption"); }
+	public void selectByLawByText(String text) { selectDropdownByText("isByLaw", text, "isByLaw"); }
 
-		safeClick(startDate);
-
-		WebElement dateSelection = driver
-				.findElement(By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']"));
-
-		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", dateSelection);
-		((JavascriptExecutor) driver).executeScript("arguments[0].click();", dateSelection);
-
-		selectedStartDate = String.valueOf(day);
-		logger.info("Selected Start Date: " + selectedStartDate);
-		test.log(Status.INFO, "Selected Start Date: " + selectedStartDate);
-	}
-
-	public void startEndRange(int day) {
-
-		WebElement dateSelection = driver
-				.findElement(By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']"));
-
-		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", dateSelection);
-		((JavascriptExecutor) driver).executeScript("arguments[0].click();", dateSelection);
-
-		selectedEndDate = String.valueOf(day);
-		logger.info("Selected End Date: " + selectedEndDate);
-		test.log(Status.INFO, "Selected End Date: " + selectedEndDate);
-	}
+	
 
 	public void validatePlateAdded() {
+		 step("Validate the plate number matches the last generated plate", () -> {
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
@@ -434,136 +393,134 @@ public class WhitelistPage {
 			throw new AssertionError(
 					"Plate number mismatch! Expected: " + lastGeneratedPlate + ", but found: " + actualPlate);
 		}
+		 });
 	}
 	// ====== Plate Source ======
-
 	public void validatePlateSource(String expectedSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateSource));
+	    step("Validate Plate Source: " + expectedSource, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateSource));
+	        String actualSource = confirmAddedPlateSource.getText().trim();
 
-		String actualSource = confirmAddedPlateSource.getText().trim();
-
-		if (actualSource.equalsIgnoreCase(expectedSource)) {
-			logger.info("Plate source successfully validated: " + actualSource);
-			test.log(Status.PASS, "Plate source successfully validated: " + actualSource);
-		} else {
-			logger.error("Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			test.log(Status.FAIL,
-					"Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			throw new AssertionError(
-					"Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-		}
+	        if (actualSource.equalsIgnoreCase(expectedSource)) {
+	            logger.info("Plate source successfully validated: " + actualSource);
+	            test.pass("Plate source successfully validated: " + actualSource);
+	        } else {
+	            logger.error("Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+	            test.fail("Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+	            throw new AssertionError("Plate source mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+	        }
+	    });
 	}
 
 	// ====== Plate Type ======
-
 	public void validatePlateType(String expectedType) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateType));
+	    step("Validate Plate Type: " + expectedType, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateType));
+	        String actualType = confirmAddedPlateType.getText().trim();
 
-		String actualType = confirmAddedPlateType.getText().trim();
-
-		if (actualType.equalsIgnoreCase(expectedType)) {
-			logger.info("Plate type successfully validated: " + actualType);
-			test.log(Status.PASS, "Plate type successfully validated: " + actualType);
-		} else {
-			logger.error("Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
-			test.log(Status.FAIL, "Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
-			throw new AssertionError("Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
-		}
+	        if (actualType.equalsIgnoreCase(expectedType)) {
+	            logger.info("Plate type successfully validated: " + actualType);
+	            test.pass("Plate type successfully validated: " + actualType);
+	        } else {
+	            logger.error("Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
+	            test.fail("Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
+	            throw new AssertionError("Plate type mismatch! Expected: " + expectedType + ", but found: " + actualType);
+	        }
+	    });
 	}
 
 	// ====== Plate Color ======
-
 	public void validatePlateColor(String expectedColor) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateColor));
+	    step("Validate Plate Color: " + expectedColor, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateColor));
+	        String actualColor = confirmAddedPlateColor.getText().trim();
 
-		String actualColor = confirmAddedPlateColor.getText().trim();
-
-		if (actualColor.equalsIgnoreCase(expectedColor)) {
-			logger.info("Plate color successfully validated: " + actualColor);
-			test.log(Status.PASS, "Plate color successfully validated: " + actualColor);
-		} else {
-			logger.error("Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
-			test.log(Status.FAIL, "Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
-			throw new AssertionError(
-					"Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
-		}
+	        if (actualColor.equalsIgnoreCase(expectedColor)) {
+	            logger.info("Plate color successfully validated: " + actualColor);
+	            test.pass("Plate color successfully validated: " + actualColor);
+	        } else {
+	            logger.error("Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
+	            test.fail("Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
+	            throw new AssertionError("Plate color mismatch! Expected: " + expectedColor + ", but found: " + actualColor);
+	        }
+	    });
 	}
 
-	// ====== Status ======
-
+	// ====== Plate Status ======
 	public void validatePlateStatus(String expectedStatus) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateStatus));
+	    step("Validate Plate Status: " + expectedStatus, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(confirmAddedPlateStatus));
+	        String actualStatus = confirmAddedPlateStatus.getText().trim();
 
-		String actualStatus = confirmAddedPlateStatus.getText().trim();
-
-		if (actualStatus.equalsIgnoreCase(expectedStatus)) {
-			logger.info("Plate status successfully validated: " + actualStatus);
-			test.log(Status.PASS, "Plate status successfully validated: " + actualStatus);
-		} else {
-			logger.error("Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
-			test.log(Status.FAIL,
-					"Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
-			throw new AssertionError(
-					"Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
-		}
+	        if (actualStatus.equalsIgnoreCase(expectedStatus)) {
+	            logger.info("Plate status successfully validated: " + actualStatus);
+	            test.pass("Plate status successfully validated: " + actualStatus);
+	        } else {
+	            logger.error("Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
+	            test.fail("Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
+	            throw new AssertionError("Plate status mismatch! Expected: " + expectedStatus + ", but found: " + actualStatus);
+	        }
+	    });
 	}
 
 	// ====== From Date ======
-
 	public void validateFromDate(String expectedDate) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(confirmAddedFromDate));
+	    step("Validate From Date: " + expectedDate, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(confirmAddedFromDate));
+	        String actualDate = confirmAddedFromDate.getText().trim();
 
-		String actualDate = confirmAddedFromDate.getText().trim();
-
-		if (actualDate.equalsIgnoreCase(expectedDate)) {
-			logger.info("From Date successfully validated: " + actualDate);
-			test.log(Status.PASS, "From Date successfully validated: " + actualDate);
-		} else {
-			logger.error("From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
-			test.log(Status.FAIL, "From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
-			throw new AssertionError("From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
-		}
+	        if (actualDate.equalsIgnoreCase(expectedDate)) {
+	            logger.info("From Date successfully validated: " + actualDate);
+	            test.pass("From Date successfully validated: " + actualDate);
+	        } else {
+	            logger.error("From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+	            test.fail("From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+	            throw new AssertionError("From Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+	        }
+	    });
 	}
 
 	// ====== To Date ======
-
 	public void validateToDate(String expectedDate) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(confirmAddedToDate));
+	    step("Validate To Date: " + expectedDate, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(confirmAddedToDate));
+	        String actualDate = confirmAddedToDate.getText().trim();
 
-		String actualDate = confirmAddedToDate.getText().trim();
-
-		if (actualDate.equalsIgnoreCase(expectedDate)) {
-			logger.info("To Date successfully validated: " + actualDate);
-			test.log(Status.PASS, "To Date successfully validated: " + actualDate);
-		} else {
-			logger.error("To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
-			test.log(Status.FAIL, "To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
-			throw new AssertionError("To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
-		}
+	        if (actualDate.equalsIgnoreCase(expectedDate)) {
+	            logger.info("To Date successfully validated: " + actualDate);
+	            test.pass("To Date successfully validated: " + actualDate);
+	        } else {
+	            logger.error("To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+	            test.fail("To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+	            throw new AssertionError("To Date mismatch! Expected: " + expectedDate + ", but found: " + actualDate);
+	        }
+	    });
 	}
 
+
 	public void validateByLawStatus(String expectedSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		wait.until(ExpectedConditions.visibilityOf(byLAwTable));
+	    step("Validate ByLaw Status: " + expectedSource, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        wait.until(ExpectedConditions.visibilityOf(byLAwTable));
 
-		String actualSource = byLAwTable.getText().trim();
+	        String actualSource = byLAwTable.getText().trim();
 
-		if (actualSource.equalsIgnoreCase(expectedSource)) {
-			logger.info("ByLaw Status successfully validated: " + actualSource);
-			test.log(Status.PASS, "ByLaw Status successfully validated: " + actualSource);
-		} else {
-			logger.error("ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			test.log(Status.FAIL,
-					"ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-			throw new AssertionError(
-					"ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
-		}
+	        if (actualSource.equalsIgnoreCase(expectedSource)) {
+	            logger.info("ByLaw Status successfully validated: " + actualSource);
+	            test.pass("ByLaw Status successfully validated: " + actualSource);
+	        } else {
+	            logger.error("ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+	            test.fail("ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+	            throw new AssertionError(
+	                    "ByLaw Status mismatch! Expected: " + expectedSource + ", but found: " + actualSource);
+	        }
+	    });
 	}
 
 	public void searchWhitelistAndValidateResult(String expectedPlateNumber, String expectedPlateSource) {
@@ -735,31 +692,7 @@ public class WhitelistPage {
 		}
 	}
 
-	public String searchStartDate(int day) {
-		safeClick(startSearch);
-
-		By dateLocator = By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']");
-
-		WebElement dateSelection = new WebDriverWait(driver, Duration.ofSeconds(10))
-				.until(ExpectedConditions.elementToBeClickable(dateLocator));
-
-		safeClick(dateSelection);
-
-		selectedStartDate = String.valueOf(day);
-		return selectedStartDate;
-	}
-
-	public String searchEndDate(int day) {
-		By dateLocator = By.xpath("//td[contains(@class,'ant-picker-cell-in-view')]//div[text()='" + day + "']");
-
-		WebElement dateSelection = new WebDriverWait(driver, Duration.ofSeconds(10))
-				.until(ExpectedConditions.elementToBeClickable(dateLocator));
-
-		safeClick(dateSelection); // retry logic for date cell
-
-		selectedEndDate = String.valueOf(day);
-		return selectedEndDate;
-	}
+	
 
 	private String extractDay(String dateText) {
 		if (dateText == null || dateText.isEmpty()) {
@@ -800,60 +733,60 @@ public class WhitelistPage {
 	}
 
 	public void clickThreeDotAndValidateMenuList() {
+	    step("Click three-dot menu and validate menu list", () -> {
+	        threeDot.click();
+	        logger.info("Clicked on three-dot menu");
+	        test.log(Status.INFO, "Clicked on three-dot menu");
 
-		threeDot.click();
-		logger.info("Clicked on three-dot menu");
-		test.log(Status.INFO, "Clicked on three-dot menu");
+	        if (menuList == null || menuList.isEmpty()) {
+	            String message = "Menu list not found after clicking three-dot!";
+	            logger.error(message);
+	            test.log(Status.FAIL, message);
+	            throw new AssertionError(message);
+	        } else {
+	            logger.info("Menu items found: " + menuList.size());
+	            test.log(Status.PASS, "Menu items found: " + menuList.size());
 
-		if (menuList == null || menuList.isEmpty()) {
-			String message = "Menu list not found after clicking three-dot!";
-			logger.error(message);
-			test.log(Status.FAIL, message);
-			throw new AssertionError(message);
-		} else {
-			logger.info("Menu items found: " + menuList.size());
-			test.log(Status.PASS, "Menu items found: " + menuList.size());
-
-			for (WebElement item : menuList) {
-				String menuText = item.getText().trim();
-				logger.info("Menu Item: " + menuText);
-				test.log(Status.INFO, "Menu Item: " + menuText);
-
-			}
-		}
+	            for (WebElement item : menuList) {
+	                String menuText = item.getText().trim();
+	                logger.info("Menu Item: " + menuText);
+	                test.log(Status.INFO, "Menu Item: " + menuText);
+	            }
+	        }
+	    });
 	}
 
-	public void editPlates() {
-		editButton.click();
-	}
+
 
 	public boolean navigateToEditPlatePage() {
+	    return step("Navigate to Edit Plate page and validate page message", () -> {
 
-		// editButton.click();
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        String sucMsg = "";
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		String sucMsg = "";
+	        try {
+	            WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(editPlatePageMessage));
+	            sucMsg = messageElement.getText().trim();
+	        } catch (TimeoutException e) {
+	            String errorMsg = "Edit Plate page message not found within timeout.";
+	            logger.error(errorMsg);
+	            test.log(Status.FAIL, errorMsg);
+	            throw new AssertionError(errorMsg, e);
+	        }
 
-		try {
-
-			WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(editPlatePageMessage));
-			sucMsg = messageElement.getText().trim();
-		} catch (TimeoutException e) {
-			logger.error("Edit Plate page message not found within timeout.");
-			test.log(Status.FAIL, "Edit Plate page message not found within timeout.");
-			throw new AssertionError("Edit Plate page message not found within timeout.", e);
-		}
-
-		if (sucMsg != null && !sucMsg.isEmpty()) {
-			logger.info("Navigated to Edit Plate page: " + sucMsg);
-			test.log(Status.PASS, "Navigated to Edit Plate page: " + sucMsg);
-			return true;
-		} else {
-			logger.error("Failed to navigate to Edit Plate page. Message was empty.");
-			test.log(Status.FAIL, "Failed to navigate to Edit Plate page. Message was empty.");
-			throw new AssertionError("Failed to navigate to Edit Plate page. Message was empty.");
-		}
+	        if (sucMsg != null && !sucMsg.isEmpty()) {
+	            logger.info("Navigated to Edit Plate page: " + sucMsg);
+	            test.log(Status.PASS, "Navigated to Edit Plate page: " + sucMsg);
+	            return true;
+	        } else {
+	            String errorMsg = "Failed to navigate to Edit Plate page. Message was empty.";
+	            logger.error(errorMsg);
+	            test.log(Status.FAIL, errorMsg);
+	            throw new AssertionError(errorMsg);
+	        }
+	    });
 	}
+
 
 	public void clearText(WebElement element) {
 		try {
@@ -894,102 +827,107 @@ public class WhitelistPage {
 	}
 
 	public void printAndValidatePlateCounts() {
+	    step("Print and validate total, active, and inactive plate counts", () -> {
 
-		int total = Integer.parseInt(totalPlates.getText().trim());
-		int active = Integer.parseInt(activePlates.getText().trim());
-		int inactive = Integer.parseInt(inactivePlates.getText().trim());
+	        int total = Integer.parseInt(totalPlates.getText().trim());
+	        int active = Integer.parseInt(activePlates.getText().trim());
+	        int inactive = Integer.parseInt(inactivePlates.getText().trim());
 
-		logger.info("Total Plates: " + total);
-		test.log(Status.INFO, "Total Plates: " + total);
+	        logger.info("Total Plates: " + total);
+	        test.log(Status.INFO, "Total Plates: " + total);
 
-		logger.info("Active Plates: " + active);
-		test.log(Status.INFO, "Active Plates: " + active);
+	        logger.info("Active Plates: " + active);
+	        test.log(Status.INFO, "Active Plates: " + active);
 
-		logger.info("Inactive Plates: " + inactive);
-		test.log(Status.INFO, "Inactive Plates: " + inactive);
+	        logger.info("Inactive Plates: " + inactive);
+	        test.log(Status.INFO, "Inactive Plates: " + inactive);
 
-		if (total == active + inactive) {
-			logger.info("Plate count validation passed: Total = Active + Inactive");
-			test.log(Status.PASS, "Plate count validation passed: Total = Active + Inactive");
-		} else {
-			logger.error(
-					"Plate count validation FAILED! Total: " + total + ", Active + Inactive: " + (active + inactive));
-			test.log(Status.FAIL,
-					"Plate count validation FAILED! Total: " + total + ", Active + Inactive: " + (active + inactive));
-			throw new AssertionError("Plate count mismatch: Total != Active + Inactive");
-		}
+	        if (total == active + inactive) {
+	            logger.info("Plate count validation passed: Total = Active + Inactive");
+	            test.log(Status.PASS, "Plate count validation passed: Total = Active + Inactive");
+	        } else {
+	            String errorMsg = "Plate count validation FAILED! Total: " + total + ", Active + Inactive: " + (active + inactive);
+	            logger.error(errorMsg);
+	            test.log(Status.FAIL, errorMsg);
+	            throw new AssertionError("Plate count mismatch: Total != Active + Inactive");
+	        }
+
+	    });
 	}
 
+
 	public void printAndValidateTableCounts() {
+	    step("Print total plates available in the table", () -> {
+	        int total = rowList.size();
 
-		int total = rowList.size();
-
-		logger.info("Total Plates available: " + total);
-		test.log(Status.INFO, "Total Plates available: " + total);
+	        logger.info("Total Plates available: " + total);
+	        test.log(Status.INFO, "Total Plates available: " + total);
+	    });
 	}
 
 	public void validateTableRowsAgainstTotalPlates() {
+	    step("Validate total plates label matches table row count", () -> {
 
-		int totalFromLabel = Integer.parseInt(totalPlates.getText().trim());
+	        int totalFromLabel = Integer.parseInt(totalPlates.getText().trim());
 
-		List<WebElement> rowList = driver
-				.findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]"));
-		int totalFromTable = rowList.size();
+	        List<WebElement> rowList = driver
+	                .findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]"));
+	        int totalFromTable = rowList.size();
 
-		logger.info("Total Plates from label: " + totalFromLabel);
-		test.log(Status.INFO, "Total Plates from label: " + totalFromLabel);
-		logger.info("Total Plates from table rows: " + totalFromTable);
-		test.log(Status.INFO, "Total Plates from table rows: " + totalFromTable);
+	        logger.info("Total Plates from label: " + totalFromLabel);
+	        test.log(Status.INFO, "Total Plates from label: " + totalFromLabel);
+	        logger.info("Total Plates from table rows: " + totalFromTable);
+	        test.log(Status.INFO, "Total Plates from table rows: " + totalFromTable);
 
-		if (totalFromLabel == totalFromTable) {
-			logger.info("Validation passed: Total plates label matches table row count.");
-			test.log(Status.PASS, "Validation passed: Total plates label matches table row count.");
-		} else {
-			logger.error(
-					"Validation FAILED! Total plates label: " + totalFromLabel + ", Table rows: " + totalFromTable);
-			test.log(Status.FAIL,
-					"Validation FAILED! Total plates label: " + totalFromLabel + ", Table rows: " + totalFromTable);
-			throw new AssertionError("Total plates mismatch: Label != Table row count");
-		}
+	        if (totalFromLabel == totalFromTable) {
+	            logger.info("Validation passed: Total plates label matches table row count.");
+	            test.log(Status.PASS, "Validation passed: Total plates label matches table row count.");
+	        } else {
+	            String errorMsg = "Validation FAILED! Total plates label: " + totalFromLabel + ", Table rows: " + totalFromTable;
+	            logger.error(errorMsg);
+	            test.log(Status.FAIL, errorMsg);
+	            throw new AssertionError("Total plates mismatch: Label != Table row count");
+	        }
+	    });
 	}
 
+
 	public boolean navigateToViewPlatePage() {
+	    return step("Navigate to View Plate page", () -> {
 
-		// viewButton.click();
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        String sucMsg = "";
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		String sucMsg = "";
+	        try {
+	            WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(viewPlatePageMessage));
+	            sucMsg = messageElement.getText().trim();
+	        } catch (TimeoutException e) {
+	            logger.error("View Plate page message not found within timeout.");
+	            test.log(Status.FAIL, "View Plate page message not found within timeout.");
+	            throw new AssertionError("View Plate page message not found within timeout.", e);
+	        }
 
-		try {
-
-			WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(viewPlatePageMessage));
-			sucMsg = messageElement.getText().trim();
-		} catch (TimeoutException e) {
-			logger.error("View Plate page message not found within timeout.");
-			test.log(Status.FAIL, "View Plate page message not found within timeout.");
-			throw new AssertionError("View Plate page message not found within timeout.", e);
-		}
-
-		if (sucMsg != null && !sucMsg.isEmpty()) {
-			logger.info("Navigated to View Plate page: " + sucMsg);
-			test.log(Status.PASS, "Navigated to View Plate page: " + sucMsg);
-			return true;
-		} else {
-			logger.error("Failed to navigate to View Plate page. Message was empty.");
-			test.log(Status.FAIL, "Failed to navigate to View Plate page. Message was empty.");
-			throw new AssertionError("Failed to navigate to View Plate page. Message was empty.");
-		}
+	        if (sucMsg != null && !sucMsg.isEmpty()) {
+	            logger.info("Navigated to View Plate page: " + sucMsg);
+	            test.log(Status.PASS, "Navigated to View Plate page: " + sucMsg);
+	            return true;
+	        } else {
+	            logger.error("Failed to navigate to View Plate page. Message was empty.");
+	            test.log(Status.FAIL, "Failed to navigate to View Plate page. Message was empty.");
+	            throw new AssertionError("Failed to navigate to View Plate page. Message was empty.");
+	        }
+	    });
 	}
 
 	public void getPlateDetails() {
-		validateAndPrint("Plate Name", viewPlateName.getText());
-		validateAndPrint("Plate Source", viewPlateSource.getText());
-		validateAndPrint("Plate Type", viewPlateType.getText());
-		validateAndPrint("Plate Color", viewPlateColor.getText());
-		validateAndPrint("Start Date", viewStartDate.getText());
-		validateAndPrint("End Date", viewEndDate.getText());
-		validateAndPrint("Status", viewStatus.getText());
-		validateAndPrint("Exemption", viewExemption.getText());
+	    step("Validate and print Plate Name", () -> validateAndPrint("Plate Name", viewPlateName.getText()));
+	    step("Validate and print Plate Source", () -> validateAndPrint("Plate Source", viewPlateSource.getText()));
+	    step("Validate and print Plate Type", () -> validateAndPrint("Plate Type", viewPlateType.getText()));
+	    step("Validate and print Plate Color", () -> validateAndPrint("Plate Color", viewPlateColor.getText()));
+	    step("Validate and print Start Date", () -> validateAndPrint("Start Date", viewStartDate.getText()));
+	    step("Validate and print End Date", () -> validateAndPrint("End Date", viewEndDate.getText()));
+	    step("Validate and print Status", () -> validateAndPrint("Status", viewStatus.getText()));
+	    step("Validate and print Exemption", () -> validateAndPrint("Exemption", viewExemption.getText()));
 	}
 
 	private void validateAndPrint(String fieldName, String value) {
@@ -1006,27 +944,32 @@ public class WhitelistPage {
 	}
 
 	public void validateTotalPlatesCount() {
-		try {
-			int total = Integer.parseInt(totalPlates.getText().trim());
-			int rowsOnPage = rowList.size();
+	    step("Validate total plates count against table rows", () -> {
+	        try {
+	            int total = Integer.parseInt(totalPlates.getText().trim());
+	            int rowsOnPage = rowList.size();
 
-			if (rowsOnPage <= total) {
-				logger.info("Row count (" + rowsOnPage + ") matches or is less than total plates (" + total + ")");
-				test.log(Status.PASS,
-						"Row count (" + rowsOnPage + ") matches or is less than total plates (" + total + ")");
-			} else {
-				logger.error("Row count (" + rowsOnPage + ") exceeds total plates (" + total + ")");
-				test.log(Status.FAIL, "Row count (" + rowsOnPage + ") exceeds total plates (" + total + ")");
-			}
+	            if (rowsOnPage <= total) {
+	                logger.info("Row count (" + rowsOnPage + ") matches or is less than total plates (" + total + ")");
+	                test.log(Status.PASS,
+	                        "Row count (" + rowsOnPage + ") matches or is less than total plates (" + total + ")");
+	            } else {
+	                logger.error("Row count (" + rowsOnPage + ") exceeds total plates (" + total + ")");
+	                test.log(Status.FAIL, "Row count (" + rowsOnPage + ") exceeds total plates (" + total + ")");
+	                throw new AssertionError("Row count (" + rowsOnPage + ") exceeds total plates (" + total + ")");
+	            }
 
-		} catch (Exception e) {
-			logger.error("Error validating total plates: " + e.getMessage());
-			test.log(Status.FAIL, "Error validating total plates: " + e.getMessage());
-			throw new RuntimeException(e);
-		}
+	        } catch (Exception e) {
+	            logger.error("Error validating total plates: " + e.getMessage());
+	            test.log(Status.FAIL, "Error validating total plates: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
 
+
 	public void checkMiddlePagesPagination() {
+		 step("Validate Middle Page Pagination", () -> {
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -1081,204 +1024,190 @@ public class WhitelistPage {
 			test.log(Status.FAIL, "Error in middle pages validation: " + e.getMessage());
 			throw new RuntimeException(e);
 		}
+		 });
 	}
 
 	public void selectPlateSource(String plateSourceName) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	    step("Select Plate Source: " + plateSourceName, () -> {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-		try {
-			// Click filter button
-			wait.until(ExpectedConditions.elementToBeClickable(plateSourceFilterBtn));
-			((JavascriptExecutor) driver).executeScript("arguments[0].click();", plateSourceFilterBtn);
+	        try {
+	            // Click filter button
+	            wait.until(ExpectedConditions.elementToBeClickable(plateSourceFilterBtn));
+	            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", plateSourceFilterBtn);
 
-			// Wait for dropdown
-			wait.until(ExpectedConditions.visibilityOfElementLocated(
-					By.xpath("//div[contains(@class,'ant-dropdown') and not(contains(@class,'hidden'))]")));
+	            // Wait for dropdown to appear
+	            wait.until(ExpectedConditions.visibilityOfElementLocated(
+	                    By.xpath("//div[contains(@class,'ant-dropdown') and not(contains(@class,'hidden'))]")));
 
-			// Build dynamic xpath using the given plateSourceName
-			String dynamicXpath = String.format(
-					"//span[@class='ant-tree-checkbox' and contains(@aria-label,'Select %s')]", plateSourceName);
+	            // Build dynamic xpath using the given plateSourceName
+	            String dynamicXpath = String.format(
+	                    "//span[@class='ant-tree-checkbox' and contains(@aria-label,'Select %s')]", plateSourceName);
 
-			WebElement checkBox = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(dynamicXpath)));
-			((JavascriptExecutor) driver).executeScript("arguments[0].click();", checkBox);
+	            WebElement checkBox = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(dynamicXpath)));
+	            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", checkBox);
 
-			logger.info("Checkbox for Plate Source '" + plateSourceName + "' clicked successfully");
-			test.log(Status.PASS, "Checkbox for Plate Source '" + plateSourceName + "' clicked successfully");
+	            logger.info("Checkbox for Plate Source '" + plateSourceName + "' clicked successfully");
+	            test.log(Status.PASS, "Checkbox for Plate Source '" + plateSourceName + "' clicked successfully");
 
-		} catch (Exception e) {
-			logger.error("Failed to select Plate Source: " + plateSourceName, e);
-			test.log(Status.FAIL, "Failed to select Plate Source: " + plateSourceName + " - " + e.getMessage());
-			throw new AssertionError("Plate Source selection failed", e);
-		}
+	        } catch (Exception e) {
+	            logger.error("Failed to select Plate Source: " + plateSourceName, e);
+	            test.log(Status.FAIL, "Failed to select Plate Source: " + plateSourceName + " - " + e.getMessage());
+	            throw new AssertionError("Plate Source selection failed", e);
+	        }
+	    });
 	}
 
 	public void validateFilterList(String expectedPlateSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
+	    step("Validate Plate Source filter: " + expectedPlateSource, () -> {
 
-			wait.until(ExpectedConditions.visibilityOfAllElements(plateSource));
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        try {
+	            Thread.sleep(2000);
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
 
-			boolean allMatched = true;
+	        wait.until(ExpectedConditions.visibilityOfAllElements(plateSource));
 
-			for (int i = 0; i < plateSource.size(); i++) {
-				String actualValue = plateSource.get(i).getText().trim();
+	        boolean allMatched = true;
 
-				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
-					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
-							+ actualValue);
-					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
-							+ ", actual = " + actualValue);
-					allMatched = false;
-				} else {
-					logger.info("Row " + (i + 1) + " matched: " + actualValue);
-					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
-				}
-			}
+	        for (int i = 0; i < plateSource.size(); i++) {
+	            String actualValue = plateSource.get(i).getText().trim();
 
-			if (!allMatched) {
-				throw new AssertionError(
-						"One or more rows did not match the expected Plate Source: " + expectedPlateSource);
-			}
+	            if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
+	                logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = " + actualValue);
+	                test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = " + actualValue);
+	                allMatched = false;
+	            } else {
+	                logger.info("Row " + (i + 1) + " matched: " + actualValue);
+	                test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
+	            }
+	        }
 
-			logger.info("All rows matched the expected Plate Source: " + expectedPlateSource);
-			test.log(Status.PASS, "All rows matched the expected Plate Source: " + expectedPlateSource);
+	        if (!allMatched) {
+	            throw new AssertionError("One or more rows did not match the expected Plate Source: " + expectedPlateSource);
+	        }
 
-		} catch (Exception e) {
-			logger.error("Validation failed for Plate Source filter: " + expectedPlateSource, e);
-			test.log(Status.FAIL,
-					"Validation failed for Plate Source filter: " + expectedPlateSource + " - " + e.getMessage());
-			throw new AssertionError("Validation failed for Plate Source filter", e);
-		}
+	        logger.info("All rows matched the expected Plate Source: " + expectedPlateSource);
+	        test.log(Status.PASS, "All rows matched the expected Plate Source: " + expectedPlateSource);
+	    });
 	}
 
 	public void validatePlateTypeFilterList(String expectedPlateSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
+	    step("Validate Plate Type filter: " + expectedPlateSource, () -> {
 
-			wait.until(ExpectedConditions.visibilityOfAllElements(plateType));
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        try {
+	            Thread.sleep(2000);
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
 
-			boolean allMatched = true;
+	        wait.until(ExpectedConditions.visibilityOfAllElements(plateType));
 
-			for (int i = 0; i < plateType.size(); i++) {
-				String actualValue = plateType.get(i).getText().trim();
+	        boolean allMatched = true;
 
-				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
-					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
-							+ actualValue);
-					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
-							+ ", actual = " + actualValue);
-					allMatched = false;
-				} else {
-					logger.info("Row " + (i + 1) + " matched: " + actualValue);
-					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
-				}
-			}
+	        for (int i = 0; i < plateType.size(); i++) {
+	            String actualValue = plateType.get(i).getText().trim();
 
-			if (!allMatched) {
-				throw new AssertionError(
-						"One or more rows did not match the expected Obstacle Source: " + expectedPlateSource);
-			}
+	            if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
+	                logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = " + actualValue);
+	                test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = " + actualValue);
+	                allMatched = false;
+	            } else {
+	                logger.info("Row " + (i + 1) + " matched: " + actualValue);
+	                test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
+	            }
+	        }
 
-			logger.info("All rows matched the expected Status Source: " + expectedPlateSource);
-			test.log(Status.PASS, "All rows matched the expected Status Source: " + expectedPlateSource);
+	        if (!allMatched) {
+	            throw new AssertionError("One or more rows did not match the expected Plate Type: " + expectedPlateSource);
+	        }
 
-		} catch (Exception e) {
-			logger.error("Validation failed for Status Source filter: " + expectedPlateSource, e);
-			test.log(Status.FAIL,
-					"Validation failed for Status Source filter: " + expectedPlateSource + " - " + e.getMessage());
-			throw new AssertionError("Validation failed for Status Source filter", e);
-		}
+	        logger.info("All rows matched the expected Plate Type: " + expectedPlateSource);
+	        test.log(Status.PASS, "All rows matched the expected Plate Type: " + expectedPlateSource);
+	    });
 	}
 
 	public void validateStatuseFilterList(String expectedPlateSource) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
+	    step("Validate Status filter: " + expectedPlateSource, () -> {
 
-			wait.until(ExpectedConditions.visibilityOfAllElements(plateStatus));
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        try {
+	            Thread.sleep(2000);
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
 
-			boolean allMatched = true;
+	        wait.until(ExpectedConditions.visibilityOfAllElements(plateStatus));
 
-			for (int i = 0; i < plateStatus.size(); i++) {
-				String actualValue = plateStatus.get(i).getText().trim();
+	        boolean allMatched = true;
 
-				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
-					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
-							+ actualValue);
-					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
-							+ ", actual = " + actualValue);
-					allMatched = false;
-				} else {
-					logger.info("Row " + (i + 1) + " matched: " + actualValue);
-					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
-				}
-			}
+	        for (int i = 0; i < plateStatus.size(); i++) {
+	            String actualValue = plateStatus.get(i).getText().trim();
 
-			if (!allMatched) {
-				throw new AssertionError(
-						"One or more rows did not match the expected Obstacle Source: " + expectedPlateSource);
-			}
+	            if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
+	                logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = " + actualValue);
+	                test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = " + actualValue);
+	                allMatched = false;
+	            } else {
+	                logger.info("Row " + (i + 1) + " matched: " + actualValue);
+	                test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
+	            }
+	        }
 
-			logger.info("All rows matched the expected Status Source: " + expectedPlateSource);
-			test.log(Status.PASS, "All rows matched the expected Status Source: " + expectedPlateSource);
+	        if (!allMatched) {
+	            throw new AssertionError("One or more rows did not match the expected Status: " + expectedPlateSource);
+	        }
 
-		} catch (Exception e) {
-			logger.error("Validation failed for Status Source filter: " + expectedPlateSource, e);
-			test.log(Status.FAIL,
-					"Validation failed for Status Source filter: " + expectedPlateSource + " - " + e.getMessage());
-			throw new AssertionError("Validation failed for Status Source filter", e);
-		}
+	        logger.info("All rows matched the expected Status: " + expectedPlateSource);
+	        test.log(Status.PASS, "All rows matched the expected Status: " + expectedPlateSource);
+	    });
 	}
+
 
 	public void printAndValidateActiveAndInActiveCounts() {
+	    step("Validate Active and Inactive Plate Counts", () -> {
 
-		// UI
-		int active = Integer.parseInt(activePlates.getText().trim());
-		int inactive = Integer.parseInt(inactivePlates.getText().trim());
+	        // UI counts
+	        int active = Integer.parseInt(activePlates.getText().trim());
+	        int inactive = Integer.parseInt(inactivePlates.getText().trim());
 
-		// Collect all statuses from the table
-		List<WebElement> statusList = driver
-				.findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class,'ant-table-row')]/td[9]"));
+	        // Collect all statuses from the table
+	        List<WebElement> statusList = driver
+	                .findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class,'ant-table-row')]/td[9]"));
 
-		long activeCount = statusList.stream().map(WebElement::getText).map(String::trim)
-				.filter(status -> status.equalsIgnoreCase("ACTIVE")).count();
+	        long activeCount = statusList.stream()
+	                .map(WebElement::getText)
+	                .map(String::trim)
+	                .filter(status -> status.equalsIgnoreCase("ACTIVE"))
+	                .count();
 
-		long inactiveCount = statusList.stream().map(WebElement::getText).map(String::trim)
-				.filter(status -> status.equalsIgnoreCase("InActive")).count();
+	        long inactiveCount = statusList.stream()
+	                .map(WebElement::getText)
+	                .map(String::trim)
+	                .filter(status -> status.equalsIgnoreCase("InActive"))
+	                .count();
 
-		logger.info("Active (UI): " + active + " | Active (Table): " + activeCount);
-		test.log(Status.INFO, "Active (UI): " + active + " | Active (Table): " + activeCount);
+	        logger.info("Active (UI): " + active + " | Active (Table): " + activeCount);
+	        test.log(Status.INFO, "Active (UI): " + active + " | Active (Table): " + activeCount);
 
-		logger.info("Inactive (UI): " + inactive + " | Inactive (Table): " + inactiveCount);
-		test.log(Status.INFO, "Inactive (UI): " + inactive + " | Inactive (Table): " + inactiveCount);
+	        logger.info("Inactive (UI): " + inactive + " | Inactive (Table): " + inactiveCount);
+	        test.log(Status.INFO, "Inactive (UI): " + inactive + " | Inactive (Table): " + inactiveCount);
 
-		if (active == activeCount && inactive == inactiveCount) {
-			logger.info("Validation passed: UI counts match table counts");
-			test.log(Status.PASS, "Validation passed: UI counts match table counts");
-		} else {
-			logger.error("Validation FAILED! Active(UI/Table): " + active + "/" + activeCount
-					+ " | Inactive(UI/Table): " + inactive + "/" + inactiveCount);
-			test.log(Status.FAIL, "Validation FAILED! Active(UI/Table): " + active + "/" + activeCount
-					+ " | Inactive(UI/Table): " + inactive + "/" + inactiveCount);
-			throw new AssertionError("Mismatch between UI and table counts");
-		}
+	        if (active == activeCount && inactive == inactiveCount) {
+	            logger.info("Validation passed: UI counts match table counts");
+	            test.log(Status.PASS, "Validation passed: UI counts match table counts");
+	        } else {
+	            logger.error("Validation FAILED! Active(UI/Table): " + active + "/" + activeCount
+	                    + " | Inactive(UI/Table): " + inactive + "/" + inactiveCount);
+	            test.log(Status.FAIL, "Validation FAILED! Active(UI/Table): " + active + "/" + activeCount
+	                    + " | Inactive(UI/Table): " + inactive + "/" + inactiveCount);
+	            throw new AssertionError("Mismatch between UI and table counts");
+	        }
+	    });
 	}
+
 
 }
