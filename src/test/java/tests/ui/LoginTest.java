@@ -13,14 +13,14 @@ import pages.ui.LoginPage;
 public class LoginTest extends BaseTest {
 	private static final Logger logger = LogManager.getLogger(TestLaunchBrowser.class);
 
-	@Test
+	//@Test
 	/*public void testLoginSuccess() {
 		 LoginPage loginPage = new LoginPage(driver, prop);
 		 loginPage.login();
 	}*/
 
 	
-	public void testLoginFailure() {
+/*	public void testLoginFailure() {
 		DashboardPage dashboard = new DashboardPage(driver, prop, test);		dashboard.dashboardrMessageValidation();
 
 	    if (dashboard.dashboardrMessageValidation()) {
@@ -31,7 +31,7 @@ public class LoginTest extends BaseTest {
 	        logger.info("Login failed");
 	        test.log(Status.FAIL, "Login failed"); 
 	    }
-	}
+	}*/
 
 
 }

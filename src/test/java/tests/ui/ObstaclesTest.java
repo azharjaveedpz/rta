@@ -30,7 +30,7 @@ public class ObstaclesTest extends BaseTest {
 		// login.login("azhar@gmail.com", "Azhar@123");
 		// login.dismissChromePasswordAlert();
 		// dashboard.dashboardrMessageValidation();
-	
+
 		dashboard.clickConfiguration();
 		dashboard.clickObstacle();
 
@@ -214,7 +214,8 @@ public class ObstaclesTest extends BaseTest {
 	}
 
 	@Test
-	public void TC_021_searchAreaAndApplyObstacleAndStatusFilters_shouldReturnMatchingResults() throws InterruptedException {
+	public void TC_021_searchAreaAndApplyObstacleAndStatusFilters_shouldReturnMatchingResults()
+			throws InterruptedException {
 		common.selectFilterByText("Area");
 		common.searchAndValidateResult("Area", "Commercial");// Residential,Commercial,Industrial
 		common.selectFilterButton("Parked Vehicle"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
@@ -228,9 +229,10 @@ public class ObstaclesTest extends BaseTest {
 	}
 
 	@Test
-	public void TC_022_searchZoneAndApplyMultipleObstacleAndStatusFilters_shouldReturnMatchingResults() throws InterruptedException {
+	public void TC_022_searchZoneAndApplyMultipleObstacleAndStatusFilters_shouldReturnMatchingResults()
+			throws InterruptedException {
 		common.searchAndValidateResult("zone", "West");
-		
+
 		common.selectFilterButton("Parked Vehicle"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
 		obstacle.validateObstacleFilterList("Parked Vehicle");
@@ -258,4 +260,17 @@ public class ObstaclesTest extends BaseTest {
 		obstacle.validateReportedAndRemovedObstacles();
 
 	}
+
+	@Test
+	public void TC_025_ValidateErrorMessage() {
+		obstacle.navigateToAddObstaclePage();
+		common.submit();
+		common.validateErrorMessage("Please enter Zone");
+		common.validateErrorMessage("Please enter Area");
+		common.validateErrorMessage("Please enter Source Of Obstacle");
+		common.validateErrorMessage("Please enter Closest Payment Device");
+		common.validateErrorMessage("Please enter Photo(s)");
+
+	}
+
 }

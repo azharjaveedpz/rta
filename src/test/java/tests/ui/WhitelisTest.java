@@ -24,7 +24,7 @@ public class WhitelisTest extends BaseTest {
 
 		// login.login("azhar@gmail.com","Azhar@123");
 		// dashboard.dashboardrMessageValidation();
-		//Thread.sleep(1500);
+		// Thread.sleep(1500);
 		dashboard.clickConfiguration();
 		dashboard.clickWhitelistManagement();
 
@@ -55,7 +55,7 @@ public class WhitelisTest extends BaseTest {
 
 		plate.validateFromDate("2025-09-29");
 		plate.validateToDate("2025-09-30");
-		
+
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class WhitelisTest extends BaseTest {
 
 		plate.validateFromDate("2025-09-29");
 		plate.validateToDate("2025-09-30");
-		
+
 	}
 
 	@Test
@@ -117,6 +117,7 @@ public class WhitelisTest extends BaseTest {
 		common.submit();
 		common.validateToastMessage("Plate number already exists for the specified period");
 	}
+
 	@Test
 	public void TC_005_shouldEditExistingPlateSuccessfully() {
 		plate.clickThreeDotAndValidateMenuList();
@@ -137,12 +138,11 @@ public class WhitelisTest extends BaseTest {
 		plate.validateFromDate("2025-09-28");
 		plate.validateToDate("2025-09-30");
 	}
-	
-	
+
 	// ----------------- SEARCH TESTS -----------------
 
 	@Test
-	public void TC_006_shouldFindPlateByValidPlateNumber()  {
+	public void TC_006_shouldFindPlateByValidPlateNumber() {
 		common.searchAndValidateResult("plate number", "KK 49389 NNB");
 	}
 
@@ -194,8 +194,6 @@ public class WhitelisTest extends BaseTest {
 		plate.printAndValidateTableCounts();
 		plate.validateTableRowsAgainstTotalPlates();
 	}
-
-	
 
 	// ----------------- VALIDATION & VIEW -----------------
 
@@ -337,11 +335,25 @@ public class WhitelisTest extends BaseTest {
 	public void TC_027_shouldFindPlatesWhenSearchingByPartialPlateNumber() {
 		plate.searchWhitelistWithPartialTextAndValidateResult("49389", null);
 	}
-	
+
 	@Test
 	public void TC_028_shouldValidateActiveAndInactivePlateCounts() throws InterruptedException {
 		Thread.sleep(3000);
 		plate.printAndValidateActiveAndInActiveCounts();
-		
+
 	}
+
+	@Test
+	public void TC_029_ValidateErrorMessage() {
+		plate.navigateToAddNewPlatePage();
+		common.submit();
+		common.validateErrorMessage("Please enter Plate Number");
+		common.validateErrorMessage("Please enter Plate Source");
+		common.validateErrorMessage("Please enter Plate Type");
+		common.validateErrorMessage("Please enter Plate Color");
+		common.validateErrorMessage("Please enter Date Range");
+		common.validateErrorMessage("Please enter Exemption Reason");
+		common.validateErrorMessage("Please enter Is By-Law");
+	}
+
 }

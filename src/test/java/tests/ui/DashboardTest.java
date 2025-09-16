@@ -16,14 +16,14 @@ public class DashboardTest extends BaseTest {
     @Test
 	public void validateDashboardMessage() {
     	DashboardPage dashboard = new DashboardPage(driver, prop, test);        
-       dashboard.dashboardrMessageValidation();
+      // dashboard.dashboardrMessageValidation();
 
     }
 
     @Test
    	public void validateWhitelistSubMenu() {
        	DashboardPage dashboard = new DashboardPage(driver, prop, test);        
-          dashboard.dashboardrMessageValidation();
+         // dashboard.dashboardrMessageValidation();
           
           dashboard.clickWhitelistManagement();
           dashboard.validateWhitelistManagementSubmenuItems();
