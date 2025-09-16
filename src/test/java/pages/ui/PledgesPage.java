@@ -165,7 +165,7 @@ public class PledgesPage {
 		test.info("Step: " + description);
 		try {
 			action.run();
-			//test.pass("Step passed: " + description);
+			// test.pass("Step passed: " + description);
 		} catch (Exception e) {
 			test.fail("Step failed: " + description + " → " + e.getMessage());
 			throw e;
@@ -176,7 +176,7 @@ public class PledgesPage {
 		test.info("Step: " + description);
 		try {
 			T result = action.get();
-			//test.pass("Step passed: " + description + " → Result: " + result);
+			// test.pass("Step passed: " + description + " → Result: " + result);
 			return result;
 		} catch (Exception e) {
 			test.fail("Step failed: " + description + " → " + e.getMessage());
@@ -348,60 +348,61 @@ public class PledgesPage {
 	}
 
 	public void clickThreeDotAndValidateMenuList() {
-	    step("Click three-dot menu and validate items", () -> {
-	        try {
-	            Thread.sleep(2000); 
-	        } catch (InterruptedException e) {
-	            Thread.currentThread().interrupt();
-	            throw new RuntimeException("Thread sleep interrupted", e);
-	        }
+		step("Click three-dot menu and validate items", () -> {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException("Thread sleep interrupted", e);
+			}
 
-	        threeDot.click();
-	        logger.info("Clicked on three-dot menu");
-	        test.info("Clicked on three-dot menu");
+			threeDot.click();
+			logger.info("Clicked on three-dot menu");
+			test.info("Clicked on three-dot menu");
 
-	        if (menuList == null || menuList.isEmpty()) {
-	            String message = "Menu list not found after clicking three-dot!";
-	            logger.error(message);
-	            test.fail(message);
-	            throw new AssertionError(message);
-	        } else {
-	            logger.info("Menu items found: " + menuList.size());
-	            test.pass("Menu items found: " + menuList.size());
+			if (menuList == null || menuList.isEmpty()) {
+				String message = "Menu list not found after clicking three-dot!";
+				logger.error(message);
+				test.fail(message);
+				throw new AssertionError(message);
+			} else {
+				logger.info("Menu items found: " + menuList.size());
+				test.pass("Menu items found: " + menuList.size());
 
-	            for (WebElement item : menuList) {
-	                String menuText = item.getText().trim();
-	                logger.info("Menu Item: " + menuText);
-	                test.info("Menu Item: " + menuText);
-	            }
-	        }
-	    });
+				for (WebElement item : menuList) {
+					String menuText = item.getText().trim();
+					logger.info("Menu Item: " + menuText);
+					test.info("Menu Item: " + menuText);
+				}
+			}
+		});
 	}
 
-
 	public void getPledgeDetails() {
-	    step("Validate and Print Plate Type", () -> validateAndPrint("Plate Type", viewPledgeType.getText()));
-	    step("Validate and Print Trade License Number", () -> validateAndPrint("Trade License Number", viewTrade.getText()));
-	    step("Validate and Print Business Name", () -> validateAndPrint("Business Name", viewBuisness.getText()));
-	    step("Validate and Print Remarks", () -> validateAndPrint("Remarks", viewRemarks.getText()));
-	  //  step("Validate and Print Added On", () -> validateAndPrint("Added On", viewAddedOn.getText()));
+		step("Validate and Print Plate Type", () -> validateAndPrint("Plate Type", viewPledgeType.getText()));
+		step("Validate and Print Trade License Number",
+				() -> validateAndPrint("Trade License Number", viewTrade.getText()));
+		step("Validate and Print Business Name", () -> validateAndPrint("Business Name", viewBuisness.getText()));
+		step("Validate and Print Remarks", () -> validateAndPrint("Remarks", viewRemarks.getText()));
+		// step("Validate and Print Added On", () -> validateAndPrint("Added On",
+		// viewAddedOn.getText()));
 
-	    step("Validate Uploaded Documents", () -> {
-	        int docCount = viewDocuments.size();
-	        if (docCount == 0) {
-	            logger.error("Document is empty!");
-	            test.fail("Document is empty!");
-	        } else {
-	            logger.info("Documents Uploaded: " + docCount);
-	            test.pass("Documents Uploaded: " + docCount);
+		step("Validate Uploaded Documents", () -> {
+			int docCount = viewDocuments.size();
+			if (docCount == 0) {
+				logger.error("Document is empty!");
+				test.fail("Document is empty!");
+			} else {
+				logger.info("Documents Uploaded: " + docCount);
+				test.pass("Documents Uploaded: " + docCount);
 
-	            for (WebElement doc : viewDocuments) {
-	                String imgPath = doc.getAttribute("src");
-	                logger.info("Document Path: " + imgPath);
-	                test.info("Document Path: " + imgPath);
-	            }
-	        }
-	    });
+				for (WebElement doc : viewDocuments) {
+					String imgPath = doc.getAttribute("src");
+					logger.info("Document Path: " + imgPath);
+					test.info("Document Path: " + imgPath);
+				}
+			}
+		});
 	}
 
 	private void validateAndPrint(String fieldName, String value) {
@@ -421,221 +422,222 @@ public class PledgesPage {
 
 		return step("Navigate to View Page", () -> {
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		String sucMsg = "";
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			String sucMsg = "";
 
-		try {
+			try {
 
-			WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(viewPledgePageMessage));
-			sucMsg = messageElement.getText().trim();
-		} catch (TimeoutException e) {
-			logger.error("View  page message not found within timeout.");
-			test.log(Status.FAIL, "View  page message not found within timeout.");
-			throw new AssertionError("View  page message not found within timeout.", e);
-		}
+				WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(viewPledgePageMessage));
+				sucMsg = messageElement.getText().trim();
+			} catch (TimeoutException e) {
+				logger.error("View  page message not found within timeout.");
+				test.log(Status.FAIL, "View  page message not found within timeout.");
+				throw new AssertionError("View  page message not found within timeout.", e);
+			}
 
-		if (sucMsg != null && !sucMsg.isEmpty()) {
-			logger.info("Navigated to View  page: " + sucMsg);
-			test.log(Status.PASS, "Navigated to View  page: " + sucMsg);
-			return true;
-		} else {
-			logger.error("Failed to navigate to View  page. Message was empty.");
-			test.log(Status.FAIL, "Failed to navigate to View  page. Message was empty.");
-			throw new AssertionError("Failed to navigate to View Plate page. Message was empty.");
-		}
-	 });
+			if (sucMsg != null && !sucMsg.isEmpty()) {
+				logger.info("Navigated to View  page: " + sucMsg);
+				test.log(Status.PASS, "Navigated to View  page: " + sucMsg);
+				return true;
+			} else {
+				logger.error("Failed to navigate to View  page. Message was empty.");
+				test.log(Status.FAIL, "Failed to navigate to View  page. Message was empty.");
+				throw new AssertionError("Failed to navigate to View Plate page. Message was empty.");
+			}
+		});
 	}
 
 	public boolean navigateToEditPlatePage() {
 
-		  return step("Navigate to Edit Plate Page", () -> {
+		return step("Navigate to Edit Plate Page", () -> {
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		String sucMsg = "";
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			String sucMsg = "";
 
-		try {
+			try {
 
-			WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(editPlatePageMessage));
-			sucMsg = messageElement.getText().trim();
-		} catch (TimeoutException e) {
-			logger.error("Edit Plate page message not found within timeout.");
-			test.log(Status.FAIL, "Edit Plate page message not found within timeout.");
-			throw new AssertionError("Edit Plate page message not found within timeout.", e);
-		}
+				WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(editPlatePageMessage));
+				sucMsg = messageElement.getText().trim();
+			} catch (TimeoutException e) {
+				logger.error("Edit Plate page message not found within timeout.");
+				test.log(Status.FAIL, "Edit Plate page message not found within timeout.");
+				throw new AssertionError("Edit Plate page message not found within timeout.", e);
+			}
 
-		if (sucMsg != null && !sucMsg.isEmpty()) {
-			logger.info("Navigated to Edit Plate page: " + sucMsg);
-			test.log(Status.PASS, "Navigated to Edit Plate page: " + sucMsg);
-			return true;
-		} else {
-			logger.error("Failed to navigate to Edit Plate page. Message was empty.");
-			test.log(Status.FAIL, "Failed to navigate to Edit Plate page. Message was empty.");
-			throw new AssertionError("Failed to navigate to Edit Plate page. Message was empty.");
-		}
-	});
+			if (sucMsg != null && !sucMsg.isEmpty()) {
+				logger.info("Navigated to Edit Plate page: " + sucMsg);
+				test.log(Status.PASS, "Navigated to Edit Plate page: " + sucMsg);
+				return true;
+			} else {
+				logger.error("Failed to navigate to Edit Plate page. Message was empty.");
+				test.log(Status.FAIL, "Failed to navigate to Edit Plate page. Message was empty.");
+				throw new AssertionError("Failed to navigate to Edit Plate page. Message was empty.");
+			}
+		});
 	}
 
 	public void validatePledgeFilterList(String expectedPlateSource) {
 		step("Validate Pledge Filter List for: " + expectedPlateSource, () -> {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
 
-			wait.until(ExpectedConditions.visibilityOfAllElements(pledgeSource));
+				wait.until(ExpectedConditions.visibilityOfAllElements(pledgeSource));
 
-			boolean allMatched = true;
+				boolean allMatched = true;
 
-			for (int i = 0; i < pledgeSource.size(); i++) {
-				String actualValue = pledgeSource.get(i).getText().trim();
+				for (int i = 0; i < pledgeSource.size(); i++) {
+					String actualValue = pledgeSource.get(i).getText().trim();
 
-				if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
-					logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
-							+ actualValue);
-					test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
-							+ ", actual = " + actualValue);
-					allMatched = false;
-				} else {
-					logger.info("Row " + (i + 1) + " matched: " + actualValue);
-					test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
+					if (!actualValue.equalsIgnoreCase(expectedPlateSource)) {
+						logger.error("Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource + ", actual = "
+								+ actualValue);
+						test.log(Status.FAIL, "Row " + (i + 1) + " mismatch: expected = " + expectedPlateSource
+								+ ", actual = " + actualValue);
+						allMatched = false;
+					} else {
+						logger.info("Row " + (i + 1) + " matched: " + actualValue);
+						test.log(Status.PASS, "Row " + (i + 1) + " matched: " + actualValue);
+					}
 				}
+
+				if (!allMatched) {
+					throw new AssertionError(
+							"One or more rows did not match the expected pledged Source: " + expectedPlateSource);
+				}
+
+				logger.info("All rows matched the expected pledged Source: " + expectedPlateSource);
+				test.log(Status.PASS, "All rows matched the expected pledged Source: " + expectedPlateSource);
+
+			} catch (Exception e) {
+				logger.error("Validation failed for pledged Source filter: " + expectedPlateSource, e);
+				test.log(Status.FAIL,
+						"Validation failed for pledged Source filter: " + expectedPlateSource + " - " + e.getMessage());
+				throw new AssertionError("Validation failed for pledged Source filter", e);
 			}
-
-			if (!allMatched) {
-				throw new AssertionError(
-						"One or more rows did not match the expected pledged Source: " + expectedPlateSource);
-			}
-
-			logger.info("All rows matched the expected pledged Source: " + expectedPlateSource);
-			test.log(Status.PASS, "All rows matched the expected pledged Source: " + expectedPlateSource);
-
-		} catch (Exception e) {
-			logger.error("Validation failed for pledged Source filter: " + expectedPlateSource, e);
-			test.log(Status.FAIL,
-					"Validation failed for pledged Source filter: " + expectedPlateSource + " - " + e.getMessage());
-			throw new AssertionError("Validation failed for pledged Source filter", e);
-		}
-	    });
+		});
 
 	}
 
 	public void validateTotalPledgesCount() {
 		step("Validate Total Pledges Count", () -> {
-		try {
-			int actualCount = Integer.parseInt(totalPledges.getText().trim()); // UI total
-			int expectedCount = rowList.size(); // rows count
+			try {
+				int actualCount = Integer.parseInt(totalPledges.getText().trim()); // UI total
+				int expectedCount = rowList.size(); // rows count
 
-			if (expectedCount == actualCount) {
-				String message = "Row count (" + expectedCount + ") matches total pledge (" + actualCount + ")";
-				logger.info(message);
-				test.log(Status.PASS, message);
-			} else {
-				String message = "Row count (" + expectedCount + ") does NOT match total pledge (" + actualCount + ")";
-				logger.error(message);
-				test.log(Status.FAIL, message);
-				throw new AssertionError(message); 
+				if (expectedCount == actualCount) {
+					String message = "Row count (" + expectedCount + ") matches total pledge (" + actualCount + ")";
+					logger.info(message);
+					test.log(Status.PASS, message);
+				} else {
+					String message = "Row count (" + expectedCount + ") does NOT match total pledge (" + actualCount
+							+ ")";
+					logger.error(message);
+					test.log(Status.FAIL, message);
+					throw new AssertionError(message);
+				}
+
+			} catch (Exception e) {
+				logger.error("Error validating total pledge: " + e.getMessage());
+				test.log(Status.FAIL, "Error validating total pledge: " + e.getMessage());
+				throw new RuntimeException(e);
 			}
-
-		} catch (Exception e) {
-			logger.error("Error validating total pledge: " + e.getMessage());
-			test.log(Status.FAIL, "Error validating total pledge: " + e.getMessage());
-			throw new RuntimeException(e); 
-		}
-	 });
+		});
 	}
 
 	public void validateCorporatePledgesCount() {
-		  step("Validate Corporate Pledges Count", () -> {
-		try {
-			// Get corporate count from statistic card
-			int corporateTotal = Integer.parseInt(coprPledges.getText().trim());
+		step("Validate Corporate Pledges Count", () -> {
+			try {
+				// Get corporate count from statistic card
+				int corporateTotal = Integer.parseInt(coprPledges.getText().trim());
 
-			// Count how many rows in the table are "Corporate"
-			long corporateRows = corList.stream().map(row -> row.getText().trim())
-					.filter(text -> text.equalsIgnoreCase("Corporate")).count();
+				// Count how many rows in the table are "Corporate"
+				long corporateRows = corList.stream().map(row -> row.getText().trim())
+						.filter(text -> text.equalsIgnoreCase("Corporate")).count();
 
-			if (corporateRows == corporateTotal) {
-				String message = "Corporate count matches: UI shows (" + corporateTotal + "), Table has ("
-						+ corporateRows + ")";
-				logger.info(message);
-				test.log(Status.PASS, message);
-			} else {
-				String message = "Corporate count mismatch! UI shows (" + corporateTotal + "), but Table has ("
-						+ corporateRows + ")";
-				logger.error(message);
-				test.log(Status.FAIL, message);
-				throw new AssertionError(message); // fail the test
+				if (corporateRows == corporateTotal) {
+					String message = "Corporate count matches: UI shows (" + corporateTotal + "), Table has ("
+							+ corporateRows + ")";
+					logger.info(message);
+					test.log(Status.PASS, message);
+				} else {
+					String message = "Corporate count mismatch! UI shows (" + corporateTotal + "), but Table has ("
+							+ corporateRows + ")";
+					logger.error(message);
+					test.log(Status.FAIL, message);
+					throw new AssertionError(message); // fail the test
+				}
+
+			} catch (Exception e) {
+				logger.error("Error validating corporate pledges: " + e.getMessage());
+				test.log(Status.FAIL, "Error validating corporate pledges: " + e.getMessage());
+				throw new RuntimeException(e);
 			}
-
-		} catch (Exception e) {
-			logger.error("Error validating corporate pledges: " + e.getMessage());
-			test.log(Status.FAIL, "Error validating corporate pledges: " + e.getMessage());
-			throw new RuntimeException(e);
-		}
-		 });
+		});
 	}
 
 	public void checkMiddlePagesPagination() {
-		 step("Validate Middle Page Pagination", () -> {
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			String paginationText = totalItemPagination.getText();
-			String[] parts = paginationText.split(" of ");
-			int itemsPerPage = Integer.parseInt(parts[0].split("-")[1].trim());
-			int totalItems = Integer.parseInt(parts[1].replaceAll("[^0-9]", "").trim());
-			int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
-			int total = Integer.parseInt(totalPledges.getText().trim());
-
-			logger.info("Total pages: " + totalPages);
-			test.log(Status.INFO, "Total pages: " + totalPages);
-
-			for (int page = 2; page < totalPages; page++) {
-				driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item') and @title='" + page + "']"))
-						.click();
-				new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.textToBePresentInElement(
-						driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item-active')]/a")),
-						String.valueOf(page)));
-
-				WebElement prevBtn = previouBtn;
-				WebElement nextBtn = nestBtn;
-				int rowsOnPage = rowList.size();
-
-				logger.info("Checking middle page: " + page);
-				test.log(Status.INFO, "Checking middle page: " + page);
-
-				if (prevBtn.isEnabled() && nextBtn.isEnabled()) {
-					logger.info("Middle page: Previous and Next enabled");
-					test.log(Status.PASS, "Middle page: Previous and Next enabled");
-				} else {
-					logger.error("Middle page: Previous and Next should be enabled");
-					test.log(Status.FAIL, "Middle page: Previous and Next should be enabled");
-				}
-
-				if (rowsOnPage == total || rowsOnPage <= total) {
-					logger.info("Rows on middle page match or less than Total Plates: " + rowsOnPage);
-					test.log(Status.PASS, "Rows on middle page match or less than Total Plates: " + rowsOnPage);
-				} else {
-					logger.error("Rows on middle page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
-					test.log(Status.FAIL,
-							"Rows on middle page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
-				}
+		step("Validate Middle Page Pagination", () -> {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			try {
+				String paginationText = totalItemPagination.getText();
+				String[] parts = paginationText.split(" of ");
+				int itemsPerPage = Integer.parseInt(parts[0].split("-")[1].trim());
+				int totalItems = Integer.parseInt(parts[1].replaceAll("[^0-9]", "").trim());
+				int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
+				int total = Integer.parseInt(totalPledges.getText().trim());
 
-		} catch (Exception e) {
-			logger.error("Error in middle pages validation: " + e.getMessage());
-			test.log(Status.FAIL, "Error in middle pages validation: " + e.getMessage());
-			throw new RuntimeException(e);
-		}
-		 });
+				logger.info("Total pages: " + totalPages);
+				test.log(Status.INFO, "Total pages: " + totalPages);
+
+				for (int page = 2; page < totalPages; page++) {
+					driver.findElement(
+							By.xpath("//li[contains(@class,'ant-pagination-item') and @title='" + page + "']")).click();
+					new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.textToBePresentInElement(
+							driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item-active')]/a")),
+							String.valueOf(page)));
+
+					WebElement prevBtn = previouBtn;
+					WebElement nextBtn = nestBtn;
+					int rowsOnPage = rowList.size();
+
+					logger.info("Checking middle page: " + page);
+					test.log(Status.INFO, "Checking middle page: " + page);
+
+					if (prevBtn.isEnabled() && nextBtn.isEnabled()) {
+						logger.info("Middle page: Previous and Next enabled");
+						test.log(Status.PASS, "Middle page: Previous and Next enabled");
+					} else {
+						logger.error("Middle page: Previous and Next should be enabled");
+						test.log(Status.FAIL, "Middle page: Previous and Next should be enabled");
+					}
+
+					if (rowsOnPage == total || rowsOnPage <= total) {
+						logger.info("Rows on middle page match or less than Total Plates: " + rowsOnPage);
+						test.log(Status.PASS, "Rows on middle page match or less than Total Plates: " + rowsOnPage);
+					} else {
+						logger.error("Rows on middle page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
+						test.log(Status.FAIL,
+								"Rows on middle page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
+					}
+				}
+
+			} catch (Exception e) {
+				logger.error("Error in middle pages validation: " + e.getMessage());
+				test.log(Status.FAIL, "Error in middle pages validation: " + e.getMessage());
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 	public void validateBusiness(String expectedSource) {

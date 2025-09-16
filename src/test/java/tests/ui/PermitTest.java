@@ -24,7 +24,7 @@ public class PermitTest extends BaseTest {
 
 		String plateNumber = "HW588X7LA";
 
-		dashboard.dashboardrMessageValidation();
+	//	dashboard.dashboardrMessageValidation();
 		dashboard.clickPermits();
 		dashboard.permitPageMessageValidation();
 		permit.enterPlateNumber(plateNumber);

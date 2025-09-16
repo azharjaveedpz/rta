@@ -1,6 +1,5 @@
 package tests.ui;
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.BeforeMethod;
@@ -22,7 +21,7 @@ public class PledgesTest extends BaseTest {
 	private WhitelistPage plate;
 
 	@BeforeMethod
-	public void setUpPages()  {
+	public void setUpPages() {
 		dashboard = new DashboardPage(driver, prop, test);
 		login = new LoginPage(driver, prop, test);
 		common = new CommonCode(driver, prop, test);
@@ -32,8 +31,7 @@ public class PledgesTest extends BaseTest {
 		// login.login("azhar@gmail.com", "Azhar@123");
 		// login.dismissChromePasswordAlert();
 		// dashboard.dashboardrMessageValidation();
-		
-		
+
 		dashboard.clickConfiguration();
 		dashboard.clickPledgeManagement();
 
@@ -60,7 +58,7 @@ public class PledgesTest extends BaseTest {
 		pledge.validateToDate("2025-09-30");
 
 	}
-	
+
 	@Test
 	public void TC_002_viewPledgeDetails_shouldDisplayCorrectly() {
 		pledge.clickThreeDotAndValidateMenuList();
@@ -174,7 +172,7 @@ public class PledgesTest extends BaseTest {
 		pledge.validateTotalPledgesCount();
 		pledge.validateCorporatePledgesCount();
 	}
-	
+
 	@Test
 	public void TC_016_searchByDateRange_shouldReturnPledgesWithinRange() {
 		common.searchStartDate(29);
@@ -199,8 +197,9 @@ public class PledgesTest extends BaseTest {
 		pledge.validateFromDate("2025-09-24");
 		pledge.validateToDate("2025-09-25");
 	}
+
 	@Test
-	public void TC_019_searchByBusinessName_andDateRange_shouldReturnMatchingPledges()  throws InterruptedException {
+	public void TC_019_searchByBusinessName_andDateRange_shouldReturnMatchingPledges() throws InterruptedException {
 		Thread.sleep(2000);
 		common.selectFilterByText("Business Name");
 		common.searchAndValidateResult("business", "Diary");
@@ -209,8 +208,10 @@ public class PledgesTest extends BaseTest {
 		pledge.validateFromDate("2025-09-24");
 		pledge.validateToDate("2025-09-30");
 	}
+
 	@Test
-	public void TC_020_searchByBusinessName_andTradeLicense_andDateRange_shouldReturnMatchingPledges() throws InterruptedException {
+	public void TC_020_searchByBusinessName_andTradeLicense_andDateRange_shouldReturnMatchingPledges()
+			throws InterruptedException {
 		common.searchAndValidateResult("trade number", "D");
 		Thread.sleep(2000);
 		common.selectFilterByText("Business Name");
@@ -220,6 +221,7 @@ public class PledgesTest extends BaseTest {
 		pledge.validateFromDate("2025-09-24");
 		pledge.validateToDate("2025-09-30");
 	}
+
 	@Test
 	public void TC_021_editPledge_shouldUpdateSuccessfully() {
 		pledge.clickThreeDotAndValidateMenuList();
@@ -229,7 +231,7 @@ public class PledgesTest extends BaseTest {
 		pledge.enterTradeLicenseNumber();
 		common.startDateRange(28);
 		common.startEndRange(30);
-		//common.uploadPhoto();
+		// common.uploadPhoto();
 
 		common.update();
 		common.validateToastMessage("Pledge updated successfully!");
@@ -237,5 +239,17 @@ public class PledgesTest extends BaseTest {
 		pledge.validateBusiness("Corporate");
 		pledge.validateFromDate("2025-09-29");
 		pledge.validateToDate("2025-09-30");
+	}
+
+	@Test
+	public void TC_022_ValidateErrorMessage() {
+		pledge.navigateToAddPledgePage();
+		common.submit();
+		common.validateErrorMessage("Please enter Pledge Type");
+		common.validateErrorMessage("Please enter Trade License Number");
+		common.validateErrorMessage("Please enter Business Name");
+		common.validateErrorMessage("Please enter Document");
+		common.validateErrorMessage("Please enter Date Range");
+
 	}
 }
