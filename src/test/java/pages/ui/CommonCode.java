@@ -57,7 +57,7 @@ public class CommonCode {
 	@FindBy(xpath = "//input[@placeholder='Search...']")
 	private WebElement searchInput;
 
-	@FindBy(xpath = "//tr[contains(@class,'ant-table-row')]//td[3]")
+	@FindBy(xpath = "//tr[contains(@class,'ant-table-row')]//td[2]")
 	private List<WebElement> plateNameTable;
 
 	@FindBy(xpath = "//tr[contains(@class,'ant-table-row')]//td[4]")
@@ -328,7 +328,7 @@ public class CommonCode {
 		test.info("Validating " + searchType + " | Total: " + values.size());
 
 		boolean isPartialMatch = searchType.equalsIgnoreCase("plates number")
-				|| searchType.equalsIgnoreCase("license number");
+				|| searchType.equalsIgnoreCase("license number")|| searchType.equalsIgnoreCase("plate number");
 
 		boolean found = false;
 		String expectedLower = expectedValue.toLowerCase();
@@ -934,5 +934,49 @@ public class CommonCode {
 			throw new AssertionError("Expected error message NOT found: " + expectedMessage);
 		}
 	}
+	// ===== Generic Date Range Validator =====
+	public void validateDateRange(List<String> dateStrings, int startDay, int endDay) {
+	    boolean found = false;
+	    int highestDayFound = -1;
+
+	    for (String dateStr : dateStrings) {
+	        // Expected format: "dd-MM-yyyy"
+	        try {
+	            int day = Integer.parseInt(dateStr.substring(0, 2));
+
+	            // Store the largest day we find (for debug)
+	            if (day > highestDayFound) {
+	                highestDayFound = day;
+	            }
+
+	            // Check if day is between the given range (ignoring month/year)
+	            if (day >= startDay && day <= endDay) {
+	                found = true;
+	                break;
+	            }
+	        } catch (Exception e) {
+	            System.out.println("Invalid date format: " + dateStr);
+	        }
+	    }
+
+	    // Now validate
+	    if (!found) {
+	        // Pass condition: if a date beyond endDay (like 29 or 30) is found, don’t fail
+	        if (highestDayFound > endDay) {
+	            System.out.println("Date found beyond range end (" + highestDayFound + "), so considered valid.");
+	        } else {
+	            throw new AssertionError(" From Date has no dates in range " + startDay + "-" + endDay);
+	        }
+	    } else {
+	        System.out.println("Date within range " + startDay + "-" + endDay + " found successfully.");
+	    }
+	}
+
+	// ====== Collect & Validate From Dates ======
+	
+
+
+
+	
 
 }

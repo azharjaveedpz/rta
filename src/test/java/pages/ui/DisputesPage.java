@@ -152,7 +152,7 @@ public class DisputesPage {
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[2]")
 	private List<WebElement> paymentSource;
 
-	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Total Disputes']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
+	@FindBy(xpath = "//div[contains(@class,'ant-statistic') and .//div[normalize-space(text())='Total Disputes']]//span[contains(@class,'ant-statistic-content-value')]/span")
 	private WebElement totalDisputes;
 
 	@FindBy(xpath = "//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]")
@@ -170,31 +170,31 @@ public class DisputesPage {
 	@FindBy(xpath = "//input[@id='sourceUser']")
 	private WebElement source;
 
-	@FindBy(xpath = "//div[.//strong[text()='Fine Number:']]/following-sibling::div")
+	@FindBy(xpath = "//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')]")
 	private WebElement viewFineNumber;
 
-	@FindBy(xpath = "//div[.//strong[text()='Department:']]/following-sibling::div")
+	@FindBy(xpath = "(//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')])[2]")
 	private WebElement viewDepartment;
 
-	@FindBy(xpath = "//div[.//strong[text()='Payment Type:']]/following-sibling::div")
+	@FindBy(xpath = "(//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')])[3]")
 	private WebElement viewPaymentType;
 
-	@FindBy(xpath = "//div[.//strong[text()='Dispute Reason:']]/following-sibling::div")
+	@FindBy(xpath = "(//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')])[4]")
 	private WebElement viewDisputeReason;
 
-	@FindBy(xpath = "//div[.//strong[text()='Email:']]/following-sibling::div")
+	@FindBy(xpath = "(//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')])[5]")
 	private WebElement viewEmail;
 
-	@FindBy(xpath = "//div[.//strong[text()='Phone Number:']]/following-sibling::div")
+	@FindBy(xpath = "(//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')])[6]")
 	private WebElement viewPhoneNumber;
 
-	@FindBy(xpath = "//div[.//strong[text()='CRM Reference:']]/following-sibling::div")
+	@FindBy(xpath = "(//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')])[7]")
 	private WebElement viewCRMReference;
 
-	@FindBy(xpath = "//div[.//strong[text()='Address:']]/following-sibling::div")
+	@FindBy(xpath = "(//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')])[8]")
 	private WebElement viewAddress;
 
-	@FindBy(xpath = "//div[.//strong[text()='Dispute Date:']]/following-sibling::div")
+	@FindBy(xpath = "(//div[normalize-space(.//strong)='Fine Number:']/following-sibling::div[contains(@class,'ant-col-14')])[9]")
 	private WebElement viewDisputeDate;
 
 	// Actions

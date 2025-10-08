@@ -46,10 +46,10 @@ public class DashboardPage {
 	@FindBy(xpath = "//h3[normalize-space()='Dashboard']")
 	private WebElement dashboardMessage;
 
-	@FindBy(xpath = "//span[normalize-space()='Configuration']")
+	@FindBy(xpath = "//span[normalize-space()='Management']")
 	private WebElement selectConfiguration;
 
-	@FindBy(xpath = "//a[normalize-space()='Whitelist']")
+	@FindBy(xpath = "//a[normalize-space()='Whitelists']")
 	private WebElement selectWhitelistManagement;
 
 	@FindBy(xpath = "//li[@class='ant-menu-item ant-menu-item-only-child']")

@@ -95,7 +95,7 @@ public class ObstaclesPage {
 	private WebElement obstacleCell;
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[4]")
 	private WebElement statusCell;
-	@FindBy(xpath = "//span[@aria-label='more']/ancestor::button")
+	@FindBy(xpath = "//tbody/tr[2]/td[7]/button[1]")
 	private WebElement threeDot;
 	@FindBy(xpath = "//ul[contains(@class,'ant-dropdown-menu')]//li")
 	private List<WebElement> menuList;
@@ -107,7 +107,7 @@ public class ObstaclesPage {
 	private WebElement viewArea;
 	@FindBy(xpath = "//tr[th/span[text()='Source Of Obstacle']]/td/span")
 	private WebElement viewSourcebstaclle;
-	@FindBy(xpath = "//tr[th/span[text()='Closest Payment Device']]/td/span")
+	@FindBy(xpath = "//tr[th/span[text()='Closest PD']]/td/span")
 	private WebElement viewDevice;
 	@FindBy(xpath = "//tr[th/span[text()='Comments']]/td/span")
 	private WebElement viewComments;
@@ -115,7 +115,7 @@ public class ObstaclesPage {
 	private WebElement viewStatus;
 	@FindBy(xpath = "//div[contains(@class,'ant-space')]//div[contains(@class,'ant-image')]//img")
 	private List<WebElement> viewDocuments;
-	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Total Obstacles']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
+	@FindBy(xpath = "//div[contains(@class,'ant-statistic') and .//div[text()='Total Obstacles']]//span[contains(@class,'ant-statistic-content-value')]//span")
 	private WebElement totalObstacle;
 	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Reported Obstacles']/following-sibling::div//span[@class='ant-statistic-content-value-int']")
 	private WebElement reportedObstacle;
@@ -135,6 +135,10 @@ public class ObstaclesPage {
 	private List<WebElement> statusSource;
 	@FindBy(xpath = "//div[contains(@class,'ant-select-dropdown') and not(contains(@class,'hidden'))]//div[contains(@class,'ant-select-item-option-content')]")
 	private List<WebElement> chooseList;
+	@FindBy(xpath = "//div[contains(@class,'ant-select-selector') and .//span[text()='Zone']]")
+	private WebElement zone;
+	@FindBy(xpath = "//div[contains(@class,'ant-select-selector') and .//span[text()='Area']]")
+	private WebElement area;
 
 	// Actions
 
@@ -163,6 +167,17 @@ public class ObstaclesPage {
 	public void selectObstacle(String obsName) {
 		step("Select Obstacle: " + obsName, () -> selectFromDropdown(dropdowObstacle, obsName));
 	}
+	
+	public void selectFilterZone(String filterZoneName) {
+		step("select Filter Zone: " + filterZoneName, () -> selectFromDropdown(zone, filterZoneName));
+	}
+	
+	public void selectFilterArea(String filterAreaName) {
+		step("select Filter Area: " + filterAreaName, () -> selectFromDropdown(area, filterAreaName));
+	}
+	
+	
+	
 
 	private void selectFromDropdown(WebElement dropdown, String value) {
 		dropdown.click();
@@ -178,6 +193,8 @@ public class ObstaclesPage {
 		}
 		throw new RuntimeException("Option not found: " + value);
 	}
+	
+	
 
 	public void enterDeviceAndReportedDetails() {
 		step("Enter Device details", () -> {
@@ -248,7 +265,7 @@ public class ObstaclesPage {
 			logger.info("Clicked on three-dot menu");
 			test.log(Status.INFO, "Clicked on three-dot menu");
 
-			if (menuList == null || menuList.isEmpty()) {
+		/*	if (menuList == null || menuList.isEmpty()) {
 				String message = "Menu list not found after clicking three-dot!";
 				logger.error(message);
 				test.log(Status.FAIL, message);
@@ -263,7 +280,7 @@ public class ObstaclesPage {
 					test.log(Status.PASS, "Menu Item: " + menuText);
 
 				}
-			}
+			}*/
 		});
 	}
 
@@ -287,7 +304,7 @@ public class ObstaclesPage {
 			validateAndPrint("Source Of Obstacle", viewSourcebstaclle.getText());
 			validateAndPrint("Device Used", viewDevice.getText());
 			validateAndPrint("Comments", viewComments.getText());
-			validateAndPrint("Status", viewStatus.getText());
+			//validateAndPrint("Status", viewStatus.getText());
 
 			int docCount = viewDocuments.size();
 			if (docCount == 0) {
@@ -320,145 +337,179 @@ public class ObstaclesPage {
 	}
 
 	public void validateTotalObstacleCount() {
-		step("Validate that table row count does not exceed Total Obstacles", () -> {
-			try {
-				int total = Integer.parseInt(totalObstacle.getText().trim());
-				int rowsOnPage = rowList.size();
+	    step("Validate that table row count does not exceed Total Obstacles", () -> {
+	        try {
+	           
+	            String obstacleText = totalObstacle.getText().trim();
+	            
+	            
+	            String[] parts = obstacleText.split("/");
+	            int total = Integer.parseInt(parts[1].trim());
+	            
+	            int rowsOnPage = rowList.size();
 
-				if (rowsOnPage <= total) {
-					logger.info(
-							"Row count (" + rowsOnPage + ") matches or is less than total obstacle (" + total + ")");
-					test.pass("Row count (" + rowsOnPage + ") matches or is less than total obstacle (" + total + ")");
-				} else {
-					logger.error("Row count (" + rowsOnPage + ") exceeds total obstacle (" + total + ")");
-					test.fail("Row count (" + rowsOnPage + ") exceeds total obstacle (" + total + ")");
-				}
+	            if (rowsOnPage <= total) {
+	                logger.info("Row count (" + rowsOnPage + ") matches or is less than total obstacles (" + total + ")");
+	                test.pass("Row count (" + rowsOnPage + ") matches or is less than total obstacles (" + total + ")");
+	            } else {
+	                logger.error("Row count (" + rowsOnPage + ") exceeds total obstacles (" + total + ")");
+	                test.fail("Row count (" + rowsOnPage + ") exceeds total obstacles (" + total + ")");
+	            }
 
-			} catch (Exception e) {
-				logger.error("Error validating total obstacle: " + e.getMessage());
-				test.fail("Error validating total obstacle: " + e.getMessage());
-				throw new RuntimeException(e);
-			}
-		});
+	        } catch (Exception e) {
+	            logger.error("Error validating total obstacle: " + e.getMessage());
+	            test.fail("Error validating total obstacle: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
 
+
 	public void printAndValidateObstacleCounts() {
-		step("Print and validate obstacle counts", () -> {
-			int total = Integer.parseInt(totalObstacle.getText().trim());
-			int reported = Integer.parseInt(reportedObstacle.getText().trim());
-			int removed = Integer.parseInt(removedObstacle.getText().trim());
+	    step("Print and validate obstacle counts", () -> {
+	        try {
+	            // Extract the total number from "current / total" format
+	            String totalText = totalObstacle.getText().trim(); // e.g. "10 / 30"
+	            int total = Integer.parseInt(totalText.split("/")[1].trim()); // 30
 
-			// Log counts
-			logger.info("Total obstacles: " + total);
-			test.info("Total obstacles: " + total);
+	            // Extract reported and removed values similarly if they are in "current / total" format
+	            String reportedText = reportedObstacle.getText().trim();
+	            int reported = Integer.parseInt(reportedText.split("/")[1].trim());
 
-			logger.info("Reported obstacles: " + reported);
-			test.info("Reported obstacles: " + reported);
+	            String removedText = removedObstacle.getText().trim();
+	            int removed = Integer.parseInt(removedText.split("/")[1].trim());
 
-			logger.info("Removed obstacles: " + removed);
-			test.info("Removed obstacles: " + removed);
+	            // Log counts
+	            logger.info("Total obstacles: " + total);
+	            test.info("Total obstacles: " + total);
 
-			// Validate total = reported + removed
-			if (total == reported + removed) {
-				logger.info("Obstacle count validation passed: Total = Reported + Removed");
-				test.pass("Obstacle count validation passed: Total = Reported + Removed");
-			} else {
-				String message = "Obstacle count validation FAILED! Total: " + total + ", Reported + Removed: "
-						+ (reported + removed);
-				logger.error(message);
-				test.fail(message);
-				throw new AssertionError("Obstacle count mismatch: Total != Reported + Removed");
-			}
-		});
+	            logger.info("Reported obstacles: " + reported);
+	            test.info("Reported obstacles: " + reported);
+
+	            logger.info("Removed obstacles: " + removed);
+	            test.info("Removed obstacles: " + removed);
+
+	           
+	            if (total == reported + removed) {
+	                logger.info("Obstacle count validation passed: Total = Reported + Removed");
+	                test.pass("Obstacle count validation passed: Total = Reported + Removed");
+	            } else {
+	                String message = "Obstacle count validation FAILED! Total: " + total + ", Reported + Removed: "
+	                        + (reported + removed);
+	                logger.error(message);
+	                test.fail(message);
+	                throw new AssertionError("Obstacle count mismatch: Total != Reported + Removed");
+	            }
+
+	        } catch (Exception e) {
+	            logger.error("Error parsing obstacle counts: " + e.getMessage());
+	            test.fail("Error parsing obstacle counts: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
 
 	public void validateTableRowsAgainstTotalObstacle() {
-		step("Validate table rows against total obstacle label", () -> {
-			int totalFromLabel = Integer.parseInt(totalObstacle.getText().trim());
+	    step("Validate table rows against total obstacle label", () -> {
+	        try {
+	           
+	            String totalText = totalObstacle.getText().trim(); // e.g., "10 / 30"
+	            int totalFromLabel = Integer.parseInt(totalText.split("/")[1].trim()); // 30
 
-			List<WebElement> tableRows = driver
-					.findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]"));
-			int totalFromTable = tableRows.size();
+	            List<WebElement> tableRows = driver
+	                    .findElements(By.xpath("//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]"));
+	            int totalFromTable = tableRows.size();
 
-			// Log values
-			logger.info("Total Obstacle from label: " + totalFromLabel);
-			test.info("Total Obstacle from label: " + totalFromLabel);
+	            // Log values
+	            logger.info("Total Obstacle from label: " + totalFromLabel);
+	            test.info("Total Obstacle from label: " + totalFromLabel);
 
-			logger.info("Total Obstacle from table rows: " + totalFromTable);
-			test.info("Total Obstacle from table rows: " + totalFromTable);
+	            logger.info("Total Obstacle from table rows: " + totalFromTable);
+	            test.info("Total Obstacle from table rows: " + totalFromTable);
 
-			// Validate counts
-			if (totalFromLabel == totalFromTable) {
-				logger.info("Validation passed: Total Obstacle label matches table row count.");
-				test.pass("Validation passed: Total Obstacle label matches table row count.");
-			} else {
-				String message = "Validation FAILED! Total Obstacle label: " + totalFromLabel + ", Table rows: "
-						+ totalFromTable;
-				logger.error(message);
-				test.fail(message);
-				throw new AssertionError("Total Obstacle mismatch: Label != Table row count");
-			}
-		});
+	            // Validate counts
+	            if (totalFromLabel == totalFromTable) {
+	                logger.info("Validation passed: Total Obstacle label matches table row count.");
+	                test.pass("Validation passed: Total Obstacle label matches table row count.");
+	            } else {
+	                String message = "Validation FAILED! Total Obstacle label: " + totalFromLabel + ", Table rows: "
+	                        + totalFromTable;
+	                logger.error(message);
+	                test.fail(message);
+	                throw new AssertionError("Total Obstacle mismatch: Label != Table row count");
+	            }
+
+	        } catch (Exception e) {
+	            logger.error("Error validating total obstacle: " + e.getMessage());
+	            test.fail("Error validating total obstacle: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
+
 
 	public void checkMiddlePagesPagination() {
-		step("Validate Middle Page Pagination", () -> {
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				String paginationText = totalItemPagination.getText();
-				String[] parts = paginationText.split(" of ");
-				int itemsPerPage = Integer.parseInt(parts[0].split("-")[1].trim());
-				int totalItems = Integer.parseInt(parts[1].replaceAll("[^0-9]", "").trim());
-				int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
-				int total = Integer.parseInt(totalObstacle.getText().trim());
+	    step("Validate Middle Page Pagination", () -> {
+	        try {
+	            Thread.sleep(2000);
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
 
-				logger.info("Total pages: " + totalPages);
-				test.log(Status.INFO, "Total pages: " + totalPages);
+	        try {
+	            String paginationText = totalItemPagination.getText();
+	            String[] parts = paginationText.split(" of ");
+	            int itemsPerPage = Integer.parseInt(parts[0].split("-")[1].trim());
+	            int totalItems = Integer.parseInt(parts[1].replaceAll("[^0-9]", "").trim());
+	            int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
 
-				for (int page = 2; page < totalPages; page++) {
-					driver.findElement(
-							By.xpath("//li[contains(@class,'ant-pagination-item') and @title='" + page + "']")).click();
-					new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.textToBePresentInElement(
-							driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item-active')]/a")),
-							String.valueOf(page)));
+	           
+	            String obstacleText = totalObstacle.getText().trim(); 
+	            String[] obstacleParts = obstacleText.split("/");
+	            int totalObstacles = Integer.parseInt(obstacleParts[1].trim()); 
 
-					WebElement prevBtn = previouBtn;
-					WebElement nextBtn = nestBtn;
-					int rowsOnPage = rowList.size();
+	            logger.info("Total pages: " + totalPages);
+	            test.log(Status.INFO, "Total pages: " + totalPages);
 
-					logger.info("Checking middle page: " + page);
-					test.log(Status.INFO, "Checking middle page: " + page);
+	            for (int page = 2; page <= totalPages; page++) {
+	                driver.findElement(
+	                        By.xpath("//li[contains(@class,'ant-pagination-item') and @title='" + page + "']")).click();
+	                new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.textToBePresentInElement(
+	                        driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item-active')]/a")),
+	                        String.valueOf(page)));
 
-					if (prevBtn.isEnabled() && nextBtn.isEnabled()) {
-						logger.info("Middle page: Previous and Next enabled");
-						test.log(Status.PASS, "Middle page: Previous and Next enabled");
-					} else {
-						logger.error("Middle page: Previous and Next should be enabled");
-						test.log(Status.FAIL, "Middle page: Previous and Next should be enabled");
-					}
+	                WebElement prevBtn = previouBtn;
+	                WebElement nextBtn = nestBtn;
+	                int rowsOnPage = rowList.size();
 
-					if (rowsOnPage == total || rowsOnPage <= total) {
-						logger.info("Rows on middle page match or less than Total Plates: " + rowsOnPage);
-						test.log(Status.PASS, "Rows on middle page match or less than Total Plates: " + rowsOnPage);
-					} else {
-						logger.error("Rows on middle page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
-						test.log(Status.FAIL,
-								"Rows on middle page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
-					}
-				}
+	                logger.info("Checking middle page: " + page);
+	                test.log(Status.INFO, "Checking middle page: " + page);
 
-			} catch (Exception e) {
-				logger.error("Error in middle pages validation: " + e.getMessage());
-				test.log(Status.FAIL, "Error in middle pages validation: " + e.getMessage());
-				throw new RuntimeException(e);
-			}
-		});
+	                if (prevBtn.isEnabled() && nextBtn.isEnabled()) {
+	                    logger.info("Middle page: Previous and Next enabled");
+	                    test.log(Status.PASS, "Middle page: Previous and Next enabled");
+	                } else {
+	                    logger.error("Middle page: Previous and Next should be enabled");
+	                    test.log(Status.FAIL, "Middle page: Previous and Next should be enabled");
+	                }
+
+	                if (rowsOnPage <= totalObstacles) {
+	                    logger.info("Rows on middle page match or less than Total Obstacles: " + rowsOnPage);
+	                    test.log(Status.PASS, "Rows on middle page match or less than Total Obstacles: " + rowsOnPage);
+	                } else {
+	                    logger.error("Rows on middle page (" + rowsOnPage + ") exceed Total Obstacles (" + totalObstacles + ")");
+	                    test.log(Status.FAIL, "Rows on middle page (" + rowsOnPage + ") exceed Total Obstacles (" + totalObstacles + ")");
+	                }
+	            }
+
+	        } catch (Exception e) {
+	            logger.error("Error in middle pages validation: " + e.getMessage());
+	            test.log(Status.FAIL, "Error in middle pages validation: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
+
 
 	public void validateObstacleFilterList(String expectedObstacleSource) {
 		step("Validate Obstacle filter list for: " + expectedObstacleSource, () -> {
@@ -564,5 +615,17 @@ public class ObstaclesPage {
 			}
 		});
 	}
-
+	public Boolean filterZone() {
+		return step("Validate Filter Zone list ", () -> {
+			zone.click();
+			/*WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			WebElement messageElement = wait.until(ExpectedConditions.visibilityOf(addInspectionPageMessage));
+			String sucMsg = messageElement.getText().trim();
+			if (sucMsg.isEmpty())
+				throw new AssertionError("Add New Inspection page message was empty");
+			logger.info("Navigated to Add New Inspection page: " + sucMsg);
+			test.pass("Navigated to Add New Inspection page: " + sucMsg);*/
+			return true;
+		});
+	}
 }

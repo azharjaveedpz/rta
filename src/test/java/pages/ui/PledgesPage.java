@@ -124,10 +124,10 @@ public class PledgesPage {
 	@FindBy(xpath = "(//td[@class='ant-table-cell'])[3]")
 	private List<WebElement> pledgeSource;
 
-	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Total Pledges']    /following-sibling::div//span[@class='ant-statistic-content-value-int']")
+	@FindBy(xpath = "//div[normalize-space(text())='Total Pledges']/following-sibling::div//span[contains(@class,'ant-statistic-content-value')]/span")
 	private WebElement totalPledges;
 
-	@FindBy(xpath = "//div[@class='ant-statistic-title' and text()='Corporate Pledges']    /following-sibling::div//span[@class='ant-statistic-content-value-int']")
+	@FindBy(xpath = "//div[normalize-space(text())='Corporate Pledges']/following-sibling::div//span[contains(@class,'ant-statistic-content-value')]/span")
 	private WebElement coprPledges;
 
 	@FindBy(xpath = "//tbody[@class='ant-table-tbody']/tr[contains(@class, 'ant-table-row')]")
@@ -525,120 +525,142 @@ public class PledgesPage {
 	}
 
 	public void validateTotalPledgesCount() {
-		step("Validate Total Pledges Count", () -> {
-			try {
-				int actualCount = Integer.parseInt(totalPledges.getText().trim()); // UI total
-				int expectedCount = rowList.size(); // rows count
+	    step("Validate Total Pledges Count", () -> {
+	        try {
+	           
+	            String uiText = totalPledges.getText().trim();
 
-				if (expectedCount == actualCount) {
-					String message = "Row count (" + expectedCount + ") matches total pledge (" + actualCount + ")";
-					logger.info(message);
-					test.log(Status.PASS, message);
-				} else {
-					String message = "Row count (" + expectedCount + ") does NOT match total pledge (" + actualCount
-							+ ")";
-					logger.error(message);
-					test.log(Status.FAIL, message);
-					throw new AssertionError(message);
-				}
+	            String firstNumber = uiText.split("/")[0].trim();
+	            int actualCount = Integer.parseInt(firstNumber);
 
-			} catch (Exception e) {
-				logger.error("Error validating total pledge: " + e.getMessage());
-				test.log(Status.FAIL, "Error validating total pledge: " + e.getMessage());
-				throw new RuntimeException(e);
-			}
-		});
+	            int expectedCount = rowList.size(); // table rows
+
+	            if (expectedCount == actualCount) {
+	                String message = "Row count (" + expectedCount + ") matches total pledge (" + actualCount + ")";
+	                logger.info(message);
+	                test.log(Status.PASS, message);
+	            } else {
+	                String message = "Row count (" + expectedCount + ") does NOT match total pledge (" + actualCount + ")";
+	                logger.error(message);
+	                test.log(Status.FAIL, message);
+	                throw new AssertionError(message);
+	            }
+
+	        } catch (Exception e) {
+	            logger.error("Error validating total pledge: " + e.getMessage());
+	            test.log(Status.FAIL, "Error validating total pledge: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
+
 
 	public void validateCorporatePledgesCount() {
-		step("Validate Corporate Pledges Count", () -> {
-			try {
-				// Get corporate count from statistic card
-				int corporateTotal = Integer.parseInt(coprPledges.getText().trim());
+	    step("Validate Corporate Pledges Count", () -> {
+	        try {
+	            
+	            String uiText = coprPledges.getText().trim();
 
-				// Count how many rows in the table are "Corporate"
-				long corporateRows = corList.stream().map(row -> row.getText().trim())
-						.filter(text -> text.equalsIgnoreCase("Corporate")).count();
+	            // Extract only the first number before "/" if present
+	            String firstNumber = uiText.contains("/") ? uiText.split("/")[0].trim() : uiText;
+	            int corporateTotal = Integer.parseInt(firstNumber);
 
-				if (corporateRows == corporateTotal) {
-					String message = "Corporate count matches: UI shows (" + corporateTotal + "), Table has ("
-							+ corporateRows + ")";
-					logger.info(message);
-					test.log(Status.PASS, message);
-				} else {
-					String message = "Corporate count mismatch! UI shows (" + corporateTotal + "), but Table has ("
-							+ corporateRows + ")";
-					logger.error(message);
-					test.log(Status.FAIL, message);
-					throw new AssertionError(message); // fail the test
-				}
+	            // Count how many rows in the table are "Corporate"
+	            long corporateRows = corList.stream()
+	                    .map(row -> row.getText().trim())
+	                    .filter(text -> text.equalsIgnoreCase("Corporate"))
+	                    .count();
 
-			} catch (Exception e) {
-				logger.error("Error validating corporate pledges: " + e.getMessage());
-				test.log(Status.FAIL, "Error validating corporate pledges: " + e.getMessage());
-				throw new RuntimeException(e);
-			}
-		});
+	            if (corporateRows == corporateTotal) {
+	                String message = String.format(
+	                        "Corporate count matches: UI shows (%d), Table has (%d)",
+	                        corporateTotal, corporateRows);
+	                logger.info(message);
+	                test.log(Status.PASS, message);
+	            } else {
+	                String message = String.format(
+	                        "Corporate count mismatch! UI shows (%d), but Table has (%d)",
+	                        corporateTotal, corporateRows);
+	                logger.error(message);
+	                test.log(Status.FAIL, message);
+	                throw new AssertionError(message);
+	            }
+
+	        } catch (Exception e) {
+	            logger.error("Error validating corporate pledges: " + e.getMessage());
+	            test.log(Status.FAIL, "Error validating corporate pledges: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
+
 
 	public void checkMiddlePagesPagination() {
-		step("Validate Middle Page Pagination", () -> {
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				String paginationText = totalItemPagination.getText();
-				String[] parts = paginationText.split(" of ");
-				int itemsPerPage = Integer.parseInt(parts[0].split("-")[1].trim());
-				int totalItems = Integer.parseInt(parts[1].replaceAll("[^0-9]", "").trim());
-				int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
-				int total = Integer.parseInt(totalPledges.getText().trim());
+	    step("Validate Middle Page Pagination", () -> {
+	        try {
+	            Thread.sleep(2000);
 
-				logger.info("Total pages: " + totalPages);
-				test.log(Status.INFO, "Total pages: " + totalPages);
+	            String paginationText = totalItemPagination.getText(); // e.g., "1-10 of 64 items"
+	            String[] parts = paginationText.split(" of ");
+	            String[] rangeParts = parts[0].split("-");
+	            int start = Integer.parseInt(rangeParts[0].trim());
+	            int end = Integer.parseInt(rangeParts[1].trim());
+	            int itemsPerPage = end - start + 1;
+	            int totalItems = Integer.parseInt(parts[1].replaceAll("[^0-9]", "").trim());
 
-				for (int page = 2; page < totalPages; page++) {
-					driver.findElement(
-							By.xpath("//li[contains(@class,'ant-pagination-item') and @title='" + page + "']")).click();
-					new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.textToBePresentInElement(
-							driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item-active')]/a")),
-							String.valueOf(page)));
+	            String totalText = totalPledges.getText().trim();
+	            String totalValue = totalText.contains("/") ? totalText.split("/")[0].trim() : totalText;
+	            int total = Integer.parseInt(totalValue);
 
-					WebElement prevBtn = previouBtn;
-					WebElement nextBtn = nestBtn;
-					int rowsOnPage = rowList.size();
+	            int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
 
-					logger.info("Checking middle page: " + page);
-					test.log(Status.INFO, "Checking middle page: " + page);
+	            logger.info("Total pages: " + totalPages);
+	            test.log(Status.INFO, "Total pages: " + totalPages);
 
-					if (prevBtn.isEnabled() && nextBtn.isEnabled()) {
-						logger.info("Middle page: Previous and Next enabled");
-						test.log(Status.PASS, "Middle page: Previous and Next enabled");
-					} else {
-						logger.error("Middle page: Previous and Next should be enabled");
-						test.log(Status.FAIL, "Middle page: Previous and Next should be enabled");
-					}
+	            for (int page = 2; page < totalPages; page++) {
+	                driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item') and @title='" + page + "']")).click();
 
-					if (rowsOnPage == total || rowsOnPage <= total) {
-						logger.info("Rows on middle page match or less than Total Plates: " + rowsOnPage);
-						test.log(Status.PASS, "Rows on middle page match or less than Total Plates: " + rowsOnPage);
-					} else {
-						logger.error("Rows on middle page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
-						test.log(Status.FAIL,
-								"Rows on middle page (" + rowsOnPage + ") exceed Total Plates (" + total + ")");
-					}
-				}
+	                new WebDriverWait(driver, Duration.ofSeconds(5)).until(
+	                    ExpectedConditions.textToBePresentInElement(
+	                        driver.findElement(By.xpath("//li[contains(@class,'ant-pagination-item-active')]/a")),
+	                        String.valueOf(page)
+	                    )
+	                );
 
-			} catch (Exception e) {
-				logger.error("Error in middle pages validation: " + e.getMessage());
-				test.log(Status.FAIL, "Error in middle pages validation: " + e.getMessage());
-				throw new RuntimeException(e);
-			}
-		});
+	                int rowsOnPage = rowList.size();
+	                WebElement prevBtn = previouBtn;
+	                WebElement nextBtn = nestBtn;
+
+	                logger.info("Checking middle page: " + page);
+	                test.log(Status.INFO, "Checking middle page: " + page);
+
+	                // Validate buttons
+	                if (prevBtn.isEnabled() && nextBtn.isEnabled()) {
+	                    logger.info("Middle page: Previous and Next enabled");
+	                    test.log(Status.PASS, "Middle page: Previous and Next enabled");
+	                } else {
+	                    logger.error("Middle page: Previous and Next should be enabled");
+	                    test.log(Status.FAIL, "Middle page: Previous and Next should be enabled");
+	                }
+
+	                // Validate rows count
+	                if (rowsOnPage <= itemsPerPage) {
+	                    logger.info("Rows on page " + page + " within limit: " + rowsOnPage);
+	                    test.log(Status.PASS, "Rows on page " + page + " within limit: " + rowsOnPage);
+	                } else {
+	                    logger.error("Rows on page " + page + " (" + rowsOnPage + ") exceed limit of " + itemsPerPage);
+	                    test.log(Status.FAIL, "Rows on page " + page + " (" + rowsOnPage + ") exceed limit of " + itemsPerPage);
+	                }
+	            }
+
+	        } catch (Exception e) {
+	            logger.error("Error in middle pages validation: " + e.getMessage());
+	            test.log(Status.FAIL, "Error in middle pages validation: " + e.getMessage());
+	            throw new RuntimeException(e);
+	        }
+	    });
 	}
+
 
 	public void validateBusiness(String expectedSource) {
 		step("Validate Business Name displayed on listing page", () -> {
