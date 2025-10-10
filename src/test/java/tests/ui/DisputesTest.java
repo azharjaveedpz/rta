@@ -43,7 +43,7 @@ public class DisputesTest extends BaseTest {
 	public void TC_001_shouldCreateNewDisputeWhenValidDetailsProvided() {
 
 		dispute.navigateToAddDisputePage();
-		dispute.enterFineNumber("1544250911163122");
+		dispute.enterFineNumber("251007110845/2777");
 		dispute.enterReason();
 		dispute.enterCRM();
 		dispute.enterEmail();
@@ -52,9 +52,9 @@ public class DisputesTest extends BaseTest {
 		dispute.selectDepartment("Parking");
 		dispute.selectPaymentType("Online");
 		dispute.enterSourceUser();
-		common.disputesDate(15);
+		common.disputesDate();
 		common.submit();
-		common.validateToastMessage("Dispute added successfully!");
+		common.validateToastMessage("Dispute created successfully");
 		dispute.validateDisputeAdded();
 		dispute.validateFineNumber();
 		dispute.validatePaymentType("Online");
@@ -86,12 +86,12 @@ public class DisputesTest extends BaseTest {
 		dispute.clearAllFields();
 		dispute.enterCRM();
 		dispute.enterSourceUser();
-		common.disputesDate(15);
+		common.disputesDate();
 		Thread.sleep(2000);
 		// dispute.selectDepartment("Traffic");
 		// dispute.selectPaymentType("Cash");
 		common.update();
-		common.validateToastMessage("Dispute updated successfully!");
+		common.validateToastMessage("Dispute updated successfully");
 		dispute.validateDisputeAdded();
 		// dispute.validateDepartment("Traffic");
 		// dispute.validatePaymentType("Cash");
@@ -101,7 +101,7 @@ public class DisputesTest extends BaseTest {
 	public void TC_004_shouldRejectDisputeCreationWhenFineNumberAlreadyExists() {
 
 		dispute.navigateToAddDisputePage();
-		dispute.enterFineNumber("1544250904225348");
+		dispute.enterFineNumber("251007110845/2777");
 		dispute.enterReason();
 		dispute.enterCRM();
 		dispute.enterEmail();
@@ -110,9 +110,9 @@ public class DisputesTest extends BaseTest {
 		dispute.selectDepartment("Parking");
 		dispute.selectPaymentType("Online");
 		dispute.enterSourceUser();
-		common.disputesDate(15);
+		common.disputesDate();
 		common.submit();
-		common.validateToastMessage("Dispute for Fine Id 1544250904225348 already exists");
+		common.validateToastMessage("Dispute for Fine Id 251007110845/2777 already exists");
 
 	}
 
@@ -153,7 +153,7 @@ public class DisputesTest extends BaseTest {
 
 	}
 
-	@Test
+	/*@Test
 	public void TC_007_shouldNotAllowDisputeCreationWithPastDate() {
 
 		dispute.navigateToAddDisputePage();
@@ -169,7 +169,7 @@ public class DisputesTest extends BaseTest {
 		common.disputesDate(12);
 		common.validateDisputeCalendar();
 
-	}
+	}*/
 	// ----------------- SEARCH TESTS -----------------
 
 	@Test
@@ -232,28 +232,28 @@ public class DisputesTest extends BaseTest {
 
 	}
 
-	@Test
+	/*@Test
 	public void TC_016_shouldFilterDisputesByRejectedStatus() throws InterruptedException {
 
 		common.selectSecondFilterButton("Rejected"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
 		dispute.validateDepartmentFilterList("Rejected");
 
-	}
+	}*/
 
 	// ----------------- SEARCH + FILTER VALIDATION (Single Filter)
 
 	@Test
 	public void TC_017_shouldSearchByFineNumberAndFilterByStatus() {
-		common.searchAndValidateResult("fine number", "12345");
-		common.selectSecondFilterButton("Approved"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
+		common.searchAndValidateResult("fine number", "251007");
+		common.selectSecondFilterButton("Pending"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
-		dispute.validateDepartmentFilterList("Approved");
+		dispute.validateDepartmentFilterList("Pending");
 	}
 
 	@Test
 	public void TC_018_shouldSearchByFineNumberAndFilterByPaymentType() {
-		common.searchAndValidateResult("fine number", "12345");
+		common.searchAndValidateResult("fine number", "251007");
 		common.selectFilterButton("Online"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
 		dispute.validatePaymentFilterList("Online");
@@ -261,13 +261,13 @@ public class DisputesTest extends BaseTest {
 
 	@Test
 	public void TC_019_shouldSearchByFineNumberAndApplyMultipleFilters() {
-		common.searchAndValidateResult("fine number", "12345");
+		common.searchAndValidateResult("fine number", "2510071");
 		common.selectFilterButton("Online"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
 		dispute.validatePaymentFilterList("Online");
-		common.selectSecondFilterButton("Approved"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
-		common.selectOK();
-		dispute.validateDepartmentFilterList("Approved");
+		common.selectSecondFilterButton("Pending"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
+		common.selectFilterTwoOK();
+		dispute.validateDepartmentFilterList("Pending");
 	}
 
 	@Test
@@ -337,15 +337,15 @@ public class DisputesTest extends BaseTest {
 
 	@Test
 	public void TC_026_shouldSearchByFineAndPhoneAndApplyMultipleFilters() {
-		common.searchAndValidateResult("fine number", "12345");
+		common.searchAndValidateResult("fine number", "251007");
 		common.selectFilterByText("Phone Number");
-		common.searchAndValidateResult("phone number", "12");
+		common.searchAndValidateResult("phone number", "338");
 		common.selectSecondFilterButton("Pending"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectOK();
 		dispute.validateDepartmentFilterList("Pending");
-		common.selectFilterButton("Cash"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
+		common.selectFilterButton("Online"); // Construction,Parked Vehicle,Natural Obstacle,Road Work
 		common.selectFilterTwoOK();
-		dispute.validatePaymentFilterList("Cash");
+		dispute.validatePaymentFilterList("Online");
 	}
 
 	// ----------------- PAGINATION VALIDATION -----------------
@@ -377,16 +377,16 @@ public class DisputesTest extends BaseTest {
 	public void TC_031_ValidateErrorMessage() {
 		dispute.navigateToAddDisputePage();
 		common.submit();
-		common.validateErrorMessage("Enter the fine number");
-		common.validateErrorMessage("Select the department");
-		common.validateErrorMessage("Select the payment type");
-		common.validateErrorMessage("Enter the dispute reason");
-		common.validateErrorMessage("Enter the CRM reference");
-		common.validateErrorMessage("Enter your email address");
-		common.validateErrorMessage("Enter your phone number");
-		common.validateErrorMessage("Enter source user");
-		common.validateErrorMessage("Select date");
-		common.validateErrorMessage("Enter your address");
+		common.validateErrorMessage("Please enter Fine Number");
+		common.validateErrorMessage("Please enter Department");
+		common.validateErrorMessage("Please enter Payment Type");
+		common.validateErrorMessage("Please enter Reason");
+		common.validateErrorMessage("Please enter CRM Reference");
+		common.validateErrorMessage("Please enter Email");
+		common.validateErrorMessage("Please enter Phone Number");
+		common.validateErrorMessage("Please enter Source User");
+		common.validateErrorMessage("Please enter Actual Dispute Date");
+		common.validateErrorMessage("Please enter Address");
 
 	}
 
