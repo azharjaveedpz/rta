@@ -886,6 +886,7 @@ public class WhitelistPage {
 	}
 
 	public void printAndValidatePlateCounts() {
+		
 	    step("Print and validate total, active, and inactive plate counts", () -> {
 
 	        int total = Integer.parseInt(totalPlates.getText().trim().split("/")[0].trim());
@@ -916,6 +917,7 @@ public class WhitelistPage {
 
 
 	public void printAndValidateTableCounts() {
+		
 		step("Print total plates available in the table", () -> {
 			int total = rowList.size();
 
@@ -1003,6 +1005,7 @@ public class WhitelistPage {
 	}
 
 	public void validateTotalPlatesCount() {
+		
 	    step("Validate total plates count against table rows", () -> {
 	        try {
 	           
@@ -1030,7 +1033,8 @@ public class WhitelistPage {
 
 	public void checkMiddlePagesPagination() {
 	    step("Validate Middle Page Pagination", () -> {
-	        try {
+	      
+	    	try {
 	            Thread.sleep(2000);
 	        } catch (InterruptedException e) {
 	            e.printStackTrace();
@@ -1240,6 +1244,7 @@ public class WhitelistPage {
 	}
 
 	public void printAndValidateActiveAndInActiveCounts() {
+		
 	    step("Validate Active and Inactive Plate Counts", () -> {
 
 	        String activeText = activePlates.getText().trim();
